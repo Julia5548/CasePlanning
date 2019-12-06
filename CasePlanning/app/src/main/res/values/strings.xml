@@ -1,0 +1,27 @@
+<resources>
+    <string name="app_name">CasePlanning</string>
+    <string name="sign_in">Sign in</string>
+    <string name="username">UserName:</string>
+    <string name="password">Password</string>
+    <string name="sign_up">Sign Up</string>
+    <string name="email">Email</string>
+    <string name="sign_out">Sign Out</string>
+    <string name="forgotPassword">Забыли пароль?</string>
+    <string name="newPassowd">Введите новый пароль</string>
+    <string name="rePassword">Введите еще раз пароль</string>
+    <string name="resetPassword">сбросить пароль</string>
+    <string name="search">Поиск</string>
+    <string name="typeTask">Тип задачи:</string>
+    <string name="addphoto">addPhoto</string>
+    <string name="addaudio">addAudio</string>
+    <string name="addvideo">addVideo</string>
+    <string name="addtodolist">addTodoList</string>
+    <string name="addtext">addText</string>
+    <string name="colorselection">colorSelection</string>
+    <string name="color">Цвет</string>
+    <string name="data">Выберите день:</string>
+    <string name="calendar">Открыть календарь</string>
+    <string name="periodDay">Период дня:</string>
+    <string name="chooseReplay"><![CDATA[Нет >]]></string>
+    <string name="Replay">Повтор:</string>
+</resources>
