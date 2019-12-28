@@ -8,7 +8,10 @@ import androidx.appcompat.app.ActionBar
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentTransaction
 import butterknife.ButterKnife
+import butterknife.OnClick
+import com.example.caseplanning.Photo.Photo
 
 class CreateTaskWindow  : Fragment(){
 
@@ -27,8 +30,18 @@ class CreateTaskWindow  : Fragment(){
         actionBar!!.title = "Создать"
         toolbar.setTitleTextColor(android.graphics.Color.WHITE)
 
-        ButterKnife.bind(this, viewFragment);
+        ButterKnife.bind(this, viewFragment)
 
         return viewFragment
+    }
+    @OnClick(R.id.photo)
+    fun onClickAddPhoto(){
+
+        val photo: Fragment = Photo()
+        val transaction: FragmentTransaction = fragmentManager!!.beginTransaction()
+
+        transaction.add(R.id.typeTask, photo)
+        transaction.commit()
+
     }
 }
