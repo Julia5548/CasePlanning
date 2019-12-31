@@ -49,6 +49,7 @@
                 android:layout_width="45dp"
                 android:layout_height="45dp"
                 android:background="@null"
+                android:id = "@+id/video"
                 android:contentDescription="@string/addvideo"
                 android:src="@drawable/ic_videocam_black_24dp" />
 
@@ -71,7 +72,7 @@
             android:id="@+id/typeTask"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/linerLayoutTypeTask" />
+            android:layout_below="@+id/linerLayoutTypeTask"/>
 
     <LinearLayout
             android:id="@+id/linearLayoutColor"

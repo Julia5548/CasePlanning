@@ -30,6 +30,12 @@ android {
         targetCompatibility JavaVersion.VERSION_1_8
     }
 
+    sourceSets {
+        main {
+            assets.srcDirs = ['/res/raw']
+        }
+    }
+
 }
 
 
