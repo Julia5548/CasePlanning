@@ -11,7 +11,8 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentTransaction
 import butterknife.ButterKnife
 import butterknife.OnClick
-import com.example.caseplanning.Photo.Photo
+import com.example.caseplanning.TypeTask.Photo
+import com.example.caseplanning.TypeTask.Video
 
 class CreateTaskWindow  : Fragment(){
 
@@ -38,6 +39,17 @@ class CreateTaskWindow  : Fragment(){
     fun onClickAddPhoto(){
 
         val photo: Fragment = Photo()
+        val transaction: FragmentTransaction = fragmentManager!!.beginTransaction()
+
+        transaction.add(R.id.typeTask, photo)
+        transaction.commit()
+
+    }
+    @OnClick(R.id.video)
+    fun onClickAddVideo(){
+
+
+        val photo: Fragment = Video()
         val transaction: FragmentTransaction = fragmentManager!!.beginTransaction()
 
         transaction.add(R.id.typeTask, photo)
