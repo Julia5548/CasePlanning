@@ -1,34 +1,30 @@
-package com.example.caseplanning.Photo
+package com.example.caseplanning.TypeTask
 
 import android.Manifest
 import android.app.Activity.RESULT_OK
-import android.content.ContentResolver
 import android.content.ContentValues
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
-import android.os.Environment
 import android.provider.MediaStore
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageButton
+import android.widget.ImageView
 import android.widget.Toast
-import androidx.core.content.PermissionChecker.checkSelfPermission
 import androidx.fragment.app.Fragment
 import com.example.caseplanning.R
-import java.io.File
 
-
+/*написать комменты, проблема с видом фотографии, нет потверждения на правильность фотографии, нажатие на фотографию, чтобы открылась полность вся, загрузка из галереи */
 class Photo : Fragment(){
 
     val CAMERA_REQUEST = 1
     val PERMISSION_CODE = 1000
-    lateinit var photo_image : ImageButton
+    lateinit var photo_image : ImageView
     lateinit var outputUriFile : Uri
 
 
@@ -74,25 +70,12 @@ class Photo : Fragment(){
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        if (resultCode == RESULT_OK){
+        if (requestCode == CAMERA_REQUEST && resultCode == RESULT_OK){
             //фотка сделана, извлекаем картинку
             photo_image.setImageURI(outputUriFile)
         }else{
             Log.d("Popka", "RUNNNN")
         }
-    }
-    /*PROBLEM*/
-    private fun saveFullImage(){
-
-        val values = ContentValues()
-        values.put(MediaStore.Images.Media.TITLE, "New Task")
-        values.put(MediaStore.Images.Media.DESCRIPTION, "From the camera")
-        outputUriFile = activity!!.contentResolver.insert(MediaStore.Images.
-            Media.EXTERNAL_CONTENT_URI, values)!!
-        val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
-        intent.putExtra(MediaStore.EXTRA_OUTPUT, outputUriFile)
-        startActivityForResult(intent, CAMERA_REQUEST)
-
     }
 
     override fun onRequestPermissionsResult(
