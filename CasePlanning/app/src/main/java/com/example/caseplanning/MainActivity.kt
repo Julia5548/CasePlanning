@@ -40,7 +40,7 @@ class MainActivity() : AppCompatActivity(){
 
         val toolbar = findViewById<Toolbar>(R.id.toolbar)
         setSupportActionBar(toolbar)
-        supportActionBar!!.title = "Sign Up"
+        supportActionBar!!.title = "Sign In"
 
         toolbar.setTitleTextColor(android.graphics.Color.WHITE)
 
