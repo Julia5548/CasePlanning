@@ -22,7 +22,7 @@ import com.example.caseplanning.R
 /*написать комменты, проблема с видом фотографии, нет потверждения на правильность фотографии, нажатие на фотографию, чтобы открылась полность вся, загрузка из галереи */
 class Photo : Fragment(){
 
-    val CAMERA_REQUEST = 1
+    val CAMERA_REQUEST = 1001
     val PERMISSION_CODE = 1000
     lateinit var photo_image : ImageView
     lateinit var outputUriFile : Uri
