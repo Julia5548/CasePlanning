@@ -11,8 +11,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentTransaction
 import butterknife.ButterKnife
 import butterknife.OnClick
-import com.example.caseplanning.TypeTask.Photo
-import com.example.caseplanning.TypeTask.Video
+import com.example.caseplanning.TypeTask.*
 
 class CreateTaskWindow  : Fragment(){
 
@@ -35,6 +34,7 @@ class CreateTaskWindow  : Fragment(){
 
         return viewFragment
     }
+    /*добавление фото задачи*/
     @OnClick(R.id.photo)
     fun onClickAddPhoto(){
 
@@ -45,14 +45,49 @@ class CreateTaskWindow  : Fragment(){
         transaction.commit()
 
     }
+    /*добавление видео задачи*/
     @OnClick(R.id.video)
     fun onClickAddVideo(){
 
-
-        val photo: Fragment = Video()
+        val video: Fragment = Video()
         val transaction: FragmentTransaction = fragmentManager!!.beginTransaction()
 
-        transaction.add(R.id.typeTask, photo)
+        transaction.add(R.id.typeTask, video)
+        transaction.commit()
+
+    }
+    /*добавление аудио задачи*/
+    @OnClick(R.id.audio)
+    fun onClickAddAudio(){
+
+        val audio = AudioTask()
+        val transaction:FragmentTransaction = fragmentManager!!.beginTransaction()
+
+        transaction.add(R.id.typeTask, audio)
+        transaction.commit()
+
+    }
+
+    /*добавление задачи в виде списка*/
+    @OnClick(R.id.to_do)
+    fun onClickAddToDoTask(){
+
+        val toDoTask = ToDoTask()
+        val transaction:FragmentTransaction = fragmentManager!!.beginTransaction()
+
+        transaction.add(R.id.typeTask, toDoTask)
+        transaction.commit()
+
+    }
+
+    /*добавление задачи в виде текста*/
+    @OnClick(R.id.text)
+    fun onClickAddTextTask(){
+
+        val textTask = TextTask()
+        val transaction:FragmentTransaction = fragmentManager!!.beginTransaction()
+
+        transaction.add(R.id.typeTask, textTask)
         transaction.commit()
 
     }
