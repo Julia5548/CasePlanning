@@ -24,4 +24,7 @@
     <string name="periodDay">Период дня:</string>
     <string name="chooseReplay"><![CDATA[Нет >]]></string>
     <string name="Replay">Повтор:</string>
+    <string name="stop">стоп</string>
+    <string name="record">запись</string>
+    <string name="playAudio">запуск</string>
 </resources>

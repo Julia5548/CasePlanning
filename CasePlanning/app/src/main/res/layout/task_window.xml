@@ -42,6 +42,7 @@
                 android:layout_width="45dp"
                 android:layout_height="45dp"
                 android:background="@null"
+                android:id = "@+id/audio"
                 android:contentDescription="@string/addaudio"
                 android:src="@drawable/ic_audiotrack_black_24dp" />
 
@@ -57,6 +58,7 @@
                 android:layout_width="45dp"
                 android:layout_height="45dp"
                 android:background="@null"
+                android:id="@+id/to_do"
                 android:contentDescription="@string/addtodolist"
                 android:src="@drawable/ic_view_list_black_24dp" />
 
@@ -64,6 +66,7 @@
                 android:layout_width="45dp"
                 android:layout_height="45dp"
                 android:background="@null"
+                android:id="@+id/text"
                 android:contentDescription="@string/addtext"
                 android:src="@drawable/ic_text_fields_black_24dp" />
     </LinearLayout>
