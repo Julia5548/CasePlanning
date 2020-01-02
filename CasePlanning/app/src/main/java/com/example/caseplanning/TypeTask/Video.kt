@@ -72,10 +72,11 @@ class Video : Fragment(){
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == CAMERA_REQUEST && resultCode == Activity.RESULT_OK){
             //фотка сделана, извлекаем картинку
-            videoFie.setVideoURI(outputUriFile)
-            val mediaController = MediaController(activity!!.applicationContext)
+            val mediaController = MediaController(activity)
             videoFie.setMediaController(mediaController)
             mediaController.setAnchorView(videoFie)
+            videoFie.setVideoURI(outputUriFile)
+            videoFie.suspend()
             //videoFie.start()
         }else{
             Log.d("Popka", "RUNNNN")
