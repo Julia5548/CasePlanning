@@ -11,6 +11,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -21,12 +22,13 @@ import com.example.caseplanning.R
 import java.io.File
 import java.lang.Exception
 
-@Suppress("DEPRECATION")
+
 class AudioTask : Fragment() {
 
     private var mediaRecorder : MediaRecorder? = null
     private var mediaPlayer : MediaPlayer? = null
     private lateinit var fileName: String
+    val PERMISSION_CODE = 1000
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -37,7 +39,7 @@ class AudioTask : Fragment() {
 
         ButterKnife.bind(this, view)
 
-        fileName = "${Environment.getExternalStorageDirectory()}/record.mp3"
+        fileName = "${Environment.getExternalStorageDirectory().absolutePath}/record.mp3"
 
         return view
     }
@@ -78,7 +80,6 @@ class AudioTask : Fragment() {
             mediaRecorder!!.setOutputFile(fileName)
             mediaRecorder!!.prepare()
             mediaRecorder!!.start()
-            Log.d("Pfgbcm bltn", "OLLLLLLLLLO")
         }catch (e : Exception){
             e.printStackTrace()
         }
@@ -129,6 +130,22 @@ class AudioTask : Fragment() {
             mediaPlayer = null
         }
 
+    }
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        when(requestCode){
+            PERMISSION_CODE -> {
+                if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED){
+                    startRecording()
+                }else{
+                    Toast.makeText(activity!!.applicationContext, "В доступе было отказано",
+                        Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
     }
 
 }
