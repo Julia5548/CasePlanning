@@ -66,7 +66,7 @@ class SignUp : AppCompatActivity() {
                     { taskTwo ->
                         if (taskTwo.isSuccessful) {
                             Toast.makeText(applicationContext, "Signup successful. Verification email sent",
-                                Toast.LENGTH_SHORT).show();
+                                Toast.LENGTH_SHORT).show()
                         } else {
                             Toast.makeText(
                                 applicationContext,
