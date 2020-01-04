@@ -27,4 +27,6 @@
     <string name="stop">стоп</string>
     <string name="record">запись</string>
     <string name="playAudio">запуск</string>
+    <string name="task">Задача</string>
+    <string name="add">Добавить</string>
 </resources>
