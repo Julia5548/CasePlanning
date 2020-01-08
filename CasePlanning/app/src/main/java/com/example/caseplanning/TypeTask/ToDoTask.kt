@@ -11,11 +11,15 @@ import androidx.fragment.app.Fragment
 import butterknife.ButterKnife
 import butterknife.OnClick
 import com.example.caseplanning.R
+import com.example.caseplanning.WindowTask
+import kotlinx.android.synthetic.main.task_window.*
 import kotlinx.android.synthetic.main.task_window.view.*
 
-class ToDoTask : Fragment() {
+class  ToDoTask : Fragment() {
 
+    /*подзадачам*/
     val addListTask = ArrayList<String>()
+
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -25,21 +29,23 @@ class ToDoTask : Fragment() {
         val view = inflater.inflate(R.layout.to_do, container, false)
 
         ButterKnife.bind(this,view)
+       val taskName = view!!.findViewById<EditText>(R.id.taskText)
+        WindowTask().textTask = taskName.text.toString()
 
             return view
     }
-    @OnClick(R.id.addTaskToDo)
-    fun onClickAddTask(){
-        val taskName = view!!.findViewById<EditText>(R.id.taskText)
-        val listTask = view!!.findViewById<ListView>(R.id.listTask)
+   /* fun onClickAddTask(){
 
+
+
+        /*к подзадачам*/
         addListTask.add(taskName.text.toString())
 
         val adapter = ArrayAdapter<String>(activity!!.applicationContext,
             android.R.layout.simple_list_item_1,
            addListTask)
 
-        listTask.adapter = adapter
+      //  listTask.adapter = adapter
         taskName.setText("")
-    }
+    }*/
 }
