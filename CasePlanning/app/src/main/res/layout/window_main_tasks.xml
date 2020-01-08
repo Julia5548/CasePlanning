@@ -1,10 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/linerLayout"
         android:layout_width="match_parent"
-        android:id = "@+id/linerLayout"
         android:layout_height="match_parent"
         android:orientation="vertical">
+
+    <Button
+            android:id="@+id/btn_signOut"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/sign_out"
+            android:textSize="15sp" />
 
     <FrameLayout
             android:id="@+id/frameLayout"
@@ -20,6 +27,7 @@
 
         </androidx.appcompat.widget.Toolbar>
 
+
         <com.miguelcatalan.materialsearchview.MaterialSearchView
                 android:id="@+id/search"
                 android:layout_width="match_parent"
@@ -29,10 +37,10 @@
     </FrameLayout>
 
     <LinearLayout
+            android:id="@+id/linearLayoutCalendar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:id = "@+id/linearLayoutCalendar"
-            android:layout_below = "@+id/frameLayout"
+            android:layout_below="@+id/frameLayout"
             android:orientation="vertical">
 
         <CalendarView
@@ -40,33 +48,40 @@
                 android:layout_height="wrap_content" />
     </LinearLayout>
 
-    <LinearLayout
-            android:id="@+id/signOut"
-            android:layout_width="wrap_content"
-            android:layout_below = "@+id/linearLayoutCalendar"
-            android:layout_height="wrap_content">
-
-        <Button
-                android:id="@+id/btn_signOut"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/sign_out"
-                android:textSize="15sp" />
-    </LinearLayout>
-
-    <FrameLayout
+    <androidx.core.widget.NestedScrollView
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="match_parent"
+            android:layout_below="@+id/linearLayoutCalendar"
+            android:id = "@+id/scrollList"
+            android:isScrollContainer="false"
+            android:clipToPadding="false"
+            android:visibility="visible"
+            app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-        <com.google.android.material.floatingactionbutton.FloatingActionButton
-                android:id="@+id/addTask"
-                android:layout_width="wrap_content"
+        <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_gravity="end|bottom"
-                android:layout_margin="16dp"
-                android:src="@drawable/ic_add"
-                app:backgroundTint="@color/red" />
-    </FrameLayout>
+                android:layout_below="@+id/linearLayoutCalendar">
+
+            <ListView
+                    android:layout_width="match_parent"
+                    android:id="@+id/listViewTask"
+                    android:layout_height="wrap_content" />
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/addTask"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentBottom="true"
+            android:layout_gravity="end|bottom"
+            android:layout_margin="16dp"
+            android:src="@drawable/ic_add"
+            app:backgroundTint="@color/red" />
 
 
 </RelativeLayout>

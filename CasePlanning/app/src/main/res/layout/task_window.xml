@@ -161,6 +161,17 @@
                 android:text="@string/chooseReplay"
                 android:textSize="20sp" />
     </RelativeLayout>
+    <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_below="@+id/linearLayoutReplay"
+            android:layout_height="wrap_content">
+        <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id = "@+id/add"
+            android:text = "lj,fdbnm"/>
+
+    </LinearLayout>
 
 
 
