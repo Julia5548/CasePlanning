@@ -1,9 +1,11 @@
 package com.example.caseplanning
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ListView
 import androidx.appcompat.app.ActionBar
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
@@ -14,6 +16,10 @@ import butterknife.OnClick
 import com.example.caseplanning.TypeTask.*
 
 class CreateTaskWindow  : Fragment(){
+
+    lateinit var listView: ListView
+    lateinit var arrayListTask: ArrayList<String>
+    var textTask : String? = null
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -90,5 +96,10 @@ class CreateTaskWindow  : Fragment(){
         transaction.add(R.id.typeTask, textTask)
         transaction.commit()
 
+    }
+    @OnClick(R.id.add)
+    fun onclickAdd(){
+        val intent = Intent(activity!!.applicationContext, MainWindowCasePlanning()::class.java )
+        startActivity(intent)
     }
 }
