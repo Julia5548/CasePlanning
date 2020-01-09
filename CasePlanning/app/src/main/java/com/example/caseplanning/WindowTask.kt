@@ -1,9 +1,12 @@
 package com.example.caseplanning
 
 import android.content.Intent
+import android.content.Intent.getIntent
 import android.os.Bundle
+import android.util.Log
 import android.view.*
 import android.widget.ArrayAdapter
+import android.widget.EditText
 import android.widget.ListView
 import androidx.appcompat.app.ActionBar
 import androidx.appcompat.app.AppCompatActivity
@@ -15,14 +18,16 @@ import butterknife.OnClick
 import com.example.caseplanning.TypeTask.ToDoTask
 import com.google.firebase.auth.FirebaseAuth
 import com.miguelcatalan.materialsearchview.MaterialSearchView
+import kotlinx.android.synthetic.main.task_window.view.*
+import kotlinx.android.synthetic.main.to_do.*
 
 
-class WindowTask() : Fragment(){
+class WindowTask() : Fragment() {
 
-    private lateinit var mAuth : FirebaseAuth
-    private lateinit var search : MaterialSearchView
-    var addListTask = ArrayList<String>()
-     var textTask : String? = null
+    private lateinit var mAuth: FirebaseAuth
+    private lateinit var search: MaterialSearchView
+     var addListTask = ArrayList<String>()
+     var textTask: String? = " "
 
 
     override fun onCreateView(
@@ -48,26 +53,32 @@ class WindowTask() : Fragment(){
         search = viewFragment.findViewById<MaterialSearchView>(R.id.search)
         search.closeSearch()
 
-        listTask(viewFragment)
+        val intent: Intent  = activity.intent
+        textTask = intent.getStringExtra("nameTask")
+
+        listTask(viewFragment,textTask)
 
         return viewFragment
     }
 
-    private fun listTask(viewFragment: View) {
+    private fun listTask(viewFragment: View, nameTask : String?) {
+
 
         val listTasks = viewFragment.findViewById<ListView>(R.id.listViewTask)
 
         /*к подзадачам*/
 
-        if (textTask != null) {
-            addListTask.add(CreateTaskWindow().textTask!!)
+        if (nameTask != null) {
+           addListTask.add(nameTask)
             val adapter = ArrayAdapter<String>(
                 activity!!.applicationContext,
                 android.R.layout.simple_list_item_1,
                 addListTask
             )
+            Log.d("ArrayList", "${addListTask.size}")
 
             listTasks.adapter = adapter
+
         }
     }
 
@@ -76,14 +87,14 @@ class WindowTask() : Fragment(){
         setHasOptionsMenu(true)
         super.onCreate(savedInstanceState)
     }
+
     //inflate the menu
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         inflater.inflate(R.menu.search, menu)
 
-        val searchItem= menu.findItem(R.id.search)
+        val searchItem = menu.findItem(R.id.search)
         search.setMenuItem(searchItem)
-        search.setOnQueryTextListener(object : MaterialSearchView.OnQueryTextListener
-        {
+        search.setOnQueryTextListener(object : MaterialSearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(query: String?): Boolean {
                 /*поиск задач*/
                 return true
@@ -95,7 +106,7 @@ class WindowTask() : Fragment(){
             }
 
         })
-        search.setOnSearchViewListener(object : MaterialSearchView.SearchViewListener{
+        search.setOnSearchViewListener(object : MaterialSearchView.SearchViewListener {
             override fun onSearchViewClosed() {
                 /*поиск*/
                 /* currentText = ""
@@ -111,7 +122,7 @@ class WindowTask() : Fragment(){
 
 
     @OnClick(R.id.btn_signOut)
-    fun onClickSignOut(){
+    fun onClickSignOut() {
         //выход пользователя из системы
         mAuth.signOut()
 
@@ -124,13 +135,17 @@ class WindowTask() : Fragment(){
 
     @Suppress("DEPRECATION")
     @OnClick(R.id.addTask)
-    fun onClickBtnAdd(){
+    fun onClickBtnAdd() {
         val createTask: Fragment = CreateTaskWindow()
         val transaction: FragmentTransaction = fragmentManager!!.beginTransaction()
 
         transaction.replace(R.id.linerLayout, createTask)
+        transaction.addToBackStack(null)
         transaction.commit()
 
-    }
 
+
+    }
 }
+
+
