@@ -2,9 +2,11 @@ package com.example.caseplanning
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.EditText
 import android.widget.ListView
 import androidx.appcompat.app.ActionBar
 import androidx.appcompat.app.AppCompatActivity
@@ -14,12 +16,10 @@ import androidx.fragment.app.FragmentTransaction
 import butterknife.ButterKnife
 import butterknife.OnClick
 import com.example.caseplanning.TypeTask.*
+import kotlinx.android.synthetic.main.task_window.view.*
+import kotlinx.android.synthetic.main.to_do.*
 
 class CreateTaskWindow  : Fragment(){
-
-    lateinit var listView: ListView
-    lateinit var arrayListTask: ArrayList<String>
-    var textTask : String? = null
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -84,6 +84,7 @@ class CreateTaskWindow  : Fragment(){
         transaction.add(R.id.typeTask, toDoTask)
         transaction.commit()
 
+
     }
 
     /*добавление задачи в виде текста*/
@@ -97,9 +98,15 @@ class CreateTaskWindow  : Fragment(){
         transaction.commit()
 
     }
+    /*получаем данные введенные пользователем в editText и передаем в активити WindowTask*/
     @OnClick(R.id.add)
     fun onclickAdd(){
+        val editTextTaskName = view!!.findViewById<EditText>(R.id.taskText)
+        val textTask = editTextTaskName.text.toString()
+
         val intent = Intent(activity!!.applicationContext, MainWindowCasePlanning()::class.java )
+        intent.putExtra("nameTask", textTask)
         startActivity(intent)
     }
+
 }
