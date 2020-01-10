@@ -11,10 +11,12 @@ import android.widget.ListView
 import androidx.appcompat.app.ActionBar
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
+import androidx.core.view.size
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentTransaction
 import butterknife.ButterKnife
 import butterknife.OnClick
+import com.example.caseplanning.DataBase.DataBaseTask
 import com.example.caseplanning.TypeTask.ToDoTask
 import com.google.firebase.auth.FirebaseAuth
 import com.miguelcatalan.materialsearchview.MaterialSearchView
@@ -26,8 +28,8 @@ class WindowTask() : Fragment() {
 
     private lateinit var mAuth: FirebaseAuth
     private lateinit var search: MaterialSearchView
-     var addListTask = ArrayList<String>()
-     var textTask: String? = " "
+    var textTask: String? = " "
+    lateinit var listTasks : ListView
 
 
     override fun onCreateView(
@@ -53,33 +55,25 @@ class WindowTask() : Fragment() {
         search = viewFragment.findViewById<MaterialSearchView>(R.id.search)
         search.closeSearch()
 
-        val intent: Intent  = activity.intent
+        val intent: Intent = activity.intent
         textTask = intent.getStringExtra("nameTask")
 
-        listTask(viewFragment,textTask)
+        listTask(viewFragment, textTask)
 
         return viewFragment
     }
 
-    private fun listTask(viewFragment: View, nameTask : String?) {
+    private fun listTask(viewFragment: View, nameTask: String?) {
 
 
-        val listTasks = viewFragment.findViewById<ListView>(R.id.listViewTask)
+        listTasks = viewFragment.findViewById<ListView>(R.id.listViewTask)
 
-        /*к подзадачам*/
-
-        if (nameTask != null) {
-           addListTask.add(nameTask)
             val adapter = ArrayAdapter<String>(
                 activity!!.applicationContext,
-                android.R.layout.simple_list_item_1,
-                addListTask
-            )
-            Log.d("ArrayList", "${addListTask.size}")
+                android.R.layout.simple_list_item_1)
 
-            listTasks.adapter = adapter
-
-        }
+            val dataBaseTask = DataBaseTask(listTasks, nameTask, adapter)
+            dataBaseTask.readDataBase()
     }
 
 
@@ -136,13 +130,12 @@ class WindowTask() : Fragment() {
     @Suppress("DEPRECATION")
     @OnClick(R.id.addTask)
     fun onClickBtnAdd() {
-        val createTask: Fragment = CreateTaskWindow()
+        val createTask: Fragment = CreateTaskWindow(listTasks)
         val transaction: FragmentTransaction = fragmentManager!!.beginTransaction()
 
         transaction.replace(R.id.linerLayout, createTask)
         transaction.addToBackStack(null)
         transaction.commit()
-
 
 
     }
