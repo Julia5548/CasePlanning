@@ -132,7 +132,6 @@ class MainActivity() : AppCompatActivity(){
                 Log.e("TAG", "onAuthStateChanged:signed_out")
             }
         }
-        //return mAuthListener
     }
 
     /*обновляем состояние пользователя*/
@@ -163,6 +162,7 @@ class MainActivity() : AppCompatActivity(){
         return super.onCreateOptionsMenu(menu)
     }
 
+    /*обработчик нажатия на кнопки меню*/
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
 
 
