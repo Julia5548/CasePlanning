@@ -1,35 +1,32 @@
 package com.example.caseplanning
 
 import android.content.Intent
-import android.content.Intent.getIntent
 import android.os.Bundle
-import android.util.Log
 import android.view.*
 import android.widget.ArrayAdapter
-import android.widget.EditText
 import android.widget.ListView
 import androidx.appcompat.app.ActionBar
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
-import androidx.core.view.size
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentTransaction
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import butterknife.ButterKnife
 import butterknife.OnClick
 import com.example.caseplanning.DataBase.DataBaseTask
-import com.example.caseplanning.TypeTask.ToDoTask
 import com.google.firebase.auth.FirebaseAuth
 import com.miguelcatalan.materialsearchview.MaterialSearchView
-import kotlinx.android.synthetic.main.task_window.view.*
-import kotlinx.android.synthetic.main.to_do.*
 
 
-class WindowTask() : Fragment() {
+class WindowTask : Fragment() {
 
     private lateinit var mAuth: FirebaseAuth
     private lateinit var search: MaterialSearchView
+    private val dataBaseTask = DataBaseTask()
     var textTask: String? = " "
     lateinit var listTasks : ListView
+
 
 
     override fun onCreateView(
@@ -68,12 +65,24 @@ class WindowTask() : Fragment() {
 
         listTasks = viewFragment.findViewById<ListView>(R.id.listViewTask)
 
-            val adapter = ArrayAdapter<String>(
-                activity!!.applicationContext,
-                android.R.layout.simple_list_item_1)
+        /*подписываемся и выводим данные из бд, при выходе надо удалить подписчиков*/
+        val disposable = dataBaseTask.retrieveData()
+            .subscribe {
+                val stringList = arrayListOf<String>()
 
-            val dataBaseTask = DataBaseTask(listTasks, nameTask, adapter)
-            dataBaseTask.readDataBase()
+                for(task in it) {
+                    stringList.add(task.name)
+                }
+
+                val adapter = ArrayAdapter<String>(
+                    activity!!.applicationContext,
+                    android.R.layout.simple_list_item_1,
+                    stringList
+                )
+
+                listTasks.adapter = adapter;
+            }
+
     }
 
 
@@ -130,7 +139,7 @@ class WindowTask() : Fragment() {
     @Suppress("DEPRECATION")
     @OnClick(R.id.addTask)
     fun onClickBtnAdd() {
-        val createTask: Fragment = CreateTaskWindow(listTasks)
+        val createTask: Fragment = CreateTaskWindow()
         val transaction: FragmentTransaction = fragmentManager!!.beginTransaction()
 
         transaction.replace(R.id.linerLayout, createTask)
