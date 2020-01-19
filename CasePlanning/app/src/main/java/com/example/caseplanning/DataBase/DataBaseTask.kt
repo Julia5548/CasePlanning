@@ -1,82 +1,77 @@
 package com.example.caseplanning.DataBase
 
 
-import android.app.Activity
-import android.util.Log
-import android.view.View
-import android.widget.AdapterView
-import android.widget.ArrayAdapter
-import android.widget.ListView
-import androidx.appcompat.app.AppCompatActivity
-import com.firebase.ui.database.FirebaseListAdapter
+import com.androidhuman.rxfirebase2.database.RxFirebaseDatabase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
+import io.reactivex.Observable
+import io.reactivex.Observer
+import io.reactivex.disposables.Disposable
+import io.reactivex.rxkotlin.toObservable
+import kotlin.collections.HashMap
 
-class DataBaseTask() {
+class DataBaseTask {
 
     private  var mAuth : FirebaseAuth = FirebaseAuth.getInstance()
-    val dataBaseReference : DatabaseReference = FirebaseDatabase.getInstance().reference
-    private var textTask:String? = null
+    private  var taskObservable: Observable<List<Task>>
+    private lateinit var disposal: Disposable
+
+    val database = FirebaseDatabase.getInstance()
+    val dataBaseReference = database.reference
     val user = mAuth.currentUser
 
-    private lateinit var listTask : List<String>
-    private lateinit var listTaskView: ListView
+    /*чтение данных из бд*/
+    constructor() {
 
-    private lateinit var mAdapter : FirebaseListAdapter<String>
-    private lateinit var adapter : ArrayAdapter<String>
-
-    constructor(listTaskView: ListView, textTask:String?, adapter: ArrayAdapter<String>) : this() {
-        this.listTaskView = listTaskView
-        this.adapter = adapter
-        this.textTask = textTask
-    }
-    constructor(listTaskView: ListView) : this() {
-        this.listTaskView = listTaskView
-    }
-
-    fun writeDataBase() {
-
-        mAdapter = object : FirebaseListAdapter<String>(
-            AppCompatActivity(), String::class.java,
-            android.R.layout.simple_list_item_1, dataBaseReference.child(user!!.uid)
-                .child("Tasks")
-        ){
-            override fun populateView(v: View?, model: String?, position: Int) {
-                Log.d("Что то делает", "хз что, пока не понимаю")
+        val ref = dataBaseReference.child(user!!.uid).child("Tasks")
+        /*подключаем класс подписки, оформляем подписчика */
+        taskObservable = object: Observable<List<Task>>() {
+            override fun subscribeActual(observer: Observer<in List<Task>>?) {
+                /*подкллючаем RxFirebaseDatabase подключаем изменения данных и подписчиков,
+                получаем данные из данных*/
+                disposal = RxFirebaseDatabase
+                    .dataChanges(ref)
+                    .subscribe(fun(dataSnapshot: DataSnapshot) {
+                        val listTaskGenerate: GenericTypeIndicator<HashMap<String, String>> =
+                            object : GenericTypeIndicator<HashMap<String, String>>() {}
+                        val tasks = arrayListOf<Task>()
+                        if (dataSnapshot.exists()) {
+                            val table = dataSnapshot.getValue(listTaskGenerate)
+                            if (table != null) {
+                                for ((key, name) in table) {
+                                    tasks.add(Task(id = key, name = name, shouldRepeat = false))
+                                }
+                            }
+                        }
+/*получаем очередной список*/
+                        observer!!.onNext(tasks);
+                    })
             }
         }
-        listTaskView.adapter = mAdapter
     }
 
-    fun readDataBase(){
+    fun createTask(taskText: String) {
 
-        dataBaseReference.child(user!!.uid).addValueEventListener(object: ValueEventListener{
-            override fun onCancelled(dataBaseError: DatabaseError) {
-
-                Log.d("Tag","Failed to read value", dataBaseError.toException())
-            }
-
-            override fun onDataChange(dataSnapshot: DataSnapshot) {
+        val task  = Task(id = "0", name = taskText, shouldRepeat = false)
 
 
-                val listTaskGenerate:GenericTypeIndicator<List<String>> = object :
-                    GenericTypeIndicator<List<String>>() {}
-                listTask = dataSnapshot.child("Tasks").getValue(listTaskGenerate)!!
-                updateUI(adapter,listTaskView)
-
-
-            }
-
-        })
+        dataBaseReference
+            .child(user!!.uid)
+            .child("Tasks")
+            .push()
+            .setValue(taskText)
     }
 
-    private fun updateUI(adapter: ArrayAdapter<String>, listTaskView: ListView) {
+//    fun updateTask(taskId: Int, taskText: String) {
+//        /// dataBaseReference.child(user!!.uid).child("Tasks").push().setValue()
+//    }
+//
+//    fun deleteTask(taskId: Int) {
+//
+//    }
 
-        listTaskView.adapter = adapter
-    }
 
-    fun onClickAddTask(textTask: String?){
-
-        dataBaseReference.child(user!!.uid).child("Tasks").push().setValue(textTask)
+    fun retrieveData() : Observable<List<Task>> {
+        return taskObservable
     }
 }
