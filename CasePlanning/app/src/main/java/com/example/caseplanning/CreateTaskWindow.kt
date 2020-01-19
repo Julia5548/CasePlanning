@@ -13,6 +13,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentTransaction
+import androidx.recyclerview.widget.RecyclerView
 import butterknife.ButterKnife
 import butterknife.OnClick
 import com.example.caseplanning.DataBase.DataBaseTask
@@ -20,12 +21,9 @@ import com.example.caseplanning.TypeTask.*
 import kotlinx.android.synthetic.main.task_window.view.*
 import kotlinx.android.synthetic.main.to_do.*
 
-class CreateTaskWindow() : Fragment(){
+class CreateTaskWindow : Fragment(){
 
-    private lateinit var listView:ListView
-    constructor(listView: ListView) : this() {
-        this.listView = listView
-    }
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -42,8 +40,7 @@ class CreateTaskWindow() : Fragment(){
         toolbar.setTitleTextColor(android.graphics.Color.WHITE)
 
         ButterKnife.bind(this, viewFragment)
-        val dataBaseTask = DataBaseTask(listView)
-        dataBaseTask.writeDataBase()
+
 
         return viewFragment
     }
@@ -112,7 +109,7 @@ class CreateTaskWindow() : Fragment(){
         val textTask = editTextTaskName.text.toString()
 
         val dataBaseTask = DataBaseTask()
-        dataBaseTask.onClickAddTask(textTask)
+        dataBaseTask.createTask(textTask)
 
         val intent = Intent(activity!!.applicationContext, MainWindowCasePlanning()::class.java )
         intent.putExtra("nameTask", textTask)
