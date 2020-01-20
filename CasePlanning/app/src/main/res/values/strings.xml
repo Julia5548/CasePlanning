@@ -29,4 +29,10 @@
     <string name="playAudio">запуск</string>
     <string name="task">Задача</string>
     <string name="add">Добавить</string>
+    <string name="groupTask">Группа задач</string>
+    <string name="Access">Доступ</string>
+    <string name="progress">Прогресс выполнения</string>
+    <string name="Other">Другое</string>
+    <string name="setting">Настройки</string>
+    <string name="SignOut">Выход</string>
 </resources>
