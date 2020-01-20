@@ -15,6 +15,7 @@ import androidx.recyclerview.widget.RecyclerView
 import butterknife.ButterKnife
 import butterknife.OnClick
 import com.example.caseplanning.DataBase.DataBaseTask
+import com.example.caseplanning.Increase.PhotoIncrease
 import com.google.firebase.auth.FirebaseAuth
 import com.miguelcatalan.materialsearchview.MaterialSearchView
 
@@ -123,7 +124,7 @@ class WindowTask : Fragment() {
         super.onCreateOptionsMenu(menu, inflater)
     }
 
-
+/*
     @OnClick(R.id.btn_signOut)
     fun onClickSignOut() {
         //выход пользователя из системы
@@ -133,7 +134,7 @@ class WindowTask : Fragment() {
         //intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
         startActivity(intent)
 
-    }
+    }*/
 
 
     @Suppress("DEPRECATION")
@@ -148,6 +149,7 @@ class WindowTask : Fragment() {
 
 
     }
+
 }
 
 
