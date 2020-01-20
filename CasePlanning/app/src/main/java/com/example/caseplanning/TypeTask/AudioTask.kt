@@ -11,6 +11,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageButton
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.core.app.ActivityCompat
@@ -25,8 +26,8 @@ import java.lang.Exception
 
 class AudioTask : Fragment() {
 
-    private var mediaRecorder : MediaRecorder? = null
-    private var mediaPlayer : MediaPlayer? = null
+    private var mediaRecorder: MediaRecorder? = null
+    private var mediaPlayer: MediaPlayer? = null
     private lateinit var fileName: String
     val PERMISSION_CODE = 1000
 
@@ -35,7 +36,7 @@ class AudioTask : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        val view  = inflater.inflate(R.layout.audio, container, false)
+        val view = inflater.inflate(R.layout.audio, container, false)
 
         ButterKnife.bind(this, view)
 
@@ -44,29 +45,49 @@ class AudioTask : Fragment() {
         return view
     }
 
-    /*запись аудио*/
-
-    @OnClick(R.id.playRecord)
+    /*запись и остановка аудио*/
+    @OnClick(R.id.playRecordAndStopRecord)
     fun onClickStartRecording() {
+
+        val playAndStopRecord = view!!.findViewById<ImageButton>(R.id.playRecordAndStopRecord)
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (context!!.checkSelfPermission(Manifest.permission.RECORD_AUDIO)
                 != PackageManager.PERMISSION_GRANTED &&
                 context!!.checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                != PackageManager.PERMISSION_GRANTED) {
+                != PackageManager.PERMISSION_GRANTED
+            ) {
                 val permission: Array<String> = arrayOf(
                     Manifest.permission.RECORD_AUDIO,
-                    Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE
+                )
                 requestPermissions(permission, 0)
             } else {
-                startRecording()
+                if (playAndStopRecord.tag == null) {
+                    playAndStopRecord.tag = 1
+                    playAndStopRecord.setImageResource(R.drawable.ic_stop_black_24dp)
+                    startRecording()
+                } else if (playAndStopRecord.tag == 1) {
+                    stopRecording()
+                    playAndStopRecord.setImageResource(R.drawable.ic_mic_black_24dp)
+                    playAndStopRecord.tag = null
+                }
             }
-            }else{
+        } else {
 
+            if (playAndStopRecord.tag == null) {
+                playAndStopRecord.tag = 1
+                playAndStopRecord.setImageResource(R.drawable.ic_stop_black_24dp)
                 startRecording()
+            } else if (playAndStopRecord.tag == 1) {
+                stopRecording()
+                playAndStopRecord.setImageResource(R.drawable.ic_mic_black_24dp)
             }
         }
-    fun startRecording(){
+    }
 
+    /*запись аудио записи*/
+    fun startRecording() {
 
         try {
             releaseRecorder()
@@ -80,69 +101,82 @@ class AudioTask : Fragment() {
             mediaRecorder!!.setOutputFile(fileName)
             mediaRecorder!!.prepare()
             mediaRecorder!!.start()
-        }catch (e : Exception){
+        } catch (e: Exception) {
             e.printStackTrace()
         }
     }
 
     private fun releaseRecorder() {
-       if (mediaRecorder != null){
-           mediaRecorder!!.release()
-           mediaRecorder = null
-       }
-    }
-
-    /*остановка записи задачи*/
-    @OnClick(R.id.stopRecord)
-    fun stopRecording(view: View){
-        if (mediaRecorder != null){
-            mediaRecorder!!.stop()
-        }else{
-            Log.d("XER", "BEEEEEEEEEEEEEEEEEEEEEEEEEE")
+        if (mediaRecorder != null) {
+            mediaRecorder!!.release()
+            mediaRecorder = null
         }
     }
 
-    @OnClick(R.id.stopPlay)
-    fun stopPlayAudio(view: View){
-
-        if(mediaPlayer != null)
-            mediaPlayer!!.stop()
-
+    /*остановка записи аудио*/
+    fun stopRecording() {
+        if (mediaRecorder != null) {
+            mediaRecorder!!.stop()
+        } else {
+            Log.d("Tag", "Audio stop is not possible")
+        }
     }
 
-    @OnClick(R.id.playAudio)
-    fun playAudio(view: View){
+    /*воспроизведение и остновка аудио*/
+    @OnClick(R.id.playAndStopAudio)
+    fun playAudio() {
 
-        try{
-            releasePlay()
-            mediaPlayer = MediaPlayer()
-            mediaPlayer!!.setDataSource(fileName)
-            mediaPlayer!!.prepare()
-            mediaPlayer!!.start()
-        }catch (e: Exception){
+        val playAndStopAudio = view!!.findViewById<ImageButton>(R.id.playAndStopAudio)
+        try {
+
+            if (playAndStopAudio.tag == null) {
+                releasePlay()
+                mediaPlayer = MediaPlayer()
+                mediaPlayer!!.setDataSource(fileName)
+                mediaPlayer!!.prepare()
+                mediaPlayer!!.start()
+                playAndStopAudio.setImageResource(R.drawable.ic_stop_black_24dp)
+                playAndStopAudio.tag = 1
+            }else if (playAndStopAudio.tag == 1){
+                stopPlayAudio()
+                playAndStopAudio.setImageResource(R.drawable.ic_play_arrow_black_24dp)
+                playAndStopAudio.tag = null
+            }
+        } catch (e: Exception) {
             e.printStackTrace()
         }
     }
 
     private fun releasePlay() {
-        if (mediaPlayer != null){
+        if (mediaPlayer != null) {
             mediaPlayer!!.release()
             mediaPlayer = null
         }
 
     }
+
+    /*остановка воспроизведение аудио*/
+    fun stopPlayAudio() {
+
+        if (mediaPlayer != null)
+            mediaPlayer!!.stop()
+
+    }
+
     override fun onRequestPermissionsResult(
         requestCode: Int,
         permissions: Array<out String>,
         grantResults: IntArray
     ) {
-        when(requestCode){
+        when (requestCode) {
             PERMISSION_CODE -> {
-                if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED){
+                if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     startRecording()
-                }else{
-                    Toast.makeText(activity!!.applicationContext, "В доступе было отказано",
-                        Toast.LENGTH_SHORT).show()
+                } else {
+                    Toast.makeText(
+                        activity!!.applicationContext, "В доступе было отказано",
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
             }
         }
