@@ -6,18 +6,22 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.EditText
-import android.widget.ListView
+import android.widget.*
 import androidx.appcompat.app.ActionBar
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
+import androidx.core.view.children
+import androidx.core.view.isEmpty
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentTransaction
 import androidx.recyclerview.widget.RecyclerView
 import butterknife.ButterKnife
 import butterknife.OnClick
+import butterknife.Optional
 import com.example.caseplanning.DataBase.DataBaseTask
+import com.example.caseplanning.Increase.PhotoIncrease
 import com.example.caseplanning.TypeTask.*
+import kotlinx.android.synthetic.main.photo.view.*
 import kotlinx.android.synthetic.main.task_window.view.*
 import kotlinx.android.synthetic.main.to_do.*
 
@@ -40,8 +44,6 @@ class CreateTaskWindow : Fragment(){
         toolbar.setTitleTextColor(android.graphics.Color.WHITE)
 
         ButterKnife.bind(this, viewFragment)
-
-
         return viewFragment
     }
     /*добавление фото задачи*/
@@ -87,8 +89,6 @@ class CreateTaskWindow : Fragment(){
 
         transaction.add(R.id.typeTask, toDoTask)
         transaction.commit()
-
-
     }
 
     /*добавление задачи в виде текста*/
@@ -114,6 +114,17 @@ class CreateTaskWindow : Fragment(){
         val intent = Intent(activity!!.applicationContext, MainWindowCasePlanning()::class.java )
         intent.putExtra("nameTask", textTask)
         startActivity(intent)
+
+    }
+
+    /*увелечение фотографии*/
+    fun photoZoom(){
+        val photoIncrease: Fragment = PhotoIncrease()
+        val transaction: FragmentTransaction = fragmentManager!!.beginTransaction()
+
+        transaction.replace(R.id.relativeLayout, photoIncrease)
+        transaction.addToBackStack(null)
+        transaction.commit()
     }
 
 }
