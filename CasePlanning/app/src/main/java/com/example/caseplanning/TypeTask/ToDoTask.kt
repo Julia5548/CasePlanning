@@ -21,8 +21,6 @@ class  ToDoTask : Fragment() {
     /*подзадачам*/
     val addListTask = ArrayList<String>()
 
-
-
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -31,18 +29,4 @@ class  ToDoTask : Fragment() {
         val view = inflater.inflate(R.layout.to_do, container, false)
             return view
     }
-   /* fun onClickAddTask(){
-
-
-
-        /*к подзадачам*/
-        addListTask.add(taskName.text.toString())
-
-        val adapter = ArrayAdapter<String>(activity!!.applicationContext,
-            android.R.layout.simple_list_item_1,
-           addListTask)
-
-      //  listTask.adapter = adapter
-        taskName.setText("")
-    }*/
 }
