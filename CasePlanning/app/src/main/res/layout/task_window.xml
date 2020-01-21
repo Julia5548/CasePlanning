@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="match_parent"
-        android:id = "@+id/relativeLayout"
+        android:id = "@+id/relativeLayoutTask"
         android:layout_height="match_parent"
         android:orientation="vertical">
+
+
 
     <androidx.appcompat.widget.Toolbar
             android:id="@+id/toolbarCreateTask"
@@ -158,6 +160,7 @@
                 android:layout_height="wrap_content"
                 android:layout_alignParentEnd="true"
                 android:layout_alignParentRight="true"
+                android:id = "@+id/textChoose"
                 android:padding="5dp"
                 android:text="@string/chooseReplay"
                 android:textSize="20sp" />
@@ -174,6 +177,12 @@
 
     </LinearLayout>
 
+    <FrameLayout
+            android:layout_width="match_parent"
+            android:id = "@+id/frameLayoutReplay"
+            android:layout_height="match_parent">
+
+    </FrameLayout>
 
 
 </RelativeLayout>

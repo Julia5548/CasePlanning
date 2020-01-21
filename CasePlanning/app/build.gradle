@@ -83,4 +83,6 @@ dependencies {
     //noinspection GradleCompatible
     implementation 'com.android.support:recyclerview-v7:27.0.0'
 
+    implementation 'android.arch.navigation:navigation-ui:1.0.0-alpha02'
+
 }

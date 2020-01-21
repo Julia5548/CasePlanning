@@ -1,15 +1,15 @@
 <resources>
     <string name="app_name">CasePlanning</string>
-    <string name="sign_in">Sign in</string>
+    <string name="sign_in">Вход</string>
     <string name="username">UserName:</string>
     <string name="password">Password</string>
-    <string name="sign_up">Sign Up</string>
+    <string name="sign_up">Регистрация</string>
     <string name="email">Email</string>
-    <string name="sign_out">Sign Out</string>
+    <string name="sign_out">Выход</string>
     <string name="forgotPassword">Забыли пароль?</string>
     <string name="newPassowd">Введите новый пароль</string>
     <string name="rePassword">Введите еще раз пароль</string>
-    <string name="resetPassword">сбросить пароль</string>
+    <string name="resetPassword">Сбросить пароль</string>
     <string name="search">Поиск</string>
     <string name="typeTask">Тип задачи:</string>
     <string name="addphoto">addPhoto</string>
@@ -35,4 +35,6 @@
     <string name="Other">Другое</string>
     <string name="setting">Настройки</string>
     <string name="SignOut">Выход</string>
+    <string name="Open">Open</string>
+    <string name="Close">Close</string>
 </resources>
