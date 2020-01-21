@@ -44,8 +44,10 @@ class CreateTaskWindow : Fragment(){
         toolbar.setTitleTextColor(android.graphics.Color.WHITE)
 
         ButterKnife.bind(this, viewFragment)
+
         return viewFragment
     }
+
     /*добавление фото задачи*/
     @OnClick(R.id.photo)
     fun onClickAddPhoto(){
@@ -57,6 +59,7 @@ class CreateTaskWindow : Fragment(){
         transaction.commit()
 
     }
+
     /*добавление видео задачи*/
     @OnClick(R.id.video)
     fun onClickAddVideo(){
@@ -68,6 +71,7 @@ class CreateTaskWindow : Fragment(){
         transaction.commit()
 
     }
+
     /*добавление аудио задачи*/
     @OnClick(R.id.audio)
     fun onClickAddAudio(){
@@ -102,6 +106,7 @@ class CreateTaskWindow : Fragment(){
         transaction.commit()
 
     }
+
     /*получаем данные введенные пользователем в editText и передаем в активити WindowTask*/
     @OnClick(R.id.add)
     fun onclickAdd(){
@@ -114,6 +119,18 @@ class CreateTaskWindow : Fragment(){
         val intent = Intent(activity!!.applicationContext, MainWindowCasePlanning()::class.java )
         intent.putExtra("nameTask", textTask)
         startActivity(intent)
+
+    }
+
+    @OnClick(R.id.textChoose)
+    fun onClickChooseReplay(){
+
+        val replay = Replay()
+        val transaction:FragmentTransaction = fragmentManager!!.beginTransaction()
+
+        transaction.replace(R.id.linerLayout, replay)
+        transaction.addToBackStack(null)
+        transaction.commit()
 
     }
 
