@@ -32,7 +32,7 @@ class SignUp : AppCompatActivity() {
         setContentView(R.layout.activity_sign_up)
         val toolbar = findViewById<Toolbar>(R.id.toolbarSignUp)
         setSupportActionBar(toolbar)
-        toolbar!!.title = "Sign Up"
+        toolbar!!.title = "Регистрация"
 
         ButterKnife.bind(this)
         //initialize FireBase Auth
@@ -51,15 +51,16 @@ class SignUp : AppCompatActivity() {
 
         val emailEdit : EditText = findViewById(R.id.editEmail)
         val passwordEdit : EditText = findViewById(R.id.editPassword)
+        val nameUserEdit : EditText = findViewById(R.id.editUserName)
 
         val email = emailEdit.text.toString()
         val password = passwordEdit.text.toString()
+
 
         mAuth.createUserWithEmailAndPassword(email,password)
             .addOnCompleteListener(this
             ) { task ->
                 if (task.isSuccessful){
-
 
                     val user = mAuth.currentUser
                     user?.sendEmailVerification()?.addOnCompleteListener(this)
@@ -67,6 +68,8 @@ class SignUp : AppCompatActivity() {
                         if (taskTwo.isSuccessful) {
                             Toast.makeText(applicationContext, "Signup successful. Verification email sent",
                                 Toast.LENGTH_SHORT).show()
+                            val intent = Intent(this, MainActivity::class.java)
+                            startActivity(intent)
                         } else {
                             Toast.makeText(
                                 applicationContext,
@@ -75,38 +78,15 @@ class SignUp : AppCompatActivity() {
                             ).show()
                         }
                     }
-                    updateId(user)
                 }else{
                     Log.d("TAG: ","createUserWithEmail:failure", task.exception)
                     Toast.makeText(applicationContext, "Authentication failed", Toast.LENGTH_SHORT).show()
-                    updateId(user = null)
                 }
             }
 
 
     }
 
-    fun updateId(user : FirebaseUser?){
-
-
-        if(user != null) {
-            /*потверждение почты*/
-
-            if (user.isEmailVerified) {
-                val intent = Intent(this, MainWindowCasePlanning::class.java)
-                startActivity(intent)
-                Toast.makeText(
-                    applicationContext,
-                    "$user добро пожаловать в систему по планировке дел",
-                    Toast.LENGTH_SHORT
-                ).show()
-            }
-        }else{
-            Toast.makeText(applicationContext, "регистрация не прошла", Toast.LENGTH_SHORT)
-                .show()
-        }
-
-    }
     /*возврат на предыдущую страницу*/
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId){
