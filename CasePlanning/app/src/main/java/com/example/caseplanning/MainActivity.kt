@@ -23,12 +23,14 @@ import butterknife.OnClick
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.miguelcatalan.materialsearchview.MaterialSearchView
+import kotlinx.android.synthetic.main.header.*
 
 
-class MainActivity() : AppCompatActivity(){
+class MainActivity : AppCompatActivity(){
 
 
     lateinit var dialog : Dialog
+    var email : String = " "
 
     private lateinit var mAuth : FirebaseAuth
 
@@ -66,7 +68,7 @@ class MainActivity() : AppCompatActivity(){
         val emailEdit : EditText = findViewById(R.id.editEmail)
         val passwordEdit : EditText = findViewById(R.id.editPassword)
 
-        val email = emailEdit.text.toString()
+        email = emailEdit.text.toString()
         val password = passwordEdit.text.toString()
 
         /*проверка на пустоту полей*/
@@ -85,25 +87,13 @@ class MainActivity() : AppCompatActivity(){
             passwordEdit.requestFocus()
         }else{
 
-            checkIfEmailVerified()
-
             /*авторизация пользователя в системе*/
             mAuth.signInWithEmailAndPassword(email, password)
                 .addOnCompleteListener(this) { task ->
                     if (task.isSuccessful) {
 
                         val user = mAuth.currentUser
-                        if (user!!.isEmailVerified) {
-                            Log.d("TAG: ", "signInWithEmail: success")
                             updateUI(user)
-                        }else{
-                            Log.d("TAG: ", "почта не потдверждена")
-                            Toast.makeText(
-                                applicationContext,
-                                "почта не потдверждена",
-                                Toast.LENGTH_SHORT
-                            ).show()
-                        }
                     } else {
                         Log.w("TAG: ", "signInWithEmail: failure", task.exception)
                         //СДЕЛАТЬ КАК ОТДЕЛЬНОЕ ОКОШКО
@@ -118,28 +108,25 @@ class MainActivity() : AppCompatActivity(){
         }
 
     }
-    private fun checkIfEmailVerified() {
-
-        val mAuthListener = FirebaseAuth.AuthStateListener {
-
-            val user = mAuth.currentUser
-            if (user != null) {
-                Log.e(
-                    "TAG ", if (user.isEmailVerified) "User is signed in and " +
-                            "email is verified" else "Email is not verified"
-                )
-            }else{
-                Log.e("TAG", "onAuthStateChanged:signed_out")
-            }
-        }
-    }
 
     /*обновляем состояние пользователя*/
     fun updateUI(user: FirebaseUser?) {
         if (user != null) {
+            /*потверждение почты*/
 
-            val intentMainWindowCasePlanning = Intent(this, MainWindowCasePlanning::class.java)
-            startActivity(intentMainWindowCasePlanning)
+            if (user.isEmailVerified) {
+                val intentMainWindowCasePlanning = Intent(this,
+                    MainWindowCasePlanning::class.java)
+                startActivity(intentMainWindowCasePlanning)
+                Toast.makeText(
+                    applicationContext,
+                    "$user добро пожаловать в систему по планировке дел",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+        }else{
+            Toast.makeText(applicationContext, "регистрация не прошла", Toast.LENGTH_SHORT)
+                .show()
         }
     }
 
