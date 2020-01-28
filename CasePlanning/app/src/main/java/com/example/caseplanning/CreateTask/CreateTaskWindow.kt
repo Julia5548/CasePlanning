@@ -1,29 +1,26 @@
-package com.example.caseplanning
+package com.example.caseplanning.CreateTask
 
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.*
+import android.widget.ArrayAdapter
+import android.widget.EditText
+import android.widget.ListView
 import androidx.appcompat.app.ActionBar
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
-import androidx.core.view.children
-import androidx.core.view.isEmpty
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentTransaction
-import androidx.recyclerview.widget.RecyclerView
 import butterknife.ButterKnife
 import butterknife.OnClick
-import butterknife.Optional
 import com.example.caseplanning.DataBase.DataBaseTask
 import com.example.caseplanning.Increase.PhotoIncrease
+import com.example.caseplanning.MainWindowCasePlanning
+import com.example.caseplanning.R
 import com.example.caseplanning.TypeTask.*
-import kotlinx.android.synthetic.main.photo.view.*
-import kotlinx.android.synthetic.main.task_window.view.*
-import kotlinx.android.synthetic.main.to_do.*
+import kotlinx.android.synthetic.main.task_window.*
 
 class CreateTaskWindow : Fragment(){
 
@@ -37,10 +34,13 @@ class CreateTaskWindow : Fragment(){
         val viewFragment = inflater.inflate(R.layout.task_window, container, false)
 
         val toolbar = viewFragment.findViewById<Toolbar>(R.id.toolbarCreateTask)
+
         val activity = activity as AppCompatActivity?
         activity!!.setSupportActionBar(toolbar)
+
         val actionBar: ActionBar? = activity.supportActionBar
         actionBar!!.title = "Создать"
+
         toolbar.setTitleTextColor(android.graphics.Color.WHITE)
 
         ButterKnife.bind(this, viewFragment)
@@ -93,6 +93,7 @@ class CreateTaskWindow : Fragment(){
 
         transaction.add(R.id.typeTask, toDoTask)
         transaction.commit()
+
     }
 
     /*добавление задачи в виде текста*/
@@ -116,6 +117,10 @@ class CreateTaskWindow : Fragment(){
         val dataBaseTask = DataBaseTask()
         dataBaseTask.createTask(textTask)
 
+        if (arguments != null) {
+            val value = arguments!!.getString("Period")
+        }
+
         val intent = Intent(activity!!.applicationContext, MainWindowCasePlanning()::class.java )
         intent.putExtra("nameTask", textTask)
         startActivity(intent)
@@ -131,7 +136,6 @@ class CreateTaskWindow : Fragment(){
         transaction.replace(R.id.linerLayout, replay)
         transaction.addToBackStack(null)
         transaction.commit()
-
     }
 
     /*увелечение фотографии*/
@@ -144,4 +148,19 @@ class CreateTaskWindow : Fragment(){
         transaction.commit()
     }
 
+    /*Добавить подзадачу*/
+    @OnClick(R.id.btnAddSubTask)
+    fun onClickAddSubTask(){
+
+        val listViewSubTask = view!!.findViewById<ListView>(R.id.listSubTask)
+        val subTask = SubTasks()
+        val listSubTask = subTask.createSubTask(listViewSubTask)
+
+        val adapter = ArrayAdapter<String>(
+            activity!!.applicationContext,
+            android.R.layout.simple_list_item_1,
+            listSubTask
+        )
+        listViewSubTask.adapter = adapter
+    }
 }

@@ -37,4 +37,10 @@
     <string name="SignOut">Выход</string>
     <string name="Open">Open</string>
     <string name="Close">Close</string>
+    <string name="addTask">Добавить задачу</string>
+    <string name="timer">Таймер:</string>
+    <string name="indicate">Указать ></string>
+    <string name="reminder">Напоминание:</string>
+    <string name="set">Установить ></string>
+    <string name="SubTask">Подзадача</string>
 </resources>

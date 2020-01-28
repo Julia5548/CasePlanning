@@ -20,7 +20,7 @@
         <activity android:name=".ResetPassword"></activity>
         <activity android:name=".MainWindowCasePlanning"></activity>
         <activity android:name=".SignUp"></activity>
-        <activity android:name=".CreateTaskWindow"></activity>
+        <activity android:name=".CreateTask.CreateTaskWindow"></activity>
         <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

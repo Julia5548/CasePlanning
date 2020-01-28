@@ -1,9 +1,11 @@
 package com.example.caseplanning
 
 
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import androidx.appcompat.app.AppCompatActivity
 
+
+@Suppress("DEPRECATION")
 class MainWindowCasePlanning : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -13,7 +15,4 @@ class MainWindowCasePlanning : AppCompatActivity() {
             .add(R.id.linerLayout, WindowTask())
             .commit()
     }
-
-
-
 }

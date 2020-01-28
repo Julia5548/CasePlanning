@@ -1,4 +1,4 @@
-package com.example.caseplanning
+package com.example.caseplanning.CreateTask
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -9,9 +9,8 @@ import androidx.appcompat.app.ActionBar
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentTransaction
 import butterknife.ButterKnife
-import butterknife.OnClick
+import com.example.caseplanning.R
 
 class Replay : Fragment() {
 
@@ -24,8 +23,10 @@ class Replay : Fragment() {
         val viewFragment = inflater.inflate(R.layout.replay, container, false)
 
         val toolbar = viewFragment.findViewById<Toolbar>(R.id.toolbar)
+
         val activity = activity as AppCompatActivity?
         activity!!.setSupportActionBar(toolbar)
+
         val actionBar: ActionBar? = activity.supportActionBar
         actionBar!!.title = "Период"
 
@@ -60,15 +61,15 @@ class Replay : Fragment() {
             AdapterView.OnItemClickListener { parent, view, position, id ->
                 val textView = view as TextView
                 val period = textView.text.toString()
-                val createTaskWindow = CreateTaskWindow()
+                val createTaskWindow =
+                    CreateTaskWindow()
                 val args = Bundle()
+
                 args.putString("Period", period)
                 createTaskWindow.arguments = args
-                fragmentManager!!.beginTransaction().replace(R.id.linerLayout,
-                    createTaskWindow).commit()
-
-
-
+                fragmentManager!!.beginTransaction().replace(
+                    R.id.linerLayout,
+                    createTaskWindow).addToBackStack(null).commit()
 
             }
     }

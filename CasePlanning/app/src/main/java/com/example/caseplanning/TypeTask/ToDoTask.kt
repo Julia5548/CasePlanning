@@ -4,17 +4,8 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ArrayAdapter
-import android.widget.EditText
-import android.widget.ListView
 import androidx.fragment.app.Fragment
-import butterknife.ButterKnife
-import butterknife.OnClick
-import com.example.caseplanning.CreateTaskWindow
 import com.example.caseplanning.R
-import com.example.caseplanning.WindowTask
-import kotlinx.android.synthetic.main.task_window.*
-import kotlinx.android.synthetic.main.task_window.view.*
 
 class  ToDoTask : Fragment() {
 

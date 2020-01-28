@@ -1,12 +1,9 @@
 package com.example.caseplanning
 
 import android.content.Intent
-import android.graphics.Color
 import android.os.Bundle
-import android.util.Log
 import android.view.*
 import android.widget.ArrayAdapter
-import android.widget.EditText
 import android.widget.ListView
 import android.widget.TextView
 import androidx.appcompat.app.ActionBar
@@ -16,12 +13,10 @@ import androidx.appcompat.widget.Toolbar
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentTransaction
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import butterknife.ButterKnife
 import butterknife.OnClick
+import com.example.caseplanning.CreateTask.CreateTaskWindow
 import com.example.caseplanning.DataBase.DataBaseTask
-import com.example.caseplanning.Increase.PhotoIncrease
 import com.example.caseplanning.Sidebar.*
 import com.google.android.material.navigation.NavigationView
 import com.google.firebase.auth.FirebaseAuth
@@ -170,7 +165,8 @@ class WindowTask : Fragment(), NavigationView.OnNavigationItemSelectedListener {
     @Suppress("DEPRECATION")
     @OnClick(R.id.addTask)
     fun onClickBtnAdd() {
-        val createTask: Fragment = CreateTaskWindow()
+        val createTask: Fragment =
+            CreateTaskWindow()
         val transaction: FragmentTransaction = fragmentManager!!.beginTransaction()
 
         transaction.replace(R.id.linerLayout, createTask)

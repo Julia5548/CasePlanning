@@ -17,10 +17,6 @@ import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentTransaction
-import butterknife.OnClick
-import com.example.caseplanning.CreateTaskWindow
-import com.example.caseplanning.Increase.PhotoIncrease
 import com.example.caseplanning.R
 
 /*написать комменты, проблема с видом фотографии, нет потверждения на правильность фотографии, нажатие на фотографию, чтобы открылась полность вся, загрузка из галереи */
