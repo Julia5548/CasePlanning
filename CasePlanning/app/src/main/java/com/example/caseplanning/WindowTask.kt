@@ -172,8 +172,6 @@ class WindowTask : Fragment(), NavigationView.OnNavigationItemSelectedListener {
         transaction.replace(R.id.linerLayout, createTask)
         transaction.addToBackStack(null)
         transaction.commit()
-
-
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {

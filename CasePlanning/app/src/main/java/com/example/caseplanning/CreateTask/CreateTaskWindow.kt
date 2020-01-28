@@ -2,6 +2,7 @@ package com.example.caseplanning.CreateTask
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -22,10 +23,11 @@ import com.example.caseplanning.R
 import com.example.caseplanning.TypeTask.*
 import kotlinx.android.synthetic.main.task_window.*
 
-class CreateTaskWindow : Fragment(){
+class CreateTaskWindow : Fragment() {
 
-    private var editTextTaskName:EditText? = null
-    private var textTask : String? = null
+    private var editTextTaskName: EditText? = null
+    private var textTask: String? = null
+    val outState = Bundle()
 
 
     override fun onCreateView(
@@ -48,12 +50,65 @@ class CreateTaskWindow : Fragment(){
 
         ButterKnife.bind(this, viewFragment)
 
+        if (savedInstanceState != null) {
+
+            textTask = savedInstanceState.getString("nameTask", "")
+            inizializationEdit()
+
+        } else {
+
+            textTask = ""
+            editTextTaskName = null
+
+        }
+
         return viewFragment
     }
 
+    override fun onSaveInstanceState(outState: Bundle) {
+
+        inizializationEdit()
+        outState.run {
+            putString("textTask", editTextTaskName!!.text.toString())
+        }
+        super.onSaveInstanceState(outState)
+
+        Log.d("myLogs", "onSaveInstanceState")
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+
+        if (outState.isEmpty) {
+            savedInstanceState == null
+        }
+
+        if (savedInstanceState != null) {
+
+            textTask = savedInstanceState.getString("nameTask", "")
+            inizializationEdit()
+
+        } else {
+
+            textTask = ""
+            editTextTaskName = null
+
+        }
+        super.onCreate(savedInstanceState)
+
+        Log.d("myLogs", "onCreate")
+    }
+
+    override fun onStop() {
+        super.onStop()
+        inizializationEdit()
+
+        Log.d("myLogs", "onStop")
+    }
+
+
     /*добавление фото задачи*/
     @OnClick(R.id.photo)
-    fun onClickAddPhoto(){
+    fun onClickAddPhoto() {
 
         val photo: Fragment = Photo()
         val transaction: FragmentTransaction = fragmentManager!!.beginTransaction()
@@ -65,7 +120,7 @@ class CreateTaskWindow : Fragment(){
 
     /*добавление видео задачи*/
     @OnClick(R.id.video)
-    fun onClickAddVideo(){
+    fun onClickAddVideo() {
 
         val video: Fragment = Video()
         val transaction: FragmentTransaction = fragmentManager!!.beginTransaction()
@@ -77,10 +132,10 @@ class CreateTaskWindow : Fragment(){
 
     /*добавление аудио задачи*/
     @OnClick(R.id.audio)
-    fun onClickAddAudio(){
+    fun onClickAddAudio() {
 
         val audio = AudioTask()
-        val transaction:FragmentTransaction = fragmentManager!!.beginTransaction()
+        val transaction: FragmentTransaction = fragmentManager!!.beginTransaction()
 
         transaction.add(R.id.typeTask, audio)
         transaction.commit()
@@ -89,10 +144,10 @@ class CreateTaskWindow : Fragment(){
 
     /*добавление задачи в виде списка*/
     @OnClick(R.id.to_do)
-    fun onClickAddToDoTask(){
+    fun onClickAddToDoTask() {
 
         val toDoTask = ToDoTask()
-        val transaction:FragmentTransaction = fragmentManager!!.beginTransaction()
+        val transaction: FragmentTransaction = fragmentManager!!.beginTransaction()
 
         transaction.add(R.id.typeTask, toDoTask)
         transaction.commit()
@@ -101,10 +156,10 @@ class CreateTaskWindow : Fragment(){
 
     /*добавление задачи в виде текста*/
     @OnClick(R.id.text)
-    fun onClickAddTextTask(){
+    fun onClickAddTextTask() {
 
         val textTask = TextTask()
-        val transaction:FragmentTransaction = fragmentManager!!.beginTransaction()
+        val transaction: FragmentTransaction = fragmentManager!!.beginTransaction()
 
         transaction.add(R.id.typeTask, textTask)
         transaction.commit()
@@ -113,10 +168,13 @@ class CreateTaskWindow : Fragment(){
 
     /*выбор повторения задачи*/
     @OnClick(R.id.textChoose)
-    fun onClickChooseReplay(){
+    fun onClickChooseReplay() {
+
+
+        onSaveInstanceState(outState)
 
         val replay = Replay()
-        val transaction:FragmentTransaction = fragmentManager!!.beginTransaction()
+        val transaction: FragmentTransaction = fragmentManager!!.beginTransaction()
 
         transaction.replace(R.id.linerLayout, replay)
         transaction.addToBackStack(null)
@@ -124,7 +182,7 @@ class CreateTaskWindow : Fragment(){
     }
 
     /*увелечение фотографии*/
-    fun photoZoom(){
+    fun photoZoom() {
         val photoIncrease: Fragment = PhotoIncrease()
         val transaction: FragmentTransaction = fragmentManager!!.beginTransaction()
 
@@ -135,7 +193,7 @@ class CreateTaskWindow : Fragment(){
 
     /*Добавить подзадачу*/
     @OnClick(R.id.btnAddSubTask)
-    fun onClickAddSubTask(){
+    fun onClickAddSubTask() {
 
         val listViewSubTask = view!!.findViewById<ListView>(R.id.listSubTask)
         val subTask = SubTasks()
@@ -151,7 +209,7 @@ class CreateTaskWindow : Fragment(){
 
     /*получаем данные введенные пользователем в editText и передаем в активити WindowTask*/
     @OnClick(R.id.add)
-    fun onclickAdd(){
+    fun onclickAdd() {
 
         inizializationEdit()
 
@@ -162,30 +220,14 @@ class CreateTaskWindow : Fragment(){
             val value = arguments!!.getString("Period")
         }
 
-        val intent = Intent(activity!!.applicationContext, MainWindowCasePlanning()::class.java )
+        val intent = Intent(activity!!.applicationContext, MainWindowCasePlanning()::class.java)
         intent.putExtra("nameTask", textTask)
         startActivity(intent)
     }
 
-    override fun onSaveInstanceState(outState: Bundle) {
-        super.onSaveInstanceState(outState)
-        outState.putString("textTask", editTextTaskName!!.text.toString())
-    }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
+    private fun inizializationEdit() {
+        editTextTaskName = activity!!.findViewById<EditText>(R.id.taskText)
 
-        if (savedInstanceState == null){
-            textTask = ""
-            editTextTaskName = null
-        }
-        else{
-            textTask = savedInstanceState.getString("nameTask", "")
-            inizializationEdit()
-        }
-    }
-
-    private fun inizializationEdit(){
-        editTextTaskName = view!!.findViewById<EditText>(R.id.taskText)
     }
 }
