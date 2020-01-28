@@ -24,6 +24,9 @@ import kotlinx.android.synthetic.main.task_window.*
 
 class CreateTaskWindow : Fragment(){
 
+    private var editTextTaskName:EditText? = null
+    private var textTask : String? = null
+
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -108,25 +111,7 @@ class CreateTaskWindow : Fragment(){
 
     }
 
-    /*получаем данные введенные пользователем в editText и передаем в активити WindowTask*/
-    @OnClick(R.id.add)
-    fun onclickAdd(){
-        val editTextTaskName = view!!.findViewById<EditText>(R.id.taskText)
-        val textTask = editTextTaskName.text.toString()
-
-        val dataBaseTask = DataBaseTask()
-        dataBaseTask.createTask(textTask)
-
-        if (arguments != null) {
-            val value = arguments!!.getString("Period")
-        }
-
-        val intent = Intent(activity!!.applicationContext, MainWindowCasePlanning()::class.java )
-        intent.putExtra("nameTask", textTask)
-        startActivity(intent)
-
-    }
-
+    /*выбор повторения задачи*/
     @OnClick(R.id.textChoose)
     fun onClickChooseReplay(){
 
@@ -162,5 +147,45 @@ class CreateTaskWindow : Fragment(){
             listSubTask
         )
         listViewSubTask.adapter = adapter
+    }
+
+    /*получаем данные введенные пользователем в editText и передаем в активити WindowTask*/
+    @OnClick(R.id.add)
+    fun onclickAdd(){
+
+        inizializationEdit()
+
+        val dataBaseTask = DataBaseTask()
+        dataBaseTask.createTask(textTask!!)
+
+        if (arguments != null) {
+            val value = arguments!!.getString("Period")
+        }
+
+        val intent = Intent(activity!!.applicationContext, MainWindowCasePlanning()::class.java )
+        intent.putExtra("nameTask", textTask)
+        startActivity(intent)
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putString("textTask", editTextTaskName!!.text.toString())
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        if (savedInstanceState == null){
+            textTask = ""
+            editTextTaskName = null
+        }
+        else{
+            textTask = savedInstanceState.getString("nameTask", "")
+            inizializationEdit()
+        }
+    }
+
+    private fun inizializationEdit(){
+        editTextTaskName = view!!.findViewById<EditText>(R.id.taskText)
     }
 }
