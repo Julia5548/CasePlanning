@@ -1,14 +1,15 @@
 package com.example.caseplanning.CreateTask
 
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ArrayAdapter
-import android.widget.EditText
-import android.widget.ListView
+import android.view.ViewStub
+import android.widget.*
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.ActionBar
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
@@ -30,6 +31,7 @@ class CreateTaskWindow : Fragment() {
     val outState = Bundle()
 
 
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -57,7 +59,7 @@ class CreateTaskWindow : Fragment() {
 
     override fun onSaveInstanceState(outState: Bundle) {
 
-        inizializationEdit()
+        //inizializationEdit()
         outState.run {
             putString("textTask", editTextTaskName!!.text.toString())
         }
@@ -75,7 +77,7 @@ class CreateTaskWindow : Fragment() {
         if (savedInstanceState != null) {
 
             textTask = savedInstanceState.getString("nameTask", "")
-            inizializationEdit()
+          //  inizializationEdit()
 
         } else {
 
@@ -88,16 +90,29 @@ class CreateTaskWindow : Fragment() {
         Log.d("myLogs", "onCreate")
     }
 
-    override fun onStop() {
+    /*override fun onStop() {
         super.onStop()
         inizializationEdit()
 
         Log.d("myLogs", "onStop")
-    }
+    }*/
 
+/*AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+val textView = TextView(activity!!.applicationContext)
+    textView.text = "Добавить подзадачу"
+    textView.textAlignment = TextView.TEXT_ALIGNMENT_CENTER
+    textView.textSize = 19F
 
+    val ll = view!!.findViewById(R.id.SubTasks) as LinearLayout
+    val lp = LinearLayout.
+        LayoutParams(
+            LinearLayout.LayoutParams.MATCH_PARENT,
+            LinearLayout.LayoutParams.WRAP_CONTENT
+        )
+    ll.addView(textView, lp)
+ */
     /*добавление фото задачи*/
-    @OnClick(R.id.photo)
+  /*  @OnClick(R.id.photo)
     fun onClickAddPhoto() {
 
         val photo: Fragment = Photo()
@@ -218,6 +233,18 @@ class CreateTaskWindow : Fragment() {
 
     private fun inizializationEdit() {
         editTextTaskName = activity!!.findViewById<EditText>(R.id.taskText)
+        }
+ */
+
+    @OnClick(R.id.addSubTasks)
+    fun onClickAddSubTask(){
+        val t = EditText(activity!!.applicationContext)
+        val linerLayoutSubTask = view!!.findViewById<LinearLayout>(R.id.editSubTask)
+        t.layoutParams =
+            LinearLayout.LayoutParams(LinearLayout.LayoutParams.FILL_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT)
+        linerLayoutSubTask.addView(t)
+
+
+}
 
     }
-}
