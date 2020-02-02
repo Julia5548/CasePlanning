@@ -50,17 +50,7 @@ class CreateTaskWindow : Fragment() {
 
         ButterKnife.bind(this, viewFragment)
 
-        if (savedInstanceState != null) {
 
-            textTask = savedInstanceState.getString("nameTask", "")
-            inizializationEdit()
-
-        } else {
-
-            textTask = ""
-            editTextTaskName = null
-
-        }
 
         return viewFragment
     }

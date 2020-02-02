@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:orientation="horizontal" android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+
+        <ImageButton
+                android:id="@+id/photo"
+                android:layout_width="45dp"
+                android:layout_height="45dp"
+                android:background="@null"
+                android:contentDescription="@string/addphoto"
+                android:src="@drawable/ic_add_a_photo_black_24dp" />
+
+        <ImageButton
+                android:id="@+id/audio"
+                android:layout_width="45dp"
+                android:layout_height="45dp"
+                android:background="@null"
+                android:contentDescription="@string/addaudio"
+                android:src="@drawable/ic_audiotrack_black_24dp" />
+
+        <ImageButton
+                android:id="@+id/video"
+                android:layout_width="45dp"
+                android:layout_height="45dp"
+                android:background="@null"
+                android:contentDescription="@string/addvideo"
+                android:src="@drawable/ic_videocam_black_24dp" />
+
+        <ImageButton
+                android:id="@+id/to_do"
+                android:layout_width="45dp"
+                android:layout_height="45dp"
+                android:background="@null"
+                android:contentDescription="@string/addtodolist"
+                android:src="@drawable/ic_view_list_black_24dp" />
+
+        <ImageButton
+                android:id="@+id/text"
+                android:layout_width="45dp"
+                android:layout_height="45dp"
+                android:background="@null"
+                android:contentDescription="@string/addtext"
+                android:src="@drawable/ic_text_fields_black_24dp" />
+</LinearLayout>
