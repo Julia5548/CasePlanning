@@ -14,6 +14,7 @@ import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.Fragment
 import butterknife.ButterKnife
 import butterknife.OnClick
+import butterknife.Optional
 import com.example.caseplanning.R
 
 class CreateTaskWindow : Fragment() {
@@ -267,15 +268,44 @@ val textView = TextView(activity!!.applicationContext)
 
     /*создает подзадачу*/
     fun onClickCreateSubTask(viewFr : View,
-                             btnDeleted : ImageButton,
+                             btnDeletedOrEdit : ImageButton,
                              btnOkSubTasks : ImageButton )
     {
 
         val editTextSubTasks = viewFr.findViewById<EditText>(R.id.editTextSubTasks)
         editTextSubTasks.isEnabled = false
-        btnDeleted.visibility = ImageButton.GONE
+        btnDeletedOrEdit.setImageResource(R.drawable.ic_edit_black_24dp)
+        btnDeletedOrEdit.setOnClickListener{onClickEditSubTask(editTextSubTasks,
+            btnDeletedOrEdit,
+                btnOkSubTasks,
+            viewFr)}
         btnOkSubTasks.visibility = ImageButton.GONE
 
+
+    }
+
+    /*редактирование подзадачи*/
+    private fun onClickEditSubTask(editTextSubTasks: EditText?,
+                                   btnDeletedOrEdit : ImageButton,
+                                   btnOkSubTasks : ImageButton,
+                                   viewFr: View) {
+
+        val relativeLayoutSubTasks = viewFr.findViewById<RelativeLayout>(R.id.rel)
+
+        editTextSubTasks!!.isEnabled = true
+        editTextSubTasks.requestFocus()
+
+        btnDeletedOrEdit.setImageResource(R.drawable.ic_delete_forever_black_24dp)
+        btnOkSubTasks.visibility = ImageButton.VISIBLE
+
+        btnDeletedOrEdit.setOnClickListener { onClickDeletedSubTask(relativeLayoutSubTasks) }
+
+        btnOkSubTasks.setOnClickListener{
+            onClickCreateSubTask(
+            viewFr,
+            btnDeletedOrEdit,
+            btnOkSubTasks)
+        }
     }
 
 }
