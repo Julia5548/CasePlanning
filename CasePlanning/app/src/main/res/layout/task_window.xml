@@ -26,10 +26,10 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_alignParentStart="true"
-                    android:focusable="false"
                     android:layout_alignParentLeft="true"
                     android:layout_alignParentEnd="true"
                     android:layout_alignParentRight="true"
+                    android:focusable="false"
                     android:hint="@string/Task" />
         </RelativeLayout>
 
@@ -47,19 +47,26 @@
                 android:layout_height="wrap_content"
                 android:layout_below="@id/type_task" />
 
+        <include
+                android:id="@+id/period"
+                layout="@layout/period"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/color_date" />
+
+
         <LinearLayout
                 android:id="@+id/SubTasks"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_below="@+id/color_date"
+                android:layout_below="@+id/period"
                 android:orientation="vertical">
 
             <include
                     android:id="@+id/editSubTask"
                     layout="@layout/sub_tasks"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                   />
+                    android:layout_height="wrap_content" />
 
             <TextView
                     android:id="@+id/addSubTasks"
@@ -71,5 +78,14 @@
 
         </LinearLayout>
 
+        <include
+                android:id="@+id/replay"
+                layout="@layout/replay_timer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/SubTasks" />
+
+
     </RelativeLayout>
+
 </ScrollView>

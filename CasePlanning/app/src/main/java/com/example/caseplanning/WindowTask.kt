@@ -149,19 +149,6 @@ class WindowTask : Fragment(), NavigationView.OnNavigationItemSelectedListener {
         super.onCreateOptionsMenu(menu, inflater)
     }
 
-/*
-    @OnClick(R.id.btn_signOut)
-    fun onClickSignOut() {
-        //выход пользователя из системы
-        mAuth.signOut()
-
-        val intent = Intent(activity!!.applicationContext, MainActivity::class.java)
-        //intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
-        startActivity(intent)
-
-    }*/
-
-
     @Suppress("DEPRECATION")
     @OnClick(R.id.addTask)
     fun onClickBtnAdd() {
