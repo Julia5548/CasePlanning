@@ -12,10 +12,13 @@ import androidx.appcompat.app.ActionBar
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentTransaction
 import butterknife.ButterKnife
 import butterknife.OnClick
 import butterknife.Optional
 import com.example.caseplanning.R
+import com.example.caseplanning.TypeTask.Photo
+import com.example.caseplanning.TypeTask.Video
 
 class CreateTaskWindow : Fragment() {
 
@@ -44,40 +47,43 @@ class CreateTaskWindow : Fragment() {
         toolbar.setTitleTextColor(android.graphics.Color.WHITE)
 
         ButterKnife.bind(this, viewFragment)
+        val linerLayoutSubTask = viewFragment.findViewById<RelativeLayout>(R.id.photo)
+        linerLayoutSubTask.visibility = LinearLayout.GONE
 
-
+        val relativeLayoutVideo = viewFragment.findViewById<RelativeLayout>(R.id.video)
+        relativeLayoutVideo.visibility = LinearLayout.GONE
 
         return viewFragment
     }
 
-    override fun onSaveInstanceState(outState: Bundle) {
+    /* override fun onSaveInstanceState(outState: Bundle) {
 
-        //inizializationEdit()
-        outState.run {
-            putString("textTask", editTextTaskName!!.text.toString())
-        }
-        super.onSaveInstanceState(outState)
+         //inizializationEdit()
+         outState.run {
+             putString("textTask", editTextTaskName!!.text.toString())
+         }
+         super.onSaveInstanceState(outState)
 
-        Log.d("myLogs", "onSaveInstanceState")
-    }
+         Log.d("myLogs", "onSaveInstanceState")
+     }*/
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
-        if (outState.isEmpty) {
-            savedInstanceState == null
-        }
+        /* if (outState.isEmpty) {
+             savedInstanceState == null
+         }
 
-        if (savedInstanceState != null) {
+         if (savedInstanceState != null) {
 
-            textTask = savedInstanceState.getString("nameTask", "")
-            //  inizializationEdit()
+             textTask = savedInstanceState.getString("nameTask", "")
+             //  inizializationEdit()
 
-        } else {
+         } else {
 
-            textTask = ""
-            editTextTaskName = null
+             textTask = ""
+             editTextTaskName = null
 
-        }
+         }*/
         super.onCreate(savedInstanceState)
 
         Log.d("myLogs", "onCreate")
@@ -90,44 +96,34 @@ class CreateTaskWindow : Fragment() {
         Log.d("myLogs", "onStop")
     }*/
 
-/*AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
-val textView = TextView(activity!!.applicationContext)
-    textView.text = "Добавить подзадачу"
-    textView.textAlignment = TextView.TEXT_ALIGNMENT_CENTER
-    textView.textSize = 19F
-
-    val ll = view!!.findViewById(R.id.SubTasks) as LinearLayout
-    val lp = LinearLayout.
-        LayoutParams(
-            LinearLayout.LayoutParams.MATCH_PARENT,
-            LinearLayout.LayoutParams.WRAP_CONTENT
-        )
-    ll.addView(textView, lp)
- */
     /*добавление фото задачи*/
-    /*  @OnClick(R.id.photo)
-      fun onClickAddPhoto() {
+    @OnClick(R.id.btnAddPhoto)
+    fun onClickAddPhoto() {
 
-          val photo: Fragment = Photo()
-          val transaction: FragmentTransaction = fragmentManager!!.beginTransaction()
+        val linerLayoutSubTask = view!!.findViewById<RelativeLayout>(R.id.photo)
+        linerLayoutSubTask.visibility = LinearLayout.VISIBLE
 
-          transaction.add(R.id.typeTask, photo)
-          transaction.commit()
+        val photo: Fragment = Photo()
+        val transaction: FragmentTransaction = fragmentManager!!.beginTransaction()
 
-      }
+        transaction.add(R.id.photo, photo)
+        transaction.commit()
+    }
 
-      /*добавление видео задачи*/
-      @OnClick(R.id.video)
-      fun onClickAddVideo() {
+    /*добавление видео задачи*/
+   @OnClick(R.id.btnAddVideo)
+    fun onClickAddVideo() {
 
-          val video: Fragment = Video()
-          val transaction: FragmentTransaction = fragmentManager!!.beginTransaction()
+        val relativeLayoutVideo = view!!.findViewById<RelativeLayout>(R.id.video)
+        relativeLayoutVideo.visibility = LinearLayout.VISIBLE
 
-          transaction.add(R.id.typeTask, video)
-          transaction.commit()
+        val video: Fragment = Video()
+        val transaction: FragmentTransaction = fragmentManager!!.beginTransaction()
 
-      }
-
+        transaction.add(R.id.video, video)
+        transaction.commit()
+    }
+/*
       /*добавление аудио задачи*/
       @OnClick(R.id.audio)
       fun onClickAddAudio() {
@@ -261,34 +257,41 @@ val textView = TextView(activity!!.applicationContext)
     }
 
     /*удаляет подзадачу*/
-    fun onClickDeletedSubTask(relativeLayoutSubTasks : RelativeLayout){
+    fun onClickDeletedSubTask(relativeLayoutSubTasks: RelativeLayout) {
 
         relativeLayoutSubTasks.visibility = RelativeLayout.GONE
     }
 
     /*создает подзадачу*/
-    fun onClickCreateSubTask(viewFr : View,
-                             btnDeletedOrEdit : ImageButton,
-                             btnOkSubTasks : ImageButton )
-    {
+    fun onClickCreateSubTask(
+        viewFr: View,
+        btnDeletedOrEdit: ImageButton,
+        btnOkSubTasks: ImageButton
+    ) {
 
         val editTextSubTasks = viewFr.findViewById<EditText>(R.id.editTextSubTasks)
         editTextSubTasks.isEnabled = false
         btnDeletedOrEdit.setImageResource(R.drawable.ic_edit_black_24dp)
-        btnDeletedOrEdit.setOnClickListener{onClickEditSubTask(editTextSubTasks,
-            btnDeletedOrEdit,
+        btnDeletedOrEdit.setOnClickListener {
+            onClickEditSubTask(
+                editTextSubTasks,
+                btnDeletedOrEdit,
                 btnOkSubTasks,
-            viewFr)}
+                viewFr
+            )
+        }
         btnOkSubTasks.visibility = ImageButton.GONE
 
 
     }
 
     /*редактирование подзадачи*/
-    private fun onClickEditSubTask(editTextSubTasks: EditText?,
-                                   btnDeletedOrEdit : ImageButton,
-                                   btnOkSubTasks : ImageButton,
-                                   viewFr: View) {
+    private fun onClickEditSubTask(
+        editTextSubTasks: EditText?,
+        btnDeletedOrEdit: ImageButton,
+        btnOkSubTasks: ImageButton,
+        viewFr: View
+    ) {
 
         val relativeLayoutSubTasks = viewFr.findViewById<RelativeLayout>(R.id.rel)
 
@@ -300,11 +303,12 @@ val textView = TextView(activity!!.applicationContext)
 
         btnDeletedOrEdit.setOnClickListener { onClickDeletedSubTask(relativeLayoutSubTasks) }
 
-        btnOkSubTasks.setOnClickListener{
+        btnOkSubTasks.setOnClickListener {
             onClickCreateSubTask(
-            viewFr,
-            btnDeletedOrEdit,
-            btnOkSubTasks)
+                viewFr,
+                btnDeletedOrEdit,
+                btnOkSubTasks
+            )
         }
     }
 

@@ -5,7 +5,7 @@
 
 
         <ImageButton
-                android:id="@+id/photo"
+                android:id="@+id/btnAddPhoto"
                 android:layout_width="45dp"
                 android:layout_height="45dp"
                 android:background="@null"
@@ -21,7 +21,7 @@
                 android:src="@drawable/ic_audiotrack_black_24dp" />
 
         <ImageButton
-                android:id="@+id/video"
+                android:id="@+id/btnAddVideo"
                 android:layout_width="45dp"
                 android:layout_height="45dp"
                 android:background="@null"

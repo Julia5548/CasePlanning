@@ -85,6 +85,34 @@
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/SubTasks" />
 
+        <LinearLayout
+                android:id="@+id/type"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/replay"
+                android:orientation="horizontal">
+
+            <include
+                    android:id="@+id/photo"
+                    layout="@layout/photo"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+
+            <include
+                    android:id="@+id/video"
+                    layout="@layout/video"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+
+        </LinearLayout>
+
+
+        <EditText
+                android:id="@+id/comment"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/type" />
+
 
     </RelativeLayout>
 

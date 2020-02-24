@@ -15,6 +15,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageButton
 import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import com.example.caseplanning.R
@@ -37,6 +38,7 @@ class Photo : Fragment(){
         val view  = inflater.inflate(R.layout.photo, container, false)
 
         photo_image = view.findViewById<ImageButton>(R.id.photoImage)
+
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
             if (context!!.checkSelfPermission(Manifest.permission.CAMERA)
@@ -76,7 +78,7 @@ class Photo : Fragment(){
             //фотка сделана, извлекаем картинку
             photo_image.setImageURI(outputUriFile)
         }else{
-            Log.d("Popka", "RUNNNN")
+            Log.d("Ощибка", "Не получилось сохранить фотографию")
         }
     }
 
