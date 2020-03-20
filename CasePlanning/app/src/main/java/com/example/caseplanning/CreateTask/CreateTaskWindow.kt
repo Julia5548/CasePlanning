@@ -84,6 +84,7 @@ class CreateTaskWindow : Fragment() {
              editTextTaskName = null
 
          }*/
+        retainInstance = true
         super.onCreate(savedInstanceState)
 
         Log.d("myLogs", "onCreate")

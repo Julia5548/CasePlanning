@@ -152,6 +152,7 @@ class WindowTask : Fragment(), NavigationView.OnNavigationItemSelectedListener {
     @Suppress("DEPRECATION")
     @OnClick(R.id.addTask)
     fun onClickBtnAdd() {
+
         val createTask: Fragment =
             CreateTaskWindow()
         val transaction: FragmentTransaction = fragmentManager!!.beginTransaction()
@@ -159,6 +160,7 @@ class WindowTask : Fragment(), NavigationView.OnNavigationItemSelectedListener {
         transaction.replace(R.id.linerLayout, createTask)
         transaction.addToBackStack(null)
         transaction.commit()
+
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
