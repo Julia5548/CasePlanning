@@ -3,9 +3,7 @@ package com.example.caseplanning
 import android.content.Intent
 import android.os.Bundle
 import android.view.*
-import android.widget.ArrayAdapter
-import android.widget.ListView
-import android.widget.TextView
+import android.widget.*
 import androidx.appcompat.app.ActionBar
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
@@ -13,17 +11,23 @@ import androidx.appcompat.widget.Toolbar
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentTransaction
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.ViewModelProviders
 import butterknife.ButterKnife
 import butterknife.OnClick
 import com.example.caseplanning.CreateTask.CreateTaskWindow
+import com.example.caseplanning.CreateTask.MyViewModel
 import com.example.caseplanning.DataBase.DataBaseTask
+import com.example.caseplanning.DataBase.Task
+import com.example.caseplanning.EditElements.EditTask
 import com.example.caseplanning.Sidebar.*
 import com.google.android.material.navigation.NavigationView
 import com.google.firebase.auth.FirebaseAuth
 import com.miguelcatalan.materialsearchview.MaterialSearchView
+import com.shrikanthravi.collapsiblecalendarview.widget.CollapsibleCalendar
 
 
-class WindowTask : Fragment(), NavigationView.OnNavigationItemSelectedListener {
+class WindowTask : Fragment(), NavigationView.OnNavigationItemSelectedListener, AdapterView.OnItemClickListener {
 
 
     private lateinit var mAuth: FirebaseAuth
@@ -31,11 +35,11 @@ class WindowTask : Fragment(), NavigationView.OnNavigationItemSelectedListener {
     private val dataBaseTask = DataBaseTask()
     var textTask: String? = " "
     lateinit var listTasks : ListView
-
+     var list: ArrayList<String>? = null
+    var adapter : ArrayAdapter<String>? = null
     private lateinit var mDrawerLayout : DrawerLayout
     private lateinit var  mToggle : ActionBarDrawerToggle
-
-    var nameUser : String = ""
+    private lateinit var pageViewModel : MyViewModel
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -43,7 +47,7 @@ class WindowTask : Fragment(), NavigationView.OnNavigationItemSelectedListener {
         savedInstanceState: Bundle?
     ): View? {
 
-        val viewFragment = inflater.inflate(R.layout.window_main_tasks, container, false)
+        val viewFragment = inflater.inflate(R.layout.window_main_task, container, false)
 
         val toolbar = viewFragment.findViewById<Toolbar>(R.id.toolbarTask)
         val activity = activity as AppCompatActivity?
@@ -81,40 +85,85 @@ class WindowTask : Fragment(), NavigationView.OnNavigationItemSelectedListener {
         val email = "${mAuth.currentUser!!.email}"
         emailUserText.text = email
 
-        listTask(viewFragment)
+        val calendarView: CollapsibleCalendar = viewFragment.findViewById(R.id.linearLayoutCalendar)
+        list = arrayListOf("Покормить кота", "Забрать документы в МФЦ",
+            "Сходить в магазин")
+        if (textTask != null) {
+
+            list!!.add(textTask!!)
+        }
+        listTask(viewFragment, list)
 
         return viewFragment
     }
 
-    private fun listTask(viewFragment: View) {
+    private fun listTask(viewFragment: View, stringList: ArrayList<String>?) {
 
 
         listTasks = viewFragment.findViewById<ListView>(R.id.listViewTask)
 
         /*подписываемся и выводим данные из бд, при выходе надо удалить подписчиков*/
-        val disposable = dataBaseTask.retrieveData()
+    /*    val disposable = dataBaseTask.retrieveData()
             .subscribe {
                 val stringList = arrayListOf<String>()
 
                 for(task in it) {
                     stringList.add(task.name)
-                }
-
-                val adapter = ArrayAdapter<String>(
+                }*/
+         adapter = ArrayAdapter<String>(
                     activity!!.applicationContext,
-                    android.R.layout.simple_list_item_1,
-                    stringList
+                    android.R.layout.simple_list_item_multiple_choice,
+                    stringList!!
                 )
 
                 listTasks.adapter = adapter
+        registerForContextMenu(listTasks)
+        listTasks.onItemClickListener = this
             }
 
+    //}
+
+    /*появление кнопок при нажатие на элемент из листа*/
+    override fun onCreateContextMenu(
+        menu: ContextMenu,
+        v: View,
+        menuInfo: ContextMenu.ContextMenuInfo?
+    ) {
+        super.onCreateContextMenu(menu, v, menuInfo)
+        val inflater: MenuInflater = activity!!.menuInflater
+        inflater.inflate(R.menu.menu_task, menu)
     }
 
+    override fun onContextItemSelected(item: MenuItem): Boolean {
+        val info : AdapterView.AdapterContextMenuInfo =  item.menuInfo as AdapterView.AdapterContextMenuInfo
+        val nameTask = listTasks.getItemAtPosition(info.position).toString()
+        when (item.itemId) {
+            R.id.edit -> {
+                val task  = Task(name = nameTask, nameSubTasks = null, shouldRepeat = true)
+                pageViewModel.setTask(task)
+                //действия при изменении
+                val editTask : Fragment = EditTask()
+                val transaction: FragmentTransaction = fragmentManager!!.beginTransaction()
+
+                transaction.replace(R.id.linerLayout, editTask)
+                transaction.addToBackStack(null)
+                transaction.commit()
+                return true
+            }
+            R.id.deleted -> {
+                list!!.removeAt(0)
+                adapter!!.notifyDataSetChanged()
+                return true
+            }
+
+        }
+        return super.onContextItemSelected(item)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         setHasOptionsMenu(true)
         super.onCreate(savedInstanceState)
+        pageViewModel  = ViewModelProviders.of(requireActivity()).get(MyViewModel::class.java)
     }
 
     //inflate the menu
@@ -182,7 +231,7 @@ class WindowTask : Fragment(), NavigationView.OnNavigationItemSelectedListener {
                 val groupTask: Fragment = GroupTask()
                 val transaction: FragmentTransaction = fragmentManager!!.beginTransaction()
 
-                transaction.replace(R.id.drawerLayout, groupTask)
+                transaction.replace(R.id.linerLayout, groupTask)
                 transaction.addToBackStack(null)
                 transaction.commit()
             }
@@ -192,7 +241,7 @@ class WindowTask : Fragment(), NavigationView.OnNavigationItemSelectedListener {
                 val access: Fragment = Access()
                 val transaction: FragmentTransaction = fragmentManager!!.beginTransaction()
 
-                transaction.replace(R.id.drawerLayout, access)
+                transaction.replace(R.id.linerLayout, access)
                 transaction.addToBackStack(null)
                 transaction.commit()
 
@@ -203,7 +252,7 @@ class WindowTask : Fragment(), NavigationView.OnNavigationItemSelectedListener {
                 val progress: Fragment = Progress()
                 val transaction: FragmentTransaction = fragmentManager!!.beginTransaction()
 
-                transaction.replace(R.id.drawerLayout, progress)
+                transaction.replace(R.id.linerLayout, progress)
                 transaction.addToBackStack(null)
                 transaction.commit()
 
@@ -214,7 +263,7 @@ class WindowTask : Fragment(), NavigationView.OnNavigationItemSelectedListener {
                 val setting: Fragment = Setting()
                 val transaction: FragmentTransaction = fragmentManager!!.beginTransaction()
 
-                transaction.replace(R.id.drawerLayout, setting)
+                transaction.replace(R.id.linerLayout, setting)
                 transaction.addToBackStack(null)
                 transaction.commit()
 
@@ -225,7 +274,7 @@ class WindowTask : Fragment(), NavigationView.OnNavigationItemSelectedListener {
                 val techSupport: Fragment = TechSupport()
                 val transaction: FragmentTransaction = fragmentManager!!.beginTransaction()
 
-                transaction.replace(R.id.drawerLayout, techSupport)
+                transaction.replace(R.id.linerLayout, techSupport)
                 transaction.addToBackStack(null)
                 transaction.commit()
 
@@ -240,6 +289,12 @@ class WindowTask : Fragment(), NavigationView.OnNavigationItemSelectedListener {
         }
         return  true
     }
+
+    override fun onItemClick(p0: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
+
+    }
+
+
 }
 
 

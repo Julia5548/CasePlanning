@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.drawerlayout.widget.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:id="@+id/drawerLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+    <RelativeLayout
+            android:id="@+id/relativeLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+        <androidx.appcompat.widget.Toolbar
+                android:id="@+id/toolbarTask"
+                style="@style/Toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+        </androidx.appcompat.widget.Toolbar>
+
+        <com.miguelcatalan.materialsearchview.MaterialSearchView
+                android:id="@+id/search"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+        </com.miguelcatalan.materialsearchview.MaterialSearchView>
+
+
+
+        <com.shrikanthravi.collapsiblecalendarview.widget.CollapsibleCalendar
+                android:layout_width="match_parent"
+                style="@style/Theme.Custom"
+                android:id="@+id/linearLayoutCalendar"
+                android:layout_below="@+id/toolbarTask"
+                android:layout_height="wrap_content"
+                app:primaryColor="@color/colorPrimary"
+                app:textColor="@android:color/white"
+                app:selectedItem_textColor="@color/colorPrimary"
+                app:todayItem_textColor="@android:color/white"
+                app:todayItem_background="@drawable/circle_white_stroke_background"
+                app:selectedItem_background="@drawable/circle_white_solid_background"
+                app:buttonLeft_drawableTintColor="@android:color/white"
+                app:buttonRight_drawableTintColor="@android:color/white"
+                app:expandIconColor="@android:color/white" />
+
+
+        <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_below="@+id/linearLayoutCalendar">
+
+
+            <ListView
+                    android:id="@+id/listViewTask"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    tools:ignore="NestedScrolling" />
+
+        </LinearLayout>
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+                android:id="@+id/addTask"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentBottom="true"
+                android:layout_gravity="end|bottom"
+                android:layout_margin="16dp"
+                android:src="@drawable/ic_add"
+                app:backgroundTint="@color/red" />
+    </RelativeLayout>
+
+    <com.google.android.material.navigation.NavigationView
+            android:layout_width="wrap_content"
+            app:headerLayout="@layout/header"
+            android:layout_height="match_parent"
+            android:id = "@+id/navigationView"
+            android:layout_marginTop="?attr/actionBarSize"
+            android:layout_gravity="start"
+            app:menu="@menu/drawer_menu">
+    </com.google.android.material.navigation.NavigationView>
+
+</androidx.drawerlayout.widget.DrawerLayout>

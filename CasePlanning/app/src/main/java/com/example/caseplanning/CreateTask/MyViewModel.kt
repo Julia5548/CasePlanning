@@ -1,12 +1,28 @@
 package com.example.caseplanning.CreateTask
 
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.example.caseplanning.DataBase.Task
+
 
 class MyViewModel : ViewModel() {
 
+     val mName = MutableLiveData<String>()
+    val task = MutableLiveData<Task>()
 
-    fun setText(nameTask: String, nameSubTask: ArrayList<String>?, comment : String?, period:String){
+    fun setnameFolder( nameFolder: String){
 
-        nameTask.
+        mName.value = nameFolder
     }
+
+    fun getNameFolder() : LiveData<String> = mName
+
+    fun setTask (task: Task)
+    {
+        this.task.value = task
+    }
+
+    fun getTask() : LiveData<Task> = task
+
 }

@@ -19,6 +19,7 @@ import androidx.core.content.ContextCompat.getSystemService
 import android.icu.lang.UCharacter.GraphemeClusterBreak.T
 import android.util.Log
 import android.view.MenuItem
+import com.example.caseplanning.DataBase.DataBaseTask
 
 
 class SignUp : AppCompatActivity() {
@@ -68,6 +69,8 @@ class SignUp : AppCompatActivity() {
                         if (taskTwo.isSuccessful) {
                             Toast.makeText(applicationContext, "Signup successful. Verification email sent",
                                 Toast.LENGTH_SHORT).show()
+                            val dataBase = DataBaseTask()
+                            dataBase.createUser(mAuth.uid, nameUserEdit.text.toString(), email )
                             val intent = Intent(this, MainActivity::class.java)
                             startActivity(intent)
                         } else {

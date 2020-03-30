@@ -1,5 +1,6 @@
 package com.example.caseplanning.CreateTask
 
+import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
@@ -13,18 +14,24 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentTransaction
+import androidx.lifecycle.ViewModelProviders
 import butterknife.ButterKnife
 import butterknife.OnClick
 import butterknife.Optional
+import com.example.caseplanning.DataBase.Task
+import com.example.caseplanning.MainWindowCasePlanning
 import com.example.caseplanning.R
 import com.example.caseplanning.TypeTask.Photo
 import com.example.caseplanning.TypeTask.Video
+import kotlinx.android.synthetic.main.add_sub_tasks.view.*
 
 class CreateTaskWindow : Fragment() {
 
     private var editTextTaskName: EditText? = null
     private var textTask: String? = null
     val outState = Bundle()
+    val listSubTasks = arrayListOf<String>()
+    val listSubTasksView = arrayListOf<View>()
 
 
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
@@ -201,30 +208,12 @@ class CreateTaskWindow : Fragment() {
           )
           listViewSubTask.adapter = adapter
       }
-
-      /*получаем данные введенные пользователем в editText и передаем в активити WindowTask*/
-      @OnClick(R.id.add)
-      fun onclickAdd() {
-
-          inizializationEdit()
-
-          val dataBaseTask = DataBaseTask()
-          dataBaseTask.createTask(textTask!!)
-
-          if (arguments != null) {
-              val value = arguments!!.getString("Period")
-          }
-
-          val intent = Intent(activity!!.applicationContext, MainWindowCasePlanning()::class.java)
-          intent.putExtra("nameTask", textTask)
-          startActivity(intent)
-      }
-
+*/
 
       private fun inizializationEdit() {
           editTextTaskName = activity!!.findViewById<EditText>(R.id.taskText)
           }
-   */
+
 
     /*динамическое добавление подзадач*/
     @OnClick(R.id.addSubTasks)
@@ -248,19 +237,24 @@ class CreateTaskWindow : Fragment() {
             (relativeLayoutSubTasks.parent as ViewGroup).removeView(relativeLayoutSubTasks)
         }
 
+        listSubTasksView.add(viewFr)
         linerLayoutSubTask.addView(relativeLayoutSubTasks)
 
+        Log.d("Size", "${listSubTasksView.size}")
         val btnDeleted = viewFr.findViewById<ImageButton>(R.id.btnDeleted)
-        btnDeleted.setOnClickListener { onClickDeletedSubTask(relativeLayoutSubTasks) }
+        btnDeleted.setOnClickListener { onClickDeletedSubTask(relativeLayoutSubTasks, viewFr) }
 
         val btnOkSubTasks = viewFr.findViewById<ImageButton>(R.id.btnOkCreate)
         btnOkSubTasks.setOnClickListener { onClickCreateSubTask(viewFr, btnDeleted, btnOkSubTasks) }
     }
 
     /*удаляет подзадачу*/
-    fun onClickDeletedSubTask(relativeLayoutSubTasks: RelativeLayout) {
+    fun onClickDeletedSubTask(relativeLayoutSubTasks: RelativeLayout, view : View) {
 
-        relativeLayoutSubTasks.visibility = RelativeLayout.GONE
+       // relativeLayoutSubTasks.visibility = RelativeLayout.GONE
+        (view.parent as LinearLayout).removeView(view)
+        listSubTasksView.remove(view)
+        Log.d("Size", "${listSubTasksView.size}")
     }
 
     /*создает подзадачу*/
@@ -282,8 +276,6 @@ class CreateTaskWindow : Fragment() {
             )
         }
         btnOkSubTasks.visibility = ImageButton.GONE
-
-
     }
 
     /*редактирование подзадачи*/
@@ -302,7 +294,7 @@ class CreateTaskWindow : Fragment() {
         btnDeletedOrEdit.setImageResource(R.drawable.ic_delete_forever_black_24dp)
         btnOkSubTasks.visibility = ImageButton.VISIBLE
 
-        btnDeletedOrEdit.setOnClickListener { onClickDeletedSubTask(relativeLayoutSubTasks) }
+        btnDeletedOrEdit.setOnClickListener { onClickDeletedSubTask(relativeLayoutSubTasks, viewFr) }
 
         btnOkSubTasks.setOnClickListener {
             onClickCreateSubTask(
@@ -311,6 +303,37 @@ class CreateTaskWindow : Fragment() {
                 btnOkSubTasks
             )
         }
+    }
+
+    /*получаем данные введенные пользователем в editText и передаем в активити WindowTask*/
+    @OnClick(R.id.add)
+    fun onclickAdd() {
+
+        /*  inizializationEdit()
+
+          val dataBaseTask = DataBaseTask()
+          dataBaseTask.createTask(textTask!!)
+
+          if (arguments != null) {
+              val value = arguments!!.getString("Period")
+          }*/
+
+
+        val editTextTask = view!!.findViewById<EditText>(R.id.editTextTask)
+        textTask = editTextTask.text.toString()
+        for (position in 0 until listSubTasksView.size){
+            listSubTasks.add(listSubTasksView[position]
+                .findViewById<EditText>(R.id.editTextSubTasks)
+                .text
+                .toString())
+            Log.d("Element", listSubTasks[position])
+        }
+        val task = Task(name = textTask!!,nameSubTasks = listSubTasks, shouldRepeat = true)
+        val pageViewModel  = ViewModelProviders.of(activity!!).get(MyViewModel::class.java)
+        pageViewModel.setTask(task)
+        val intent = Intent(activity!!.applicationContext, MainWindowCasePlanning()::class.java)
+        intent.putExtra("nameTask", textTask)
+        startActivity(intent)
     }
 
 }

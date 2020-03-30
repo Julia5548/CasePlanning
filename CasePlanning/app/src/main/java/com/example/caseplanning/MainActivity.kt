@@ -42,9 +42,9 @@ class MainActivity : AppCompatActivity(){
 
         val toolbar = findViewById<Toolbar>(R.id.toolbar)
         setSupportActionBar(toolbar)
-        supportActionBar!!.title = "Sign In"
+        supportActionBar!!.title = "Авторизация"
 
-        toolbar.setTitleTextColor(android.graphics.Color.WHITE)
+        toolbar.setTitleTextColor(android.graphics.Color.BLACK)
 
         //initialize FireBase Auth
         mAuth = FirebaseAuth.getInstance()

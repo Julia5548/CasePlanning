@@ -5,13 +5,25 @@
         <!-- Customize your theme here. -->
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
-        <item name="colorAccent">@color/textBlack</item>
+        <item name="colorControlNormal">#c5c5c5</item>
+        <item name="colorAccent">@color/colorPrimary</item>
     </style>
     <style name="Toolbar">
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">?attr/actionBarSize</item>
         <!-- <item name="theme">@style/ThemeOverlay.AppCompat.Dark.ActionBar</item> -->
-        <item name="android:background">@color/colorPrimary</item>
+        <item name="android:background">@color/textWhite</item>
+    </style>
+
+    <style name="Theme.Custom" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="android:calendarViewStyle">@style/Widget.CalendarView.Custom</item>
+    </style>
+
+    <style name="Widget.CalendarView.Custom" parent="android:Widget.CalendarView">
+        <item name="android:focusedMonthDateColor">@color/colorPrimary</item>
+        <item name="android:weekNumberColor">@color/red</item>
+        <item name="android:weekDayTextAppearance">@style/TextAppearance.AppCompat.Medium</item>
+        <item name="android:dateTextAppearance">@style/TextAppearance.AppCompat.Medium</item>
     </style>
 
 </resources>

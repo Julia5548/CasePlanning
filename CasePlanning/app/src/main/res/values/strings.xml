@@ -45,4 +45,7 @@
     <string name="SubTask">Подзадача</string>
     <string name="Task">Задача</string>
     <string name="NameSubTask">Название подзадачи</string>
+    <string name="nameFolder">Название папки</string>
+    <string name="acсess">Разрешить</string>
+    <string name="edit">Изменить</string>
 </resources>

@@ -14,6 +14,7 @@ class DataBaseTask {
 
     private  var mAuth : FirebaseAuth = FirebaseAuth.getInstance()
     private  var taskObservable: Observable<List<Task>>
+    private lateinit var userObservable : Observable<List<User>>
     private lateinit var disposal: Disposable
 
     val database = FirebaseDatabase.getInstance()
@@ -44,10 +45,47 @@ class DataBaseTask {
                             }
                         }
 /*получаем очередной список*/
-                        observer!!.onNext(tasks);
+                        observer!!.onNext(tasks)
                     })
             }
         }
+    }
+
+    fun readUser(){
+        val ref = dataBaseReference.child("users")
+        /*подключаем класс подписки, оформляем подписчика */
+        userObservable = object: Observable<List<User>>() {
+            override fun subscribeActual(observer: Observer<in List<User>>?) {
+                /*подкллючаем RxFirebaseDatabase подключаем изменения данных и подписчиков,
+                получаем данные из данных*/
+                disposal = RxFirebaseDatabase
+                    .dataChanges(ref)
+                    .subscribe(fun(dataSnapshot: DataSnapshot) {
+                        val listTaskGenerate: GenericTypeIndicator<HashMap<String, String>> =
+                            object : GenericTypeIndicator<HashMap<String, String>>() {}
+                        val users = arrayListOf<User>()
+                        if (dataSnapshot.exists()) {
+                            val table = dataSnapshot.getValue(listTaskGenerate)
+                            if (table != null) {
+                                for ((key, name) in table) {
+                                    users.add(User(id = key, name = name))
+                                }
+                            }
+                        }
+/*получаем очередной список*/
+                        observer!!.onNext(users)
+                    })
+            }
+        }
+    }
+
+    fun createUser(id:String?, name:String?, email:String?){
+        val  users = User(id = id, name = name, email = email)
+        dataBaseReference
+            .child(user!!.uid)
+            .child("Users")
+            .push()
+            .setValue(users)
     }
 
     fun createTask(taskText: String) {
