@@ -87,8 +87,8 @@ class WindowTask : Fragment(), NavigationView.OnNavigationItemSelectedListener, 
         val navigationView = viewFragment.findViewById<NavigationView>(R.id.navigationView)
         navigationView.setNavigationItemSelectedListener(this)
 
-        val intent: Intent = activity.intent
-        textTask = intent.getStringExtra("nameTask")
+      /*  val intent: Intent = activity.intent
+        textTask = intent.getStringExtra("nameTask")*/
 
         val navHeader = navigationView.getHeaderView(0)
         val emailUser = navHeader.findViewById<TextView>(R.id.emailText)
@@ -142,34 +142,32 @@ class WindowTask : Fragment(), NavigationView.OnNavigationItemSelectedListener, 
 
 
         val calendarView: CollapsibleCalendar = viewFragment.findViewById(R.id.linearLayoutCalendar)
-        list = arrayListOf("Покормить кота", "Забрать документы в МФЦ",
-            "Сходить в магазин")
-        if (textTask != null) {
 
-            list!!.add(textTask!!)
-        }
-        listTask(viewFragment, list)
+        listTask(viewFragment)
 
         return viewFragment
     }
 
-    private fun listTask(viewFragment: View, stringList: ArrayList<String>?) {
+    private fun listTask(viewFragment: View) {
 
 
         listTasks = viewFragment.findViewById<ListView>(R.id.listViewTask)
 
         /*подписываемся и выводим данные из бд, при выходе надо удалить подписчиков*/
-    /*    val disposable = dataBaseTask.retrieveData()
+        val disposable = dataBaseTask
+            .retrieveData()
             .subscribe {
+             task ->
                 val stringList = arrayListOf<String>()
 
-                for(task in it) {
-                    stringList.add(task.name)
-                }*/
+                for(tasks in task) {
+                    stringList.add(tasks.name!!)
+                }
+
          adapter = ArrayAdapter<String>(
                     activity!!.applicationContext,
                     android.R.layout.simple_list_item_multiple_choice,
-                    stringList!!
+                    stringList
                 )
 
                 listTasks.adapter = adapter
@@ -177,7 +175,7 @@ class WindowTask : Fragment(), NavigationView.OnNavigationItemSelectedListener, 
         listTasks.onItemClickListener = this
             }
 
-    //}
+    }
 
     /*появление кнопок при нажатие на элемент из листа*/
     override fun onCreateContextMenu(

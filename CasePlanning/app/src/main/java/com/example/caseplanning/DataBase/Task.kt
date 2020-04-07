@@ -5,7 +5,7 @@ import com.google.firebase.database.IgnoreExtraProperties
 @IgnoreExtraProperties
 data class Task (
     var id: String ? = "",
-    var name: String,
+    var name: String? = "",
     var nameSubTasks:ArrayList<String>? = arrayListOf(),
     var photo: String ? = "",
     var audio: String ? = "",
@@ -15,5 +15,5 @@ data class Task (
     var day: String ? = "",
     var timeStart: String ? = "",
     var timeEnd: String ? = "",
-    var shouldRepeat: Boolean
+    var shouldRepeat: Boolean = false
 )

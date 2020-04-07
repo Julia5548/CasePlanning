@@ -1,14 +1,11 @@
 package com.example.caseplanning.DataBase
 
-
-import android.util.Log
 import com.androidhuman.rxfirebase2.database.RxFirebaseDatabase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
 import io.reactivex.Observable
 import io.reactivex.Observer
 import io.reactivex.disposables.Disposable
-import io.reactivex.rxkotlin.toObservable
 import kotlin.collections.HashMap
 
 class DataBaseTask {
@@ -25,7 +22,7 @@ class DataBaseTask {
     val user = mAuth.currentUser!!
 
     /*чтение данных из бд*/
-    constructor() {
+    init {
 
         val ref = dataBaseReference.child(user.uid).child("Tasks")
         /*подключаем класс подписки, оформляем подписчика */
@@ -36,14 +33,14 @@ class DataBaseTask {
                 disposal = RxFirebaseDatabase
                     .dataChanges(ref)
                     .subscribe(fun(dataSnapshot: DataSnapshot) {
-                        val listTaskGenerate: GenericTypeIndicator<HashMap<String, String>> =
-                            object : GenericTypeIndicator<HashMap<String, String>>() {}
-                        val tasks = arrayListOf<Task>()
+                        val listTaskGenerate: GenericTypeIndicator<HashMap<String,Task>> =
+                            object : GenericTypeIndicator<HashMap<String,Task>>() {}
+                        var tasks = arrayListOf<Task>()
                         if (dataSnapshot.exists()) {
                             val table = dataSnapshot.getValue(listTaskGenerate)
                             if (table != null) {
-                                for ((key, name) in table) {
-                                    tasks.add(Task(id = key, name = name, shouldRepeat = false))
+                                for (task in table) {
+                                    tasks.add(Task(name = task.value.name))
                                 }
                             }
                         }
@@ -103,16 +100,13 @@ class DataBaseTask {
             .setValue(users)
     }
 
-    fun createTask(taskText: String) {
-
-        val task  = Task(id = "0", name = taskText, shouldRepeat = false)
-
+    fun createTask(task:Task) {
 
         dataBaseReference
             .child(user.uid)
             .child("Tasks")
             .push()
-            .setValue(taskText)
+            .setValue(task)
     }
 
 //    fun updateTask(taskId: Int, taskText: String) {

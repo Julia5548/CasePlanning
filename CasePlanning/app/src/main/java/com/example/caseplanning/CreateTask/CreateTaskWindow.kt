@@ -18,6 +18,7 @@ import androidx.lifecycle.ViewModelProviders
 import butterknife.ButterKnife
 import butterknife.OnClick
 import butterknife.Optional
+import com.example.caseplanning.DataBase.DataBaseTask
 import com.example.caseplanning.DataBase.Task
 import com.example.caseplanning.MainWindowCasePlanning
 import com.example.caseplanning.R
@@ -309,18 +310,13 @@ class CreateTaskWindow : Fragment() {
     @OnClick(R.id.add)
     fun onclickAdd() {
 
-        /*  inizializationEdit()
-
-          val dataBaseTask = DataBaseTask()
-          dataBaseTask.createTask(textTask!!)
-
-          if (arguments != null) {
+        /*  if (arguments != null) {
               val value = arguments!!.getString("Period")
           }*/
 
-
         val editTextTask = view!!.findViewById<EditText>(R.id.editTextTask)
         textTask = editTextTask.text.toString()
+
         for (position in 0 until listSubTasksView.size){
             listSubTasks.add(listSubTasksView[position]
                 .findViewById<EditText>(R.id.editTextSubTasks)
@@ -328,12 +324,13 @@ class CreateTaskWindow : Fragment() {
                 .toString())
             Log.d("Element", listSubTasks[position])
         }
-        val task = Task(name = textTask!!,nameSubTasks = listSubTasks, shouldRepeat = true)
+        val task = Task(name = textTask!!, shouldRepeat = true)
+        val dataBaseTask = DataBaseTask()
+        dataBaseTask.createTask(task)
         val pageViewModel  = ViewModelProviders.of(activity!!).get(MyViewModel::class.java)
         pageViewModel.setTask(task)
         val intent = Intent(activity!!.applicationContext, MainWindowCasePlanning()::class.java)
         intent.putExtra("nameTask", textTask)
         startActivity(intent)
     }
-
 }
