@@ -139,7 +139,7 @@ class WindowTask : Fragment(), NavigationView.OnNavigationItemSelectedListener, 
                 }
             }
         val userRecord = FirebaseAuth.getInstance()
-/*rjz*/
+
 
         val calendarView: CollapsibleCalendar = viewFragment.findViewById(R.id.linearLayoutCalendar)
         list = arrayListOf("Покормить кота", "Забрать документы в МФЦ",
