@@ -2,6 +2,7 @@ package com.example.caseplanning
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.*
 import android.widget.*
 import androidx.appcompat.app.ActionBar
@@ -15,14 +16,21 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProviders
 import butterknife.ButterKnife
 import butterknife.OnClick
+import com.androidhuman.rxfirebase2.database.RxFirebaseDatabase
 import com.example.caseplanning.CreateTask.CreateTaskWindow
 import com.example.caseplanning.CreateTask.MyViewModel
 import com.example.caseplanning.DataBase.DataBaseTask
 import com.example.caseplanning.DataBase.Task
+import com.example.caseplanning.DataBase.Users
 import com.example.caseplanning.EditElements.EditTask
 import com.example.caseplanning.Sidebar.*
 import com.google.android.material.navigation.NavigationView
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ValueEventListener
+import com.google.firebase.events.Subscriber
 import com.miguelcatalan.materialsearchview.MaterialSearchView
 import com.shrikanthravi.collapsiblecalendarview.widget.CollapsibleCalendar
 
@@ -37,6 +45,7 @@ class WindowTask : Fragment(), NavigationView.OnNavigationItemSelectedListener, 
     lateinit var listTasks : ListView
      var list: ArrayList<String>? = null
     var adapter : ArrayAdapter<String>? = null
+    private var subsribe : Subscriber? = null
     private lateinit var mDrawerLayout : DrawerLayout
     private lateinit var  mToggle : ActionBarDrawerToggle
     private lateinit var pageViewModel : MyViewModel
@@ -46,6 +55,7 @@ class WindowTask : Fragment(), NavigationView.OnNavigationItemSelectedListener, 
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
+
 
         val viewFragment = inflater.inflate(R.layout.window_main_task, container, false)
 
@@ -81,9 +91,55 @@ class WindowTask : Fragment(), NavigationView.OnNavigationItemSelectedListener, 
         textTask = intent.getStringExtra("nameTask")
 
         val navHeader = navigationView.getHeaderView(0)
-        val emailUserText = navHeader.findViewById<TextView>(R.id.emailText)
-        val email = "${mAuth.currentUser!!.email}"
-        emailUserText.text = email
+        val emailUser = navHeader.findViewById<TextView>(R.id.emailText)
+        val nameUser = navHeader.findViewById<TextView>(R.id.nameUser)
+
+
+        var disposable  = dataBaseTask
+            .retrieveDataUser()
+            .subscribe{
+                user->
+                nameUser.text = user.name
+                emailUser.text = user.email
+            }
+
+        val email_find = "negodyaeva.yulya@gmail.com"
+        val list1 = arrayListOf<String>()
+        disposable = dataBaseTask
+            .retrieveDataUid()
+            .subscribe{
+                uids->
+                    for(uid in uids){
+                        list1.add(uid.id!!)
+                    }
+                for (uid_user in list1) {
+                    FirebaseDatabase.getInstance()
+                        .reference
+                        .child(uid_user)
+                        .child("Users")
+                        .addListenerForSingleValueEvent(object : ValueEventListener {
+                            override fun onCancelled(p0: DatabaseError) {
+                                Log.d("Error", "Error trying to get classified ads for")
+                            }
+
+                            override fun onDataChange(dataSnapshot: DataSnapshot) {
+                                if (dataSnapshot.exists()) {
+                                    val user = dataSnapshot.getValue(Users::class.java)
+                                    if (email_find == user!!.email){
+                                        Log.d("эта хрень", "существует")
+                                    }else{
+                                        Log.d("эта хрень", "no существует")
+                                    }
+
+                                } else {
+                                    Log.d("ошибка", "пользователя не существует")
+                                }
+                            }
+                        })
+                }
+            }
+        val userRecord = FirebaseAuth.getInstance()
+
 
         val calendarView: CollapsibleCalendar = viewFragment.findViewById(R.id.linearLayoutCalendar)
         list = arrayListOf("Покормить кота", "Забрать документы в МФЦ",
@@ -292,6 +348,10 @@ class WindowTask : Fragment(), NavigationView.OnNavigationItemSelectedListener, 
 
     override fun onItemClick(p0: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
 
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
     }
 
 

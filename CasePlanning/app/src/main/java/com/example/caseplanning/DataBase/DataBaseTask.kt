@@ -1,6 +1,7 @@
 package com.example.caseplanning.DataBase
 
 
+import android.util.Log
 import com.androidhuman.rxfirebase2.database.RxFirebaseDatabase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
@@ -14,17 +15,19 @@ class DataBaseTask {
 
     private  var mAuth : FirebaseAuth = FirebaseAuth.getInstance()
     private  var taskObservable: Observable<List<Task>>
-    private lateinit var userObservable : Observable<List<User>>
+    private lateinit var userObservable : Observable<Users>
+    private lateinit var uid : Observable<List<UID>>
     private lateinit var disposal: Disposable
+
 
     val database = FirebaseDatabase.getInstance()
     val dataBaseReference = database.reference
-    val user = mAuth.currentUser
+    val user = mAuth.currentUser!!
 
     /*чтение данных из бд*/
     constructor() {
 
-        val ref = dataBaseReference.child(user!!.uid).child("Tasks")
+        val ref = dataBaseReference.child(user.uid).child("Tasks")
         /*подключаем класс подписки, оформляем подписчика */
         taskObservable = object: Observable<List<Task>>() {
             override fun subscribeActual(observer: Observer<in List<Task>>?) {
@@ -51,27 +54,40 @@ class DataBaseTask {
         }
     }
 
+    fun readUid(){
+         uid = object : Observable<List<UID>>(){
+            override fun subscribeActual(observer: Observer<in List<UID>>?) {
+                disposal = RxFirebaseDatabase
+                    .dataChanges(dataBaseReference)
+                    .subscribe(fun (dataSnapshot : DataSnapshot){
+                        val uids = arrayListOf<UID>()
+                        if (dataSnapshot.exists()) {
+                            for (uid in dataSnapshot.children){
+                                val uid_user = uid.key
+                                uids.add(UID(id=uid_user))
+                                }
+                            }
+                            observer!!.onNext(uids)
+                    })
+
+            }
+        }
+    }
+
     fun readUser(){
-        val ref = dataBaseReference.child("users")
+        val ref = dataBaseReference.child(user.uid).child("Users")
         /*подключаем класс подписки, оформляем подписчика */
-        userObservable = object: Observable<List<User>>() {
-            override fun subscribeActual(observer: Observer<in List<User>>?) {
+        userObservable = object: Observable<Users>() {
+            override fun subscribeActual(observer: Observer<in Users>?) {
                 /*подкллючаем RxFirebaseDatabase подключаем изменения данных и подписчиков,
                 получаем данные из данных*/
                 disposal = RxFirebaseDatabase
                     .dataChanges(ref)
                     .subscribe(fun(dataSnapshot: DataSnapshot) {
-                        val listTaskGenerate: GenericTypeIndicator<HashMap<String, String>> =
-                            object : GenericTypeIndicator<HashMap<String, String>>() {}
-                        val users = arrayListOf<User>()
+                        var users  = Users()
                         if (dataSnapshot.exists()) {
-                            val table = dataSnapshot.getValue(listTaskGenerate)
-                            if (table != null) {
-                                for ((key, name) in table) {
-                                    users.add(User(id = key, name = name))
-                                }
+                            users = dataSnapshot.getValue(Users::class.java)!!
                             }
-                        }
 /*получаем очередной список*/
                         observer!!.onNext(users)
                     })
@@ -79,12 +95,11 @@ class DataBaseTask {
         }
     }
 
-    fun createUser(id:String?, name:String?, email:String?){
-        val  users = User(id = id, name = name, email = email)
+    fun createUser(name:String?, email:String?){
+        val  users = Users(name = name, email = email)
         dataBaseReference
-            .child(user!!.uid)
+            .child(user.uid)
             .child("Users")
-            .push()
             .setValue(users)
     }
 
@@ -94,7 +109,7 @@ class DataBaseTask {
 
 
         dataBaseReference
-            .child(user!!.uid)
+            .child(user.uid)
             .child("Tasks")
             .push()
             .setValue(taskText)
@@ -111,5 +126,13 @@ class DataBaseTask {
 
     fun retrieveData() : Observable<List<Task>> {
         return taskObservable
+    }
+    fun retrieveDataUser() : Observable<Users> {
+        readUser()
+        return userObservable
+    }
+    fun retrieveDataUid() : Observable<List<UID>> {
+        readUid()
+        return uid
     }
 }

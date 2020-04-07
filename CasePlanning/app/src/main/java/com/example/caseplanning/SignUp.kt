@@ -70,7 +70,7 @@ class SignUp : AppCompatActivity() {
                             Toast.makeText(applicationContext, "Signup successful. Verification email sent",
                                 Toast.LENGTH_SHORT).show()
                             val dataBase = DataBaseTask()
-                            dataBase.createUser(mAuth.uid, nameUserEdit.text.toString(), email )
+                            dataBase.createUser( nameUserEdit.text.toString(), email )
                             val intent = Intent(this, MainActivity::class.java)
                             startActivity(intent)
                         } else {

@@ -1,7 +1,6 @@
 package com.example.caseplanning.DataBase
 
-data class User (
-    var id: String ? = "",
+data class Users (
     var name: String? = "",
     var email: String ? = ""
 )
