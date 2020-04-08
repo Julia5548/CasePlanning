@@ -45,6 +45,7 @@
         <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/editTextPassword"
                 android:layout_width="match_parent"
+                app:theme="@style/AppTheme"
                 android:layout_height="wrap_content"
                 android:textColorHint="@color/colorPrimary"
                 android:layout_marginBottom="5dp">

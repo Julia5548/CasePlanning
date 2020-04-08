@@ -8,6 +8,6 @@
     <color name="textBlack">#000000</color>
     <color name="lilac_disabled">#F0A0FF</color>
     <color name="sand_default">#F0B000</color>
-    <color name="sand_disabled">#FFC080</color>
+    <color name="sand_disabled">#6AF493DF</color>
     <color name="sand_checked">#FFD0A0</color>
 </resources>
