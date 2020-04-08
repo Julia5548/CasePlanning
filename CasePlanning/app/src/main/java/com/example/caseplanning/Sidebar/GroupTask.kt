@@ -1,6 +1,7 @@
 package com.example.caseplanning.Sidebar
 
 import android.content.DialogInterface
+import android.content.Intent
 import android.os.Bundle
 import android.view.*
 import android.widget.*
@@ -21,6 +22,7 @@ import butterknife.OnItemLongClick
 import com.example.caseplanning.CreateTask.MyViewModel
 import com.example.caseplanning.DataBase.DataBaseTask
 import com.example.caseplanning.EditElements.EditFolder
+import com.example.caseplanning.MainActivity
 import com.example.caseplanning.R
 import com.google.android.material.navigation.NavigationView
 import com.google.firebase.auth.FirebaseAuth
@@ -38,7 +40,7 @@ class GroupTask: Fragment(), NavigationView.OnNavigationItemSelectedListener, Ad
     var adapter : ArrayAdapter<String>? = null
     private lateinit var mDrawerLayout : DrawerLayout
     private lateinit var  mToggle : ActionBarDrawerToggle
-var pageViewModel : MyViewModel = MyViewModel()
+    var pageViewModel : MyViewModel = MyViewModel()
     var id : Int? = null
 
     override fun onCreateView(
@@ -180,8 +182,71 @@ var pageViewModel : MyViewModel = MyViewModel()
         return super.onContextItemSelected(item)
     }
 
-    override fun onNavigationItemSelected(p0: MenuItem): Boolean {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    override fun onNavigationItemSelected(menuItem: MenuItem): Boolean {
+        when (menuItem.itemId) {
+            /*группа задач*/
+            R.id.groupTask -> {
+
+                val groupTask: Fragment = GroupTask()
+                val transaction: FragmentTransaction = fragmentManager!!.beginTransaction()
+
+                transaction.replace(R.id.linerLayout, groupTask)
+                transaction.addToBackStack(null)
+                transaction.commit()
+            }
+            /*доступ к задачам другим людям*/
+            R.id.access -> {
+
+                val access: Fragment = Access()
+                val transaction: FragmentTransaction = fragmentManager!!.beginTransaction()
+
+                transaction.replace(R.id.linerLayout, access)
+                transaction.addToBackStack(null)
+                transaction.commit()
+
+            }
+            /*прогресс выполнения задач*/
+            R.id.progress -> {
+
+                val progress: Fragment = Progress()
+                val transaction: FragmentTransaction = fragmentManager!!.beginTransaction()
+
+                transaction.replace(R.id.linerLayout, progress)
+                transaction.addToBackStack(null)
+                transaction.commit()
+
+            }
+            /*настройки*/
+            R.id.setting -> {
+
+                val setting: Fragment = Setting()
+                val transaction: FragmentTransaction = fragmentManager!!.beginTransaction()
+
+                transaction.replace(R.id.linerLayout, setting)
+                transaction.addToBackStack(null)
+                transaction.commit()
+
+            }
+            /*техподдержка*/
+            R.id.techSupport -> {
+
+                val techSupport: Fragment = TechSupport()
+                val transaction: FragmentTransaction = fragmentManager!!.beginTransaction()
+
+                transaction.replace(R.id.linerLayout, techSupport)
+                transaction.addToBackStack(null)
+                transaction.commit()
+
+            }
+            /*выход пользователя из системы*/
+            R.id.signOut -> {
+                mAuth.signOut()
+                val intent = Intent(activity!!.applicationContext, MainActivity::class.java)
+                //intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
+                startActivity(intent)
+            }
+        }
+        return true
     }
 
     override fun onItemClick(adapter: AdapterView<*>?,

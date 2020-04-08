@@ -1,6 +1,7 @@
 package com.example.caseplanning.Sidebar
 
 import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.MenuItem
@@ -13,8 +14,10 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentTransaction
 import butterknife.ButterKnife
 import com.example.caseplanning.DataBase.DataBaseTask
+import com.example.caseplanning.MainActivity
 import com.example.caseplanning.R
 import com.google.android.material.navigation.NavigationView
 import com.google.firebase.auth.FirebaseAuth
@@ -86,9 +89,72 @@ class Access: Fragment(), NavigationView.OnNavigationItemSelectedListener{
 
     }
 
-    override fun onNavigationItemSelected(p0: MenuItem): Boolean {
-        return true
+    override fun onNavigationItemSelected(menuItem: MenuItem): Boolean {
+        when (menuItem.itemId) {
+            /*группа задач*/
+            R.id.groupTask -> {
+
+                val groupTask: Fragment = GroupTask()
+                val transaction: FragmentTransaction = fragmentManager!!.beginTransaction()
+
+                transaction.replace(R.id.linerLayout, groupTask)
+                transaction.addToBackStack(null)
+                transaction.commit()
+            }
+            /*доступ к задачам другим людям*/
+            R.id.access -> {
+
+                val access: Fragment = Access()
+                val transaction: FragmentTransaction = fragmentManager!!.beginTransaction()
+
+                transaction.replace(R.id.linerLayout, access)
+                transaction.addToBackStack(null)
+                transaction.commit()
+
+            }
+            /*прогресс выполнения задач*/
+            R.id.progress -> {
+
+                val progress: Fragment = Progress()
+                val transaction: FragmentTransaction = fragmentManager!!.beginTransaction()
+
+                transaction.replace(R.id.linerLayout, progress)
+                transaction.addToBackStack(null)
+                transaction.commit()
+
+            }
+            /*настройки*/
+            R.id.setting -> {
+
+                val setting: Fragment = Setting()
+                val transaction: FragmentTransaction = fragmentManager!!.beginTransaction()
+
+                transaction.replace(R.id.linerLayout, setting)
+                transaction.addToBackStack(null)
+                transaction.commit()
+
+            }
+            /*техподдержка*/
+            R.id.techSupport -> {
+
+                val techSupport: Fragment = TechSupport()
+                val transaction: FragmentTransaction = fragmentManager!!.beginTransaction()
+
+                transaction.replace(R.id.linerLayout, techSupport)
+                transaction.addToBackStack(null)
+                transaction.commit()
+
+            }
+            /*выход пользователя из системы*/
+            R.id.signOut -> {
+                mAuth.signOut()
+                val intent = Intent(activity!!.applicationContext, MainActivity::class.java)
+                //intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
+                startActivity(intent)
+            }
         }
+        return true
+    }
 
     class MyListAdapter(var mCtx:Context , var resource:Int,var items:List<Model>)
         :ArrayAdapter<Model>( mCtx , resource , items ){
@@ -101,9 +167,12 @@ class Access: Fragment(), NavigationView.OnNavigationItemSelectedListener{
             if (convertView == null){
                 val inflater = LayoutInflater.from(context)
                 mConvertView = inflater.inflate(layout, parent, false)
+
                 holder.access = mConvertView.findViewById(R.id.btnListView)
                 holder.title = mConvertView.findViewById(R.id.textForList)
+
                 val users : Model = items[position]
+
                 holder.title.text = users.title
                 holder.access.setOnClickListener {
                   Toast.makeText(context, "Доступ разрешен", Toast.LENGTH_SHORT).show()

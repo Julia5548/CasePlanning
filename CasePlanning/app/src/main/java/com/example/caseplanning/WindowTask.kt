@@ -1,5 +1,8 @@
 package com.example.caseplanning
 
+import android.annotation.SuppressLint
+import android.content.Context
+import android.content.DialogInterface
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
@@ -7,16 +10,15 @@ import android.view.*
 import android.widget.*
 import androidx.appcompat.app.ActionBar
 import androidx.appcompat.app.ActionBarDrawerToggle
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentTransaction
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProviders
 import butterknife.ButterKnife
 import butterknife.OnClick
-import com.androidhuman.rxfirebase2.database.RxFirebaseDatabase
 import com.example.caseplanning.CreateTask.CreateTaskWindow
 import com.example.caseplanning.CreateTask.MyViewModel
 import com.example.caseplanning.DataBase.DataBaseTask
@@ -24,6 +26,7 @@ import com.example.caseplanning.DataBase.Task
 import com.example.caseplanning.DataBase.Users
 import com.example.caseplanning.EditElements.EditTask
 import com.example.caseplanning.Sidebar.*
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.navigation.NavigationView
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
@@ -33,22 +36,22 @@ import com.google.firebase.database.ValueEventListener
 import com.google.firebase.events.Subscriber
 import com.miguelcatalan.materialsearchview.MaterialSearchView
 import com.shrikanthravi.collapsiblecalendarview.widget.CollapsibleCalendar
+import java.lang.Exception
 
 
-class WindowTask : Fragment(), NavigationView.OnNavigationItemSelectedListener, AdapterView.OnItemClickListener {
+class WindowTask : Fragment(), NavigationView.OnNavigationItemSelectedListener,
+    AdapterView.OnItemClickListener {
 
 
     private lateinit var mAuth: FirebaseAuth
     private lateinit var search: MaterialSearchView
     private val dataBaseTask = DataBaseTask()
-    var textTask: String? = " "
-    lateinit var listTasks : ListView
-     var list: ArrayList<String>? = null
-    var adapter : ArrayAdapter<String>? = null
-    private var subsribe : Subscriber? = null
-    private lateinit var mDrawerLayout : DrawerLayout
-    private lateinit var  mToggle : ActionBarDrawerToggle
-    private lateinit var pageViewModel : MyViewModel
+    lateinit var listTasks: ListView
+    var list: ArrayList<String>? = null
+    var adapter: ArrayAdapter<String>? = null
+    private lateinit var mDrawerLayout: DrawerLayout
+    private lateinit var mToggle: ActionBarDrawerToggle
+    private lateinit var pageViewModel: MyViewModel
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -75,8 +78,10 @@ class WindowTask : Fragment(), NavigationView.OnNavigationItemSelectedListener, 
 
         /*боковое меню*/
         mDrawerLayout = viewFragment.findViewById(R.id.drawerLayout)
-        mToggle = ActionBarDrawerToggle(activity, mDrawerLayout,
-            R.string.Open, R.string.Close)
+        mToggle = ActionBarDrawerToggle(
+            activity, mDrawerLayout,
+            R.string.Open, R.string.Close
+        )
         mDrawerLayout.addDrawerListener(mToggle)
         /*проверяем состояние*/
         mToggle.syncState()
@@ -87,18 +92,17 @@ class WindowTask : Fragment(), NavigationView.OnNavigationItemSelectedListener, 
         val navigationView = viewFragment.findViewById<NavigationView>(R.id.navigationView)
         navigationView.setNavigationItemSelectedListener(this)
 
-      /*  val intent: Intent = activity.intent
-        textTask = intent.getStringExtra("nameTask")*/
+        /*  val intent: Intent = activity.intent
+          textTask = intent.getStringExtra("nameTask")*/
 
         val navHeader = navigationView.getHeaderView(0)
         val emailUser = navHeader.findViewById<TextView>(R.id.emailText)
         val nameUser = navHeader.findViewById<TextView>(R.id.nameUser)
 
 
-        var disposable  = dataBaseTask
+        var disposable = dataBaseTask
             .retrieveDataUser()
-            .subscribe{
-                user->
+            .subscribe { user ->
                 nameUser.text = user.name
                 emailUser.text = user.email
             }
@@ -107,11 +111,10 @@ class WindowTask : Fragment(), NavigationView.OnNavigationItemSelectedListener, 
         val list1 = arrayListOf<String>()
         disposable = dataBaseTask
             .retrieveDataUid()
-            .subscribe{
-                uids->
-                    for(uid in uids){
-                        list1.add(uid.id!!)
-                    }
+            .subscribe { uids ->
+                for (uid in uids) {
+                    list1.add(uid.id!!)
+                }
                 for (uid_user in list1) {
                     FirebaseDatabase.getInstance()
                         .reference
@@ -125,9 +128,9 @@ class WindowTask : Fragment(), NavigationView.OnNavigationItemSelectedListener, 
                             override fun onDataChange(dataSnapshot: DataSnapshot) {
                                 if (dataSnapshot.exists()) {
                                     val user = dataSnapshot.getValue(Users::class.java)
-                                    if (email_find == user!!.email){
+                                    if (email_find == user!!.email) {
                                         Log.d("эта хрень", "существует")
-                                    }else{
+                                    } else {
                                         Log.d("эта хрень", "no существует")
                                     }
 
@@ -156,25 +159,17 @@ class WindowTask : Fragment(), NavigationView.OnNavigationItemSelectedListener, 
         /*подписываемся и выводим данные из бд, при выходе надо удалить подписчиков*/
         val disposable = dataBaseTask
             .retrieveData()
-            .subscribe {
-             task ->
-                val stringList = arrayListOf<String>()
+            .subscribe { task ->
+                val stringList = arrayListOf<Task>()
 
-                for(tasks in task) {
-                    stringList.add(tasks.name!!)
+                for (tasks in task) {
+                    stringList.add(Task(name=tasks.name))
                 }
 
-         adapter = ArrayAdapter<String>(
-                    activity!!.applicationContext,
-                    android.R.layout.simple_list_item_multiple_choice,
-                    stringList
-                )
-
-                listTasks.adapter = adapter
-        registerForContextMenu(listTasks)
-        listTasks.onItemClickListener = this
+                listTasks.adapter = MyListAdapter(context!!,R.layout.card_list,stringList)
+                registerForContextMenu(listTasks)
+                listTasks.onItemClickListener = this
             }
-
     }
 
     /*появление кнопок при нажатие на элемент из листа*/
@@ -189,14 +184,15 @@ class WindowTask : Fragment(), NavigationView.OnNavigationItemSelectedListener, 
     }
 
     override fun onContextItemSelected(item: MenuItem): Boolean {
-        val info : AdapterView.AdapterContextMenuInfo =  item.menuInfo as AdapterView.AdapterContextMenuInfo
+        val info: AdapterView.AdapterContextMenuInfo =
+            item.menuInfo as AdapterView.AdapterContextMenuInfo
         val nameTask = listTasks.getItemAtPosition(info.position).toString()
         when (item.itemId) {
             R.id.edit -> {
-                val task  = Task(name = nameTask, nameSubTasks = null, shouldRepeat = true)
+                val task = Task(name = nameTask, nameSubTasks = null, shouldRepeat = true)
                 pageViewModel.setTask(task)
                 //действия при изменении
-                val editTask : Fragment = EditTask()
+                val editTask: Fragment = EditTask()
                 val transaction: FragmentTransaction = fragmentManager!!.beginTransaction()
 
                 transaction.replace(R.id.linerLayout, editTask)
@@ -217,7 +213,7 @@ class WindowTask : Fragment(), NavigationView.OnNavigationItemSelectedListener, 
     override fun onCreate(savedInstanceState: Bundle?) {
         setHasOptionsMenu(true)
         super.onCreate(savedInstanceState)
-        pageViewModel  = ViewModelProviders.of(requireActivity()).get(MyViewModel::class.java)
+        pageViewModel = ViewModelProviders.of(requireActivity()).get(MyViewModel::class.java)
     }
 
     //inflate the menu
@@ -267,7 +263,7 @@ class WindowTask : Fragment(), NavigationView.OnNavigationItemSelectedListener, 
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        if (mToggle.onOptionsItemSelected(item)){
+        if (mToggle.onOptionsItemSelected(item)) {
             return true
         }
         return super.onOptionsItemSelected(item)
@@ -276,9 +272,7 @@ class WindowTask : Fragment(), NavigationView.OnNavigationItemSelectedListener, 
     /*обработчик кнопок меню*/
     override fun onNavigationItemSelected(menuItem: MenuItem): Boolean {
 
-        val id = menuItem.itemId
-
-        when(id){
+        when (menuItem.itemId) {
             /*группа задач*/
             R.id.groupTask -> {
 
@@ -323,7 +317,7 @@ class WindowTask : Fragment(), NavigationView.OnNavigationItemSelectedListener, 
 
             }
             /*техподдержка*/
-            R.id.techSupport ->{
+            R.id.techSupport -> {
 
                 val techSupport: Fragment = TechSupport()
                 val transaction: FragmentTransaction = fragmentManager!!.beginTransaction()
@@ -341,10 +335,20 @@ class WindowTask : Fragment(), NavigationView.OnNavigationItemSelectedListener, 
                 startActivity(intent)
             }
         }
-        return  true
+        return true
     }
 
-    override fun onItemClick(p0: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
+    override fun onItemClick(adapterView: AdapterView<*>?, view: View?, position: Int, id: Long) {
+
+/*придумать как получить все данные о текущей задачи*/
+        MaterialAlertDialogBuilder(context)
+            .setTitle("Задача")
+            .setMessage("mze")
+            .setPositiveButton("Ok"
+            ) { dialogInterface, p1 ->
+                dialogInterface.dismiss()
+            }
+            .show()
 
     }
 
@@ -352,7 +356,32 @@ class WindowTask : Fragment(), NavigationView.OnNavigationItemSelectedListener, 
         super.onDestroy()
     }
 
+    private class Holder {
+        lateinit var nameTask: TextView
+    }
 
+    class MyListAdapter(var mCtx: Context, var resource: Int, var items: List<Task>) :
+        ArrayAdapter<Task>(mCtx, resource, items) {
+
+        private val layout = resource
+        @SuppressLint("ViewHolder")
+        override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
+            var mConvertView = convertView
+            val holder = Holder()
+            val inflater = LayoutInflater.from(context)
+            mConvertView = inflater.inflate(layout, parent, false)
+
+            holder.nameTask = mConvertView.findViewById(R.id.nameTask)
+
+            val task: Task = items[position]
+
+            holder.nameTask.text = task.name
+
+            mConvertView.tag = holder
+
+            return mConvertView!!
+        }
+    }
 }
 
 

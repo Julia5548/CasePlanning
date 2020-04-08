@@ -28,7 +28,7 @@ class Replay : Fragment() {
         activity!!.setSupportActionBar(toolbar)
 
         val actionBar: ActionBar? = activity.supportActionBar
-        actionBar!!.title = "Период"
+        actionBar!!.title = "Повтор"
 
         ButterKnife.bind(this, viewFragment)
 
@@ -65,7 +65,7 @@ class Replay : Fragment() {
                     CreateTaskWindow()
                 val args = Bundle()
 
-                args.putString("Period", period)
+                args.putString("Replay", period)
                 createTaskWindow.arguments = args
                 fragmentManager!!.beginTransaction().replace(
                     R.id.linerLayout,

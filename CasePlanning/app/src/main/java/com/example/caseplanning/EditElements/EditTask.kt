@@ -28,9 +28,7 @@ import com.example.caseplanning.R
 
 class EditTask : Fragment() {
 
-    private var editTextTaskName: EditText? = null
     private var textTask: String? = null
-    val outState = Bundle()
     val listSubTasks = arrayListOf<String>()
     val listSubTasksView = arrayListOf<View>()
     private lateinit var pageViewModel : MyViewModel
@@ -70,7 +68,8 @@ class EditTask : Fragment() {
         var task : Task? = null
 
         pageViewModel.getTask().observe(requireActivity(), Observer<Task> {
-            task = Task(name = it.name, nameSubTasks = it.nameSubTasks, shouldRepeat = it.shouldRepeat)
+            tasks->
+            task = Task(name = tasks.name, nameSubTasks = tasks.nameSubTasks, shouldRepeat = tasks.shouldRepeat)
         })
         if (task != null) {
             val editTextTask = view.findViewById<EditText>(R.id.editTextTask)

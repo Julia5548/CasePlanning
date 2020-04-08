@@ -14,8 +14,10 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentTransaction
+import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import butterknife.ButterKnife
+import butterknife.OnCheckedChanged
 import butterknife.OnClick
 import butterknife.Optional
 import com.example.caseplanning.DataBase.DataBaseTask
@@ -25,15 +27,15 @@ import com.example.caseplanning.R
 import com.example.caseplanning.TypeTask.Photo
 import com.example.caseplanning.TypeTask.Video
 import kotlinx.android.synthetic.main.add_sub_tasks.view.*
+import kotlinx.android.synthetic.main.type_task.*
 
 class CreateTaskWindow : Fragment() {
 
-    private var editTextTaskName: EditText? = null
     private var textTask: String? = null
-    val outState = Bundle()
     val listSubTasks = arrayListOf<String>()
     val listSubTasksView = arrayListOf<View>()
-
+    private lateinit var pageViewModel: MyViewModel
+    var textPeriod = ""
 
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
     override fun onCreateView(
@@ -64,46 +66,54 @@ class CreateTaskWindow : Fragment() {
         return viewFragment
     }
 
-    /* override fun onSaveInstanceState(outState: Bundle) {
-
-         //inizializationEdit()
-         outState.run {
-             putString("textTask", editTextTaskName!!.text.toString())
-         }
-         super.onSaveInstanceState(outState)
-
-         Log.d("myLogs", "onSaveInstanceState")
-     }*/
 
     override fun onCreate(savedInstanceState: Bundle?) {
-
-        /* if (outState.isEmpty) {
-             savedInstanceState == null
-         }
-
-         if (savedInstanceState != null) {
-
-             textTask = savedInstanceState.getString("nameTask", "")
-             //  inizializationEdit()
-
-         } else {
-
-             textTask = ""
-             editTextTaskName = null
-
-         }*/
-        retainInstance = true
         super.onCreate(savedInstanceState)
+        retainInstance = true
+        pageViewModel = ViewModelProviders.of(requireActivity()).get(MyViewModel::class.java)
 
-        Log.d("myLogs", "onCreate")
     }
 
-    /*override fun onStop() {
-        super.onStop()
-        inizializationEdit()
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        var task: Task? = null
 
-        Log.d("myLogs", "onStop")
-    }*/
+        pageViewModel.getTask().observe(requireActivity(), Observer<Task> { tasks ->
+            task = Task(
+                name = tasks.name,
+                period = tasks.period
+            )
+        })
+
+        val editTextTask = view.findViewById<EditText>(R.id.editTextTask)
+        val textReplay = view.findViewById<TextView>(R.id.textChoose)
+
+        if(task != null) {
+            editTextTask.setText(task!!.name)
+
+            val radioButtonMorning = view.findViewById<RadioButton>(R.id.radio_morning)
+            val radioButtonDay = view.findViewById<RadioButton>(R.id.radio_day)
+            val radioButtonEvening = view.findViewById<RadioButton>(R.id.radio_evening)
+            val radioButtonOnceAnytime = view.findViewById<RadioButton>(R.id.radio_onceAnytime)
+
+           when(task!!.period){
+               radioButtonMorning.text.toString() ->
+                   radioButtonMorning.isChecked = true
+               radioButtonDay.text.toString() ->
+                   radioButtonDay.isChecked = true
+               radioButtonEvening.text.toString() ->
+                   radioButtonEvening.isChecked = true
+               radioButtonOnceAnytime.text.toString() ->
+                    radioButtonOnceAnytime.isChecked = true
+           }
+        }
+
+
+        if (arguments != null) {
+             textReplay.text = arguments!!.getString("Replay")
+        }
+    }
+
 
     /*добавление фото задачи*/
     @OnClick(R.id.btnAddPhoto)
@@ -120,7 +130,7 @@ class CreateTaskWindow : Fragment() {
     }
 
     /*добавление видео задачи*/
-   @OnClick(R.id.btnAddVideo)
+    @OnClick(R.id.btnAddVideo)
     fun onClickAddVideo() {
 
         val relativeLayoutVideo = view!!.findViewById<RelativeLayout>(R.id.video)
@@ -167,24 +177,35 @@ class CreateTaskWindow : Fragment() {
           transaction.add(R.id.typeTask, textTask)
           transaction.commit()
 
-      }
+      }*/
 
-      /*выбор повторения задачи*/
-      @OnClick(R.id.textChoose)
-      fun onClickChooseReplay() {
+    @OnCheckedChanged
+        (
+        R.id.radio_morning,
+        R.id.radio_day,
+        R.id.radio_evening,
+        R.id.radio_onceAnytime)
+    fun onRadioButtonCheckChanged(button: CompoundButton, checked : Boolean){
+        if(checked){
+            textPeriod = button.text.toString()
+        }
+    }
+    /*выбор повторения задачи*/
+    @OnClick(R.id.textChoose)
+    fun onClickChooseReplay() {
 
+        val replay = Replay()
+        val transaction: FragmentTransaction = fragmentManager!!.beginTransaction()
 
-          onSaveInstanceState(outState)
+        transaction.replace(R.id.linerLayout, replay)
+        transaction.addToBackStack(null)
+        transaction.commit()
 
-          val replay = Replay()
-          val transaction: FragmentTransaction = fragmentManager!!.beginTransaction()
+        val task = saveDataTask()
+        pageViewModel.setTask(task)
+    }
 
-          transaction.replace(R.id.linerLayout, replay)
-          transaction.addToBackStack(null)
-          transaction.commit()
-      }
-
-      /*увелечение фотографии*/
+/*      /*увелечение фотографии*/
       fun photoZoom() {
           val photoIncrease: Fragment = PhotoIncrease()
           val transaction: FragmentTransaction = fragmentManager!!.beginTransaction()
@@ -211,16 +232,9 @@ class CreateTaskWindow : Fragment() {
       }
 */
 
-      private fun inizializationEdit() {
-          editTextTaskName = activity!!.findViewById<EditText>(R.id.taskText)
-          }
-
-
     /*динамическое добавление подзадач*/
     @OnClick(R.id.addSubTasks)
     fun onClickAddSubTask() {
-
-        val layoutInflater = layoutInflater
 
         val linerLayoutSubTask = view!!.findViewById<LinearLayout>(R.id.editSubTask)
 
@@ -243,16 +257,16 @@ class CreateTaskWindow : Fragment() {
 
         Log.d("Size", "${listSubTasksView.size}")
         val btnDeleted = viewFr.findViewById<ImageButton>(R.id.btnDeleted)
-        btnDeleted.setOnClickListener { onClickDeletedSubTask(relativeLayoutSubTasks, viewFr) }
+        btnDeleted.setOnClickListener { onClickDeletedSubTask(viewFr) }
 
         val btnOkSubTasks = viewFr.findViewById<ImageButton>(R.id.btnOkCreate)
         btnOkSubTasks.setOnClickListener { onClickCreateSubTask(viewFr, btnDeleted, btnOkSubTasks) }
     }
 
     /*удаляет подзадачу*/
-    fun onClickDeletedSubTask(relativeLayoutSubTasks: RelativeLayout, view : View) {
+    fun onClickDeletedSubTask(view: View) {
 
-       // relativeLayoutSubTasks.visibility = RelativeLayout.GONE
+        // relativeLayoutSubTasks.visibility = RelativeLayout.GONE
         (view.parent as LinearLayout).removeView(view)
         listSubTasksView.remove(view)
         Log.d("Size", "${listSubTasksView.size}")
@@ -287,15 +301,13 @@ class CreateTaskWindow : Fragment() {
         viewFr: View
     ) {
 
-        val relativeLayoutSubTasks = viewFr.findViewById<RelativeLayout>(R.id.rel)
-
         editTextSubTasks!!.isEnabled = true
         editTextSubTasks.requestFocus()
 
         btnDeletedOrEdit.setImageResource(R.drawable.ic_delete_forever_black_24dp)
         btnOkSubTasks.visibility = ImageButton.VISIBLE
 
-        btnDeletedOrEdit.setOnClickListener { onClickDeletedSubTask(relativeLayoutSubTasks, viewFr) }
+        btnDeletedOrEdit.setOnClickListener { onClickDeletedSubTask(viewFr) }
 
         btnOkSubTasks.setOnClickListener {
             onClickCreateSubTask(
@@ -310,27 +322,37 @@ class CreateTaskWindow : Fragment() {
     @OnClick(R.id.add)
     fun onclickAdd() {
 
-        /*  if (arguments != null) {
-              val value = arguments!!.getString("Period")
-          }*/
+        val task = saveDataTask()
+        val dataBaseTask = DataBaseTask()
+        dataBaseTask.createTask(task)
+
+        val pageViewModel = ViewModelProviders.of(activity!!).get(MyViewModel::class.java)
+        pageViewModel.setTask(task)
+
+        val intent = Intent(activity!!.applicationContext, MainWindowCasePlanning()::class.java)
+        startActivity(intent)
+    }
+
+    private fun saveDataTask(): Task {
+
 
         val editTextTask = view!!.findViewById<EditText>(R.id.editTextTask)
         textTask = editTextTask.text.toString()
 
-        for (position in 0 until listSubTasksView.size){
-            listSubTasks.add(listSubTasksView[position]
-                .findViewById<EditText>(R.id.editTextSubTasks)
-                .text
-                .toString())
+        val textReplay = view!!.findViewById<TextView>(R.id.textChoose)
+        val replay = textReplay.text.toString()
+
+        for (position in 0 until listSubTasksView.size) {
+            listSubTasks.add(
+                listSubTasksView[position]
+                    .findViewById<EditText>(R.id.editTextSubTasks)
+                    .text
+                    .toString()
+            )
             Log.d("Element", listSubTasks[position])
         }
-        val task = Task(name = textTask!!, shouldRepeat = true)
-        val dataBaseTask = DataBaseTask()
-        dataBaseTask.createTask(task)
-        val pageViewModel  = ViewModelProviders.of(activity!!).get(MyViewModel::class.java)
-        pageViewModel.setTask(task)
-        val intent = Intent(activity!!.applicationContext, MainWindowCasePlanning()::class.java)
-        intent.putExtra("nameTask", textTask)
-        startActivity(intent)
+        return Task(name = textTask!!,
+            period = textPeriod,
+            replay = replay)
     }
 }

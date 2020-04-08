@@ -20,35 +20,27 @@
                 android:orientation="horizontal">
 
             <RadioButton
-                    android:id="@+id/radio_red"
+                    android:id="@+id/radio_morning"
                     android:layout_width="wrap_content"
                     android:text="Утро"
-                    android:layout_height="wrap_content"
-                    android:layout_marginLeft="24dp"
-                    android:layout_marginStart="24dp" />
+                    android:layout_height="wrap_content" />
 
             <RadioButton
-                    android:id="@+id/radio_blue"
+                    android:id="@+id/radio_day"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginLeft="24dp"
-                    android:text="День"
-                    android:layout_marginStart="24dp" />
+                    android:text="День"/>
 
             <RadioButton
-                    android:id="@+id/radio_green"
+                    android:id="@+id/radio_evening"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="20dp"
-                    android:layout_marginLeft="20dp"
                     android:text="Вечер" />
 
             <RadioButton
-                    android:id="@+id/radio_"
+                    android:id="@+id/radio_onceAnytime"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="24dp"
-                    android:layout_marginLeft="24dp"
                     android:text="Один раз в любое время" />
 
         </RadioGroup>
