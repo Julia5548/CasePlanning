@@ -13,6 +13,7 @@ class DataBaseTask {
     private  var mAuth : FirebaseAuth = FirebaseAuth.getInstance()
     private  var taskObservable: Observable<List<Task>>
     private lateinit var userObservable : Observable<Users>
+    private lateinit var folderObservable : Observable<List<Folder>>
     private lateinit var uid : Observable<List<UID>>
     private lateinit var disposal: Disposable
 
@@ -35,7 +36,7 @@ class DataBaseTask {
                     .subscribe(fun(dataSnapshot: DataSnapshot) {
                         val listTaskGenerate: GenericTypeIndicator<HashMap<String,Task>> =
                             object : GenericTypeIndicator<HashMap<String,Task>>() {}
-                        var tasks = arrayListOf<Task>()
+                        val tasks = arrayListOf<Task>()
                         if (dataSnapshot.exists()) {
                             val table = dataSnapshot.getValue(listTaskGenerate)
                             if (table != null) {
@@ -92,6 +93,28 @@ class DataBaseTask {
         }
     }
 
+    private fun readFolder(){
+
+        val folder = dataBaseReference.child(user.uid).child("Folders")
+        folderObservable = object : Observable<List<Folder>>(){
+            override fun subscribeActual(observer: Observer<in List<Folder>>?) {
+             disposal = RxFirebaseDatabase
+                 .dataChanges(folder)
+                 .subscribe(fun (dataSnapshot : DataSnapshot){
+                     val genericList = object:GenericTypeIndicator<HashMap<String,Folder>>(){}
+                     val folders = arrayListOf<Folder>()
+                     if(dataSnapshot.exists()){
+                         val table = dataSnapshot.getValue(genericList)
+                         for ((key, value) in table!!){
+                             folders.add(value)
+                         }
+                     }
+                     observer!!.onNext(folders)
+                 })
+            }
+        }
+    }
+
     fun createUser(name:String?, email:String?){
         val  users = Users(name = name, email = email)
         dataBaseReference
@@ -109,6 +132,13 @@ class DataBaseTask {
             .setValue(task)
     }
 
+    fun createFolder(folder : Folder){
+        dataBaseReference
+            .child(user.uid)
+            .child("Folders")
+            .push()
+            .setValue(folder)
+    }
 //    fun updateTask(taskId: Int, taskText: String) {
 //        /// dataBaseReference.child(user!!.uid).child("Tasks").push().setValue()
 //    }
@@ -121,12 +151,19 @@ class DataBaseTask {
     fun retrieveData() : Observable<List<Task>> {
         return taskObservable
     }
+
     fun retrieveDataUser() : Observable<Users> {
         readUser()
         return userObservable
     }
+
     fun retrieveDataUid() : Observable<List<UID>> {
         readUid()
         return uid
+    }
+
+    fun retrieveDataFolders() : Observable<List<Folder>>{
+        readFolder()
+        return folderObservable
     }
 }

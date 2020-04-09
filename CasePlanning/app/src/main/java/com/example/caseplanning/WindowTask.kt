@@ -371,7 +371,7 @@ class WindowTask : Fragment(), NavigationView.OnNavigationItemSelectedListener,
             val inflater = LayoutInflater.from(context)
             mConvertView = inflater.inflate(layout, parent, false)
 
-            holder.nameTask = mConvertView.findViewById(R.id.nameTask)
+            holder.nameTask = mConvertView.findViewById(R.id.nameItemList)
 
             val task: Task = items[position]
 
