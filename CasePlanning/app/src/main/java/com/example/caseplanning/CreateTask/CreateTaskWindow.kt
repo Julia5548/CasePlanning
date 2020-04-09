@@ -54,8 +54,6 @@ class CreateTaskWindow : Fragment() {
         val actionBar: ActionBar? = activity.supportActionBar
         actionBar!!.title = "Создать"
 
-        toolbar.setTitleTextColor(android.graphics.Color.WHITE)
-
         ButterKnife.bind(this, viewFragment)
         val linerLayoutSubTask = viewFragment.findViewById<RelativeLayout>(R.id.photo)
         linerLayoutSubTask.visibility = LinearLayout.GONE

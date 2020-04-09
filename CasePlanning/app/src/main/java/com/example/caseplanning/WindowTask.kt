@@ -19,6 +19,7 @@ import androidx.fragment.app.FragmentTransaction
 import androidx.lifecycle.ViewModelProviders
 import butterknife.ButterKnife
 import butterknife.OnClick
+import com.androidhuman.rxfirebase2.database.RxFirebaseDatabase
 import com.example.caseplanning.CreateTask.CreateTaskWindow
 import com.example.caseplanning.CreateTask.MyViewModel
 import com.example.caseplanning.DataBase.DataBaseTask
@@ -36,6 +37,8 @@ import com.google.firebase.database.ValueEventListener
 import com.google.firebase.events.Subscriber
 import com.miguelcatalan.materialsearchview.MaterialSearchView
 import com.shrikanthravi.collapsiblecalendarview.widget.CollapsibleCalendar
+import io.reactivex.disposables.Disposable
+import io.reactivex.schedulers.Schedulers
 import java.lang.Exception
 
 
@@ -45,13 +48,14 @@ class WindowTask : Fragment(), NavigationView.OnNavigationItemSelectedListener,
 
     private lateinit var mAuth: FirebaseAuth
     private lateinit var search: MaterialSearchView
-    private val dataBaseTask = DataBaseTask()
+    private var dataBaseTask : DataBaseTask?= DataBaseTask()
     lateinit var listTasks: ListView
     var list: ArrayList<String>? = null
     var adapter: ArrayAdapter<String>? = null
     private lateinit var mDrawerLayout: DrawerLayout
     private lateinit var mToggle: ActionBarDrawerToggle
     private lateinit var pageViewModel: MyViewModel
+    private  var disposable:Disposable? = null
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -65,7 +69,7 @@ class WindowTask : Fragment(), NavigationView.OnNavigationItemSelectedListener,
         val toolbar = viewFragment.findViewById<Toolbar>(R.id.toolbarTask)
         val activity = activity as AppCompatActivity?
         activity!!.setSupportActionBar(toolbar)
-        val actionBar: ActionBar? = activity.supportActionBar
+        val actionBar = activity.supportActionBar
         actionBar!!.title = "Главное меню"
 
         ButterKnife.bind(this, viewFragment)
@@ -100,18 +104,24 @@ class WindowTask : Fragment(), NavigationView.OnNavigationItemSelectedListener,
         val nameUser = navHeader.findViewById<TextView>(R.id.nameUser)
 
 
-        var disposable = dataBaseTask
+
+        disposable = dataBaseTask!!
             .retrieveDataUser()
-            .subscribe { user ->
+            .subscribe( { user ->
                 nameUser.text = user.name
                 emailUser.text = user.email
-            }
+            },
+                {
+                        throwable->
+                    throwable.printStackTrace()
+                })
+
 
         val email_find = "negodyaeva.yulya@gmail.com"
         val list1 = arrayListOf<String>()
-        disposable = dataBaseTask
+         disposable = dataBaseTask!!
             .retrieveDataUid()
-            .subscribe { uids ->
+            .subscribe ({ uids ->
                 for (uid in uids) {
                     list1.add(uid.id!!)
                 }
@@ -140,7 +150,13 @@ class WindowTask : Fragment(), NavigationView.OnNavigationItemSelectedListener,
                             }
                         })
                 }
-            }
+
+            },
+                {
+                    throwable->
+                    throwable.printStackTrace()
+                })
+
         val userRecord = FirebaseAuth.getInstance()
 
 
@@ -157,9 +173,9 @@ class WindowTask : Fragment(), NavigationView.OnNavigationItemSelectedListener,
         listTasks = viewFragment.findViewById<ListView>(R.id.listViewTask)
 
         /*подписываемся и выводим данные из бд, при выходе надо удалить подписчиков*/
-        val disposable = dataBaseTask
+        disposable = dataBaseTask!!
             .retrieveData()
-            .subscribe { task ->
+            .subscribe ({ task ->
                 val stringList = arrayListOf<Task>()
 
                 for (tasks in task) {
@@ -169,7 +185,11 @@ class WindowTask : Fragment(), NavigationView.OnNavigationItemSelectedListener,
                 listTasks.adapter = MyListAdapter(context!!,R.layout.card_list,stringList)
                 registerForContextMenu(listTasks)
                 listTasks.onItemClickListener = this
-            }
+            },
+        {
+                throwable->
+            throwable.printStackTrace()
+        })
     }
 
     /*появление кнопок при нажатие на элемент из листа*/
@@ -283,6 +303,14 @@ class WindowTask : Fragment(), NavigationView.OnNavigationItemSelectedListener,
                 transaction.addToBackStack(null)
                 transaction.commit()
             }
+            R.id.tasks->{
+                val windowTask : Fragment = WindowTask()
+                val transaction: FragmentTransaction = fragmentManager!!.beginTransaction()
+
+                transaction.replace(R.id.linerLayout, windowTask)
+                transaction.addToBackStack(null)
+                transaction.commit()
+            }
             /*доступ к задачам другим людям*/
             R.id.access -> {
 
@@ -329,6 +357,7 @@ class WindowTask : Fragment(), NavigationView.OnNavigationItemSelectedListener,
             }
             /*выход пользователя из системы*/
             R.id.signOut -> {
+                dataBaseTask!!.dispose()
                 mAuth.signOut()
                 val intent = Intent(activity!!.applicationContext, MainActivity::class.java)
                 //intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
@@ -354,6 +383,8 @@ class WindowTask : Fragment(), NavigationView.OnNavigationItemSelectedListener,
 
     override fun onDestroy() {
         super.onDestroy()
+        if (disposable != null && disposable!!.isDisposed)
+            disposable!!.dispose()
     }
 
     private class Holder {

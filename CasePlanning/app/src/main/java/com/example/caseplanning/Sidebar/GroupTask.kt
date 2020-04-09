@@ -12,6 +12,7 @@ import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
+import androidx.core.view.GravityCompat
 import androidx.core.view.get
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.Fragment
@@ -28,6 +29,7 @@ import com.example.caseplanning.DataBase.Task
 import com.example.caseplanning.EditElements.EditFolder
 import com.example.caseplanning.MainActivity
 import com.example.caseplanning.R
+import com.example.caseplanning.WindowTask
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.navigation.NavigationView
 import com.google.android.material.textfield.TextInputLayout
@@ -48,9 +50,9 @@ class GroupTask : Fragment(), NavigationView.OnNavigationItemSelectedListener,
     var list: ArrayList<String>? = null
     var adapter: ArrayAdapter<String>? = null
     private lateinit var mDrawerLayout: DrawerLayout
-    private lateinit var mToggle: ActionBarDrawerToggle
     var pageViewModel: MyViewModel = MyViewModel()
     var id: Int? = null
+    lateinit var disposable:Disposable
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -59,7 +61,7 @@ class GroupTask : Fragment(), NavigationView.OnNavigationItemSelectedListener,
     ): View? {
         val viewFragment = inflater.inflate(R.layout.folder_tasks, container, false)
 
-        val toolbar = viewFragment.findViewById<Toolbar>(R.id.toolbar)
+        val toolbar = viewFragment.findViewById<Toolbar>(R.id.toolbarGroup)
         val activity = activity as AppCompatActivity?
         activity!!.setSupportActionBar(toolbar)
         val actionBar: ActionBar? = activity.supportActionBar
@@ -75,22 +77,34 @@ class GroupTask : Fragment(), NavigationView.OnNavigationItemSelectedListener,
 
         /*боковое меню*/
         mDrawerLayout = viewFragment.findViewById(R.id.drawerLayout)
-        mToggle = ActionBarDrawerToggle(
-            activity, mDrawerLayout,
-            R.string.Open, R.string.Close
-        )
-        mDrawerLayout.addDrawerListener(mToggle)
-        /*проверяем состояние*/
-        mToggle.syncState()
-        /*добавление стрелки для закрытия бокового меню, делает ее кликабельной*/
-        actionBar.setDisplayHomeAsUpEnabled(true)
-
         /*подключение обработчика события кнопок бокового меню*/
         val navigationView = viewFragment.findViewById<NavigationView>(R.id.navigationView)
         navigationView.setNavigationItemSelectedListener(this)
 
-        list = arrayListOf()
+        val navHeader = navigationView.getHeaderView(0)
+        val emailUser = navHeader.findViewById<TextView>(R.id.emailText)
+        val nameUser = navHeader.findViewById<TextView>(R.id.nameUser)
 
+
+        val mToggle = ActionBarDrawerToggle(
+            activity, mDrawerLayout, toolbar,
+            R.string.Open, R.string.Close
+        )
+
+        mDrawerLayout.addDrawerListener(mToggle)
+        /*проверяем состояние*/
+        mToggle.syncState()
+
+        disposable = dataBaseTask
+            .retrieveDataUser()
+            .subscribe( { user ->
+                nameUser.text = user.name
+                emailUser.text = user.email
+            },
+                {
+                        throwable->
+                    throwable.printStackTrace()
+                })
 
         listTask(viewFragment)
 
@@ -103,15 +117,19 @@ class GroupTask : Fragment(), NavigationView.OnNavigationItemSelectedListener,
         listFolder = viewFragment.findViewById<ListView>(R.id.listViewFolder)
 
         /*подписываемся и выводим данные из бд, при выходе надо удалить подписчиков*/
-               val disposable = dataBaseTask
+                disposable = dataBaseTask
                      .retrieveDataFolders()
-                     .subscribe {
+                     .subscribe( {
                          folders ->
                          val nameFolderList = arrayListOf<Folder>()
                          for (folder in folders)
                              nameFolderList.add(Folder(name = folder.name))
                          listFolder.adapter = MyListAdapter(context!!, R.layout.card_list, nameFolderList)
-                     }
+                     },
+        {
+                throwable->
+            throwable.printStackTrace()
+        })
         registerForContextMenu(listFolder)
         listFolder.onItemClickListener = this
 
@@ -224,6 +242,14 @@ class GroupTask : Fragment(), NavigationView.OnNavigationItemSelectedListener,
                 transaction.addToBackStack(null)
                 transaction.commit()
             }
+            R.id.tasks->{
+                val windowTask : Fragment = WindowTask()
+                val transaction: FragmentTransaction = fragmentManager!!.beginTransaction()
+
+                transaction.replace(R.id.linerLayout, windowTask)
+                transaction.addToBackStack(null)
+                transaction.commit()
+            }
             /*доступ к задачам другим людям*/
             R.id.access -> {
 
@@ -270,12 +296,14 @@ class GroupTask : Fragment(), NavigationView.OnNavigationItemSelectedListener,
             }
             /*выход пользователя из системы*/
             R.id.signOut -> {
+                disposable.dispose()
                 mAuth.signOut()
                 val intent = Intent(activity!!.applicationContext, MainActivity::class.java)
                 //intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
                 startActivity(intent)
             }
         }
+        mDrawerLayout.closeDrawer(GravityCompat.START)
         return true
     }
 

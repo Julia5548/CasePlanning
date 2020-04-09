@@ -11,7 +11,7 @@ import kotlin.collections.HashMap
 class DataBaseTask {
 
     private  var mAuth : FirebaseAuth = FirebaseAuth.getInstance()
-    private  var taskObservable: Observable<List<Task>>
+    private lateinit var taskObservable: Observable<List<Task>>
     private lateinit var userObservable : Observable<Users>
     private lateinit var folderObservable : Observable<List<Folder>>
     private lateinit var uid : Observable<List<UID>>
@@ -23,7 +23,7 @@ class DataBaseTask {
     val user = mAuth.currentUser!!
 
     /*чтение данных из бд*/
-    init {
+    private fun readData() {
 
         val ref = dataBaseReference.child(user.uid).child("Tasks")
         /*подключаем класс подписки, оформляем подписчика */
@@ -47,7 +47,11 @@ class DataBaseTask {
                         }
 /*получаем очередной список*/
                         observer!!.onNext(tasks)
-                    })
+                    },
+                        {
+                                throwable->
+                            throwable.printStackTrace()
+                        })
             }
         }
     }
@@ -66,7 +70,11 @@ class DataBaseTask {
                                 }
                             }
                             observer!!.onNext(uids)
-                    })
+                    },
+                        {
+                                throwable->
+                            throwable.printStackTrace()
+                        })
 
             }
         }
@@ -88,7 +96,11 @@ class DataBaseTask {
                             }
 /*получаем очередной список*/
                         observer!!.onNext(users)
-                    })
+                    },
+                        {
+                                throwable->
+                            throwable.printStackTrace()
+                        })
             }
         }
     }
@@ -110,7 +122,11 @@ class DataBaseTask {
                          }
                      }
                      observer!!.onNext(folders)
-                 })
+                 },
+                     {
+                             throwable->
+                         throwable.printStackTrace()
+                     })
             }
         }
     }
@@ -149,6 +165,7 @@ class DataBaseTask {
 
 
     fun retrieveData() : Observable<List<Task>> {
+        readData()
         return taskObservable
     }
 
@@ -165,5 +182,9 @@ class DataBaseTask {
     fun retrieveDataFolders() : Observable<List<Folder>>{
         readFolder()
         return folderObservable
+    }
+
+    fun dispose(){
+            disposal.dispose()
     }
 }

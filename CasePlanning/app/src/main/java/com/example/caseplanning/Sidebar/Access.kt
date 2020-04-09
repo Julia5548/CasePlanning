@@ -19,19 +19,21 @@ import butterknife.ButterKnife
 import com.example.caseplanning.DataBase.DataBaseTask
 import com.example.caseplanning.MainActivity
 import com.example.caseplanning.R
+import com.example.caseplanning.WindowTask
 import com.google.android.material.navigation.NavigationView
 import com.google.firebase.auth.FirebaseAuth
 import com.miguelcatalan.materialsearchview.MaterialSearchView
+import io.reactivex.disposables.Disposable
 
 class Access: Fragment(), NavigationView.OnNavigationItemSelectedListener{
 
 
     private lateinit var mAuth: FirebaseAuth
     private lateinit var search: MaterialSearchView
-
-
+    lateinit var disposable: Disposable
+    private val dataBaseTask = DataBaseTask()
     private lateinit var mDrawerLayout : DrawerLayout
-    private lateinit var  mToggle : ActionBarDrawerToggle
+
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -56,17 +58,35 @@ class Access: Fragment(), NavigationView.OnNavigationItemSelectedListener{
 
         /*боковое меню*/
         mDrawerLayout = viewFragment.findViewById(R.id.drawerLayout)
-        mToggle = ActionBarDrawerToggle(activity, mDrawerLayout,
-            R.string.Open, R.string.Close)
-        mDrawerLayout.addDrawerListener(mToggle)
-        /*проверяем состояние*/
-        mToggle.syncState()
-        /*добавление стрелки для закрытия бокового меню, делает ее кликабельной*/
-        actionBar.setDisplayHomeAsUpEnabled(true)
-
         /*подключение обработчика события кнопок бокового меню*/
         val navigationView = viewFragment.findViewById<NavigationView>(R.id.navigationView)
         navigationView.setNavigationItemSelectedListener(this)
+
+        val navHeader = navigationView.getHeaderView(0)
+        val emailUser = navHeader.findViewById<TextView>(R.id.emailText)
+        val nameUser = navHeader.findViewById<TextView>(R.id.nameUser)
+
+
+        val mToggle = ActionBarDrawerToggle(
+            activity, mDrawerLayout, toolbar,
+            R.string.Open, R.string.Close
+        )
+
+        mDrawerLayout.addDrawerListener(mToggle)
+        /*проверяем состояние*/
+        mToggle.syncState()
+
+        disposable = dataBaseTask
+            .retrieveDataUser()
+            .subscribe( { user ->
+                nameUser.text = user.name
+                emailUser.text = user.email
+            },
+                {
+                        throwable->
+                    throwable.printStackTrace()
+                })
+
 
         listTask(viewFragment)
         return viewFragment
@@ -98,6 +118,15 @@ class Access: Fragment(), NavigationView.OnNavigationItemSelectedListener{
                 val transaction: FragmentTransaction = fragmentManager!!.beginTransaction()
 
                 transaction.replace(R.id.linerLayout, groupTask)
+                transaction.addToBackStack(null)
+                transaction.commit()
+            }
+
+            R.id.tasks->{
+                val windowTask : Fragment = WindowTask()
+                val transaction: FragmentTransaction = fragmentManager!!.beginTransaction()
+
+                transaction.replace(R.id.linerLayout, windowTask)
                 transaction.addToBackStack(null)
                 transaction.commit()
             }
@@ -152,6 +181,7 @@ class Access: Fragment(), NavigationView.OnNavigationItemSelectedListener{
                 //intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
                 startActivity(intent)
             }
+
         }
         return true
     }

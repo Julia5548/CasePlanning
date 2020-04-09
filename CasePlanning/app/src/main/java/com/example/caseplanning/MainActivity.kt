@@ -44,8 +44,6 @@ class MainActivity : AppCompatActivity(){
         setSupportActionBar(toolbar)
         supportActionBar!!.title = "Авторизация"
 
-        toolbar.setTitleTextColor(android.graphics.Color.BLACK)
-
         //initialize FireBase Auth
         mAuth = FirebaseAuth.getInstance()
 

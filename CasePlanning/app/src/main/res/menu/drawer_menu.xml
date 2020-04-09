@@ -5,6 +5,10 @@
     <group android:checkableBehavior="single">
 
         <item
+                android:id="@+id/tasks"
+                android:icon="@drawable/ic_format_list_bulleted_black_24dp"
+                android:title="@string/tasks" />
+        <item
                 android:id="@+id/groupTask"
                 android:icon="@drawable/ic_folder_black_24dp"
                 android:title="@string/groupTask" />

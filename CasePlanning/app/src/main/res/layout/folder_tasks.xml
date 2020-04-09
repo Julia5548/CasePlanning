@@ -14,7 +14,7 @@
             android:orientation="vertical">
 
         <androidx.appcompat.widget.Toolbar
-                android:id="@+id/toolbar"
+                android:id="@+id/toolbarGroup"
                 style="@style/Toolbar"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
@@ -32,7 +32,7 @@
         <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_below="@+id/toolbar">
+                android:layout_below="@+id/toolbarGroup">
 
             <ListView
                     android:id="@+id/listViewFolder"
