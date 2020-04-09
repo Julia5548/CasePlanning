@@ -57,8 +57,8 @@
     </style>
 
     <style name="Widget.CalendarView.Custom" parent="android:Widget.CalendarView">
-        <item name="android:focusedMonthDateColor">@color/colorPrimary</item>
-        <item name="android:weekNumberColor">@color/red</item>
+        <item name="android:focusedMonthDateColor">@color/sand_disabled</item>
+        <item name="android:weekNumberColor">@color/textWhite</item>
         <item name="android:weekDayTextAppearance">@style/TextAppearance.AppCompat.Medium</item>
         <item name="android:dateTextAppearance">@style/TextAppearance.AppCompat.Medium</item>
     </style>

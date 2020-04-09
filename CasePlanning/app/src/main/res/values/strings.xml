@@ -49,4 +49,5 @@
     <string name="acсess">Разрешить</string>
     <string name="edit">Изменить</string>
     <string name="tasks">Задачи</string>
+    <string name="comment">Комментарий</string>
 </resources>

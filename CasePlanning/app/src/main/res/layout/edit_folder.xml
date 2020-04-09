@@ -7,24 +7,15 @@
         android:id="@+id/relativeCreateFolder"
         android:orientation="vertical">
 
-    <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text = "@string/edit"
-            android:id = "@+id/text"
-            android:layout_marginStart="10dp"
-            android:textColor="@color/colorPrimary"
-            android:textSize="20sp"/>
-
 
     <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/editTextFolderName"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textColorHint="@color/colorPrimary"
-            app:theme="@style/AppTheme"
-            android:layout_marginTop="25dp"
-            android:layout_below="@+id/text"
-            android:layout_width="match_parent">
+            android:layout_marginEnd="5dp"
+            android:layout_marginStart="5dp"
+            android:textColorHint="@color/colorPrimary">
+
         <EditText
                 android:layout_width="match_parent"
                 android:layout_gravity="center"
@@ -32,9 +23,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="20dp"
                 android:layout_marginEnd="20dp"
-                android:layout_marginBottom="2dp"
-
-                android:ems="10"/>
+                android:layout_marginBottom="2dp" />
     </com.google.android.material.textfield.TextInputLayout>
 
 </RelativeLayout>

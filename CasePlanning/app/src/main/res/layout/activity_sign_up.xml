@@ -14,12 +14,15 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical">
+
         <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/editTextUserName"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textColorHint="@color/colorPrimary"
-                app:theme="@style/AppTheme"
-                android:layout_width="match_parent">
+                android:layout_marginEnd="5dp"
+                android:layout_marginStart="5dp"
+                android:textColorHint="@color/colorPrimary">
+
             <EditText
                     android:layout_width="match_parent"
                     android:layout_gravity="center"
@@ -32,12 +35,14 @@
 
                     android:ems="10"/>
         </com.google.android.material.textfield.TextInputLayout>
+
         <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/editTextEmail"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textColorHint="@color/colorPrimary"
-                app:theme="@style/AppTheme"
-                android:layout_width="match_parent">
+                android:layout_marginEnd="5dp"
+                android:layout_marginStart="5dp"
+                android:textColorHint="@color/colorPrimary">
             <EditText
                     android:id = "@+id/editEmail"
                     android:layout_width="match_parent"
@@ -51,13 +56,14 @@
                     android:ems="25"
                     android:layout_height="wrap_content"/>
         </com.google.android.material.textfield.TextInputLayout>
+
         <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/editTextPassword"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textColorHint="@color/colorPrimary"
-                app:theme="@style/AppTheme"
-                android:layout_marginBottom="3dp"
-                android:layout_width="match_parent">
+                android:layout_marginEnd="5dp"
+                android:layout_marginStart="5dp"
+                android:textColorHint="@color/colorPrimary">
             <EditText
 
                     android:id="@+id/editPassword"
