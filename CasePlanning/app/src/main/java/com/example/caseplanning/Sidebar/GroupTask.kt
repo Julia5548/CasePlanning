@@ -1,43 +1,35 @@
 package com.example.caseplanning.Sidebar
 
-import android.annotation.SuppressLint
-import android.content.Context
-import android.content.DialogInterface
 import android.content.Intent
 import android.os.Bundle
 import android.view.*
 import android.widget.*
 import androidx.appcompat.app.ActionBar
 import androidx.appcompat.app.ActionBarDrawerToggle
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.core.view.GravityCompat
-import androidx.core.view.get
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentTransaction
-import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProviders
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import butterknife.ButterKnife
 import butterknife.OnClick
-import butterknife.OnItemLongClick
 import com.example.caseplanning.CreateTask.MyViewModel
 import com.example.caseplanning.DataBase.DataBaseTask
 import com.example.caseplanning.DataBase.Folder
 import com.example.caseplanning.DataBase.Task
-import com.example.caseplanning.EditElements.EditFolder
 import com.example.caseplanning.MainActivity
 import com.example.caseplanning.R
 import com.example.caseplanning.WindowTask
+import com.example.caseplanning.adapter.AdapterRecyclerViewFolder
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.navigation.NavigationView
 import com.google.android.material.textfield.TextInputLayout
 import com.google.firebase.auth.FirebaseAuth
 import com.miguelcatalan.materialsearchview.MaterialSearchView
 import io.reactivex.disposables.Disposable
-import kotlinx.android.synthetic.main.create_folder.*
-import java.lang.Exception
 
 class GroupTask : Fragment(), NavigationView.OnNavigationItemSelectedListener,
     AdapterView.OnItemClickListener {
@@ -46,7 +38,7 @@ class GroupTask : Fragment(), NavigationView.OnNavigationItemSelectedListener,
     private lateinit var search: MaterialSearchView
     private val dataBaseTask = DataBaseTask()
     var nameFolder: String? = null
-    lateinit var listFolder: ListView
+    lateinit var listFolder: RecyclerView
     var list: ArrayList<String>? = null
     var adapter: ArrayAdapter<String>? = null
     private lateinit var mDrawerLayout: DrawerLayout
@@ -106,32 +98,31 @@ class GroupTask : Fragment(), NavigationView.OnNavigationItemSelectedListener,
                     throwable.printStackTrace()
                 })
 
-        listTask(viewFragment)
+        listFolder(viewFragment)
 
         return viewFragment
     }
 
-    private fun listTask(viewFragment: View) {
+    private fun listFolder(viewFragment: View) {
 
 
-        listFolder = viewFragment.findViewById<ListView>(R.id.listViewFolder)
+        listFolder = viewFragment.findViewById<RecyclerView>(R.id.listViewFolder)
+        listFolder.layoutManager = LinearLayoutManager(context)
 
         /*подписываемся и выводим данные из бд, при выходе надо удалить подписчиков*/
                 disposable = dataBaseTask
                      .retrieveDataFolders()
                      .subscribe( {
                          folders ->
-                         val nameFolderList = arrayListOf<Folder>()
+                         val nameFolderList = arrayListOf<String>()
                          for (folder in folders)
-                             nameFolderList.add(Folder(name = folder.name))
-                         listFolder.adapter = MyListAdapter(context!!, R.layout.card_list, nameFolderList)
+                             nameFolderList.add(folder.name)
+                         listFolder.adapter = AdapterRecyclerViewFolder(context!!, nameFolderList)
                      },
         {
                 throwable->
             throwable.printStackTrace()
         })
-        registerForContextMenu(listFolder)
-        listFolder.onItemClickListener = this
 
     }
 
@@ -160,74 +151,6 @@ class GroupTask : Fragment(), NavigationView.OnNavigationItemSelectedListener,
             }
             .setNegativeButton("Отменить", null)
             .show()
-    }
-
-    private class Holder {
-        lateinit var nameFolder: TextView
-    }
-
-    class MyListAdapter(var mCtx: Context, var resource: Int, var items: List<Folder>) :
-        ArrayAdapter<Folder>(mCtx, resource, items) {
-
-        private val layout = resource
-        @SuppressLint("ViewHolder")
-        override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
-            var mConvertView = convertView
-            val holder = Holder()
-            val inflater = LayoutInflater.from(context)
-            mConvertView = inflater.inflate(layout, parent, false)
-
-            holder.nameFolder = mConvertView.findViewById(R.id.nameItemList)
-
-            val folder: Folder = items[position]
-
-            holder.nameFolder.text = folder.name
-
-            mConvertView.tag = holder
-
-            return mConvertView!!
-        }
-    }
-
-    /*появление кнопок при нажатие на элемент из листа*/
-    override fun onCreateContextMenu(
-        menu: ContextMenu,
-        v: View,
-        menuInfo: ContextMenu.ContextMenuInfo?
-    ) {
-        super.onCreateContextMenu(menu, v, menuInfo)
-        val inflater: MenuInflater = activity!!.menuInflater
-        inflater.inflate(R.menu.menu_task, menu)
-    }
-
-    override fun onContextItemSelected(item: MenuItem): Boolean {
-        val info: AdapterView.AdapterContextMenuInfo =
-            item.menuInfo as AdapterView.AdapterContextMenuInfo
-        this.id = info.position
-        val name = listFolder.getItemAtPosition(this.id!!).toString()
-        when (item.itemId) {
-            R.id.edit -> {
-                //действия при изменении
-                val editFolder = EditFolder(context, requireActivity(), adapter, list!!, id!!)
-                editFolder.createDialog(name)
-                val pageViewModel =
-                    ViewModelProviders.of(requireActivity()).get(MyViewModel::class.java)
-
-                pageViewModel.getNameFolder().observe(requireActivity(), Observer<String> {
-                    nameFolder = it
-                })
-
-
-                return true
-            }
-            R.id.deleted -> {
-                list!!.removeAt(0)
-                adapter!!.notifyDataSetChanged()
-                return true
-            }
-
-        }
-        return super.onContextItemSelected(item)
     }
 
     override fun onNavigationItemSelected(menuItem: MenuItem): Boolean {

@@ -1,29 +1,21 @@
 package com.example.caseplanning.adapter
 
 import android.content.Context
-import android.util.Log
-import android.view.ContextMenu
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.AdapterView
 import android.widget.TextView
-import android.widget.Toast
 import androidx.cardview.widget.CardView
-import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentTransaction
 import androidx.recyclerview.widget.RecyclerView
 import com.example.caseplanning.DataBase.DataBaseTask
 import com.example.caseplanning.DataBase.Task
-import com.example.caseplanning.EditElements.EditTask
 import com.example.caseplanning.R
-import com.example.caseplanning.WindowTask
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.intrusoft.sectionedrecyclerview.SectionRecyclerViewAdapter
 import io.reactivex.disposables.Disposable
 
-class Adapter(val context: Context, data: ArrayList<SectionHeader>) :
-    SectionRecyclerViewAdapter<SectionHeader, Task, Adapter.SectionViewHolder, Adapter.ChildViewHolder>(
+class AdapterSection(val context: Context, data: ArrayList<SectionHeader>) :
+    SectionRecyclerViewAdapter<SectionHeader, Task, AdapterSection.SectionViewHolder, AdapterSection.ChildViewHolder>(
         context,
         data
     ) {
@@ -31,10 +23,6 @@ class Adapter(val context: Context, data: ArrayList<SectionHeader>) :
     private val mData: ArrayList<SectionHeader> = data
     val dataBaseTask = DataBaseTask()
     var disposable : Disposable? =  null
-
-
-
-
 
     class ChildViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
 

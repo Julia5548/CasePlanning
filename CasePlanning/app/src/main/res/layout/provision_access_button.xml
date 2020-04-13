@@ -1,20 +1,41 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:app="http://schemas.android.com/apk/res-auto"
-        android:orientation="vertical"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
-    <TextView
-            android:layout_width="wrap_content"
-            android:id = "@+id/textForList"
-            android:layout_alignParentStart="true"
-            android:layout_height="match_parent"/>
-    <Button
-            android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        xmlns:card_view="http://schemas.android.com/tools"
+        android:orientation="vertical">
+
+    <com.google.android.material.card.MaterialCardView
+            android:id="@+id/card_view"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:id="@+id/btnListView"
-            android:layout_alignParentEnd="true"
-            android:textColor="@color/colorPrimary"
-            android:background="@null"
-        android:text = "@string/acсess"/>
+            card_view:cardCornerRadius="2dp"
+            card_view:contentPadding="10dp">
+
+        <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="horizontal">
+
+
+            <TextView
+                    android:id="@+id/nameItemList"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentStart="true"
+                    android:layout_marginTop="13dp" />
+
+            <Button
+                    android:id="@+id/buttonAccess"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:filterTouchesWhenObscured="true"
+                    android:text = "@string/acсess"/>
+
+        </RelativeLayout>
+
+    </com.google.android.material.card.MaterialCardView>
+
 </RelativeLayout>

@@ -1,6 +1,5 @@
 package com.example.caseplanning.Sidebar
 
-import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -15,24 +14,27 @@ import androidx.appcompat.widget.Toolbar
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentTransaction
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import butterknife.ButterKnife
 import com.example.caseplanning.DataBase.DataBaseTask
 import com.example.caseplanning.MainActivity
 import com.example.caseplanning.R
 import com.example.caseplanning.WindowTask
+import com.example.caseplanning.adapter.AdapterRecyclerViewAccess
 import com.google.android.material.navigation.NavigationView
 import com.google.firebase.auth.FirebaseAuth
 import com.miguelcatalan.materialsearchview.MaterialSearchView
 import io.reactivex.disposables.Disposable
 
-class Access: Fragment(), NavigationView.OnNavigationItemSelectedListener{
+class Access: Fragment(), NavigationView.OnNavigationItemSelectedListener {
 
 
     private lateinit var mAuth: FirebaseAuth
     private lateinit var search: MaterialSearchView
     lateinit var disposable: Disposable
     private val dataBaseTask = DataBaseTask()
-    private lateinit var mDrawerLayout : DrawerLayout
+    private lateinit var mDrawerLayout: DrawerLayout
 
 
     override fun onCreateView(
@@ -78,35 +80,38 @@ class Access: Fragment(), NavigationView.OnNavigationItemSelectedListener{
 
         disposable = dataBaseTask
             .retrieveDataUser()
-            .subscribe( { user ->
+            .subscribe({ user ->
                 nameUser.text = user.name
                 emailUser.text = user.email
             },
-                {
-                        throwable->
+                { throwable ->
                     throwable.printStackTrace()
                 })
 
 
-        listTask(viewFragment)
+        listUsers(viewFragment)
         return viewFragment
     }
 
 
-    private fun listTask(viewFragment: View) {
+    private fun listUsers(viewFragment: View) {
 
-        val listTasks = viewFragment.findViewById<ListView>(R.id.listViewUser)
+        val listUsers = viewFragment.findViewById<RecyclerView>(R.id.listViewUser)
 
-        val stringList = mutableListOf<Model>()
-        stringList.add(Model("Алексей"))
-        stringList.add(Model("Юлия" ))
-        stringList.add(Model("Ольга"))
-        stringList.add(Model("Сергей" ))
-        stringList.add(Model("Евгений" ))
-
-        listTasks.adapter = MyListAdapter(context!!,R.layout.provision_access_button,stringList)
+        val stringList = arrayListOf<String>()
 
 
+
+        stringList.add("Алексей")
+        stringList.add("Юлия")
+        stringList.add("Ольга")
+        stringList.add("Сергей")
+        stringList.add("Евгений")
+
+        val layoutManager = LinearLayoutManager(context)
+        listUsers.layoutManager = layoutManager
+
+        listUsers.adapter = AdapterRecyclerViewAccess(context!!, stringList)
     }
 
     override fun onNavigationItemSelected(menuItem: MenuItem): Boolean {
@@ -122,8 +127,8 @@ class Access: Fragment(), NavigationView.OnNavigationItemSelectedListener{
                 transaction.commit()
             }
 
-            R.id.tasks->{
-                val windowTask : Fragment = WindowTask()
+            R.id.tasks -> {
+                val windowTask: Fragment = WindowTask()
                 val transaction: FragmentTransaction = fragmentManager!!.beginTransaction()
 
                 transaction.replace(R.id.linerLayout, windowTask)
@@ -184,40 +189,5 @@ class Access: Fragment(), NavigationView.OnNavigationItemSelectedListener{
 
         }
         return true
-    }
-
-    class MyListAdapter(var mCtx:Context , var resource:Int,var items:List<Model>)
-        :ArrayAdapter<Model>( mCtx , resource , items ){
-
-            private val layout = resource
-        override fun getView( position: Int, convertView: View?, parent: ViewGroup): View {
-            var mConvertView = convertView
-            var  holder: ViewHolder = ViewHolder()
-            var mViewHolder : ViewHolder? = null
-            if (convertView == null){
-                val inflater = LayoutInflater.from(context)
-                mConvertView = inflater.inflate(layout, parent, false)
-
-                holder.access = mConvertView.findViewById(R.id.btnListView)
-                holder.title = mConvertView.findViewById(R.id.textForList)
-
-                val users : Model = items[position]
-
-                holder.title.text = users.title
-                holder.access.setOnClickListener {
-                  Toast.makeText(context, "Доступ разрешен", Toast.LENGTH_SHORT).show()
-                }
-                mConvertView.tag = holder
-            }else{
-                mViewHolder = mConvertView!!.tag as ViewHolder
-                mViewHolder.access
-
-            }
-            return mConvertView!!
-        }
-    }
-    class ViewHolder{
-        lateinit var access: Button
-        lateinit var title : TextView
     }
 }
