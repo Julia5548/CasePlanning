@@ -13,10 +13,13 @@ import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
+import androidx.core.content.contentValuesOf
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentTransaction
 import androidx.lifecycle.ViewModelProviders
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import butterknife.ButterKnife
 import butterknife.OnClick
 import com.androidhuman.rxfirebase2.database.RxFirebaseDatabase
@@ -37,21 +40,22 @@ import com.google.firebase.database.ValueEventListener
 import com.google.firebase.events.Subscriber
 import com.miguelcatalan.materialsearchview.MaterialSearchView
 import com.shrikanthravi.collapsiblecalendarview.widget.CollapsibleCalendar
+import com.example.caseplanning.adapter.Adapter
+import com.example.caseplanning.adapter.SectionHeader
 import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
 import java.lang.Exception
 
 
-class WindowTask : Fragment(), NavigationView.OnNavigationItemSelectedListener,
-    AdapterView.OnItemClickListener {
+class WindowTask : Fragment(), NavigationView.OnNavigationItemSelectedListener{
 
 
     private lateinit var mAuth: FirebaseAuth
     private lateinit var search: MaterialSearchView
     private var dataBaseTask : DataBaseTask?= DataBaseTask()
-    lateinit var listTasks: ListView
+    lateinit var listTasks: RecyclerView
     var list: ArrayList<String>? = null
-    var adapter: ArrayAdapter<String>? = null
+    var adapter : Adapter? = null
     private lateinit var mDrawerLayout: DrawerLayout
     private lateinit var mToggle: ActionBarDrawerToggle
     private lateinit var pageViewModel: MyViewModel
@@ -157,9 +161,6 @@ class WindowTask : Fragment(), NavigationView.OnNavigationItemSelectedListener,
                     throwable.printStackTrace()
                 })
 
-        val userRecord = FirebaseAuth.getInstance()
-
-
         val calendarView: CollapsibleCalendar = viewFragment.findViewById(R.id.linearLayoutCalendar)
 
         listTask(viewFragment)
@@ -170,64 +171,52 @@ class WindowTask : Fragment(), NavigationView.OnNavigationItemSelectedListener,
     private fun listTask(viewFragment: View) {
 
 
-        listTasks = viewFragment.findViewById<ListView>(R.id.listViewTask)
+        listTasks = viewFragment.findViewById<RecyclerView>(R.id.listViewTask)
+
+        val sections : ArrayList<SectionHeader> = arrayListOf()
+
+        val layoutManager = LinearLayoutManager(context)
+        listTasks.layoutManager = layoutManager
 
         /*подписываемся и выводим данные из бд, при выходе надо удалить подписчиков*/
         disposable = dataBaseTask!!
             .retrieveData()
             .subscribe ({ task ->
+                val stringListMorning = arrayListOf<Task>()
+                val stringListDay = arrayListOf<Task>()
+                val stringListEvening = arrayListOf<Task>()
                 val stringList = arrayListOf<Task>()
 
                 for (tasks in task) {
-                    stringList.add(Task(name=tasks.name))
+                    when(tasks.period){
+                        "Утро" -> stringListMorning.add(Task(name = tasks.name!!))
+                        "День" ->stringListDay.add(Task(name = tasks.name!!))
+                        "Вечер"-> stringListEvening.add(Task(name = tasks.name!!))
+                        "Один раз в любое время" -> stringList.add(Task(name = tasks.name!!))
+                        else ->  stringList.add(Task(name = tasks.name!!))
+                    }
                 }
 
-                listTasks.adapter = MyListAdapter(context!!,R.layout.card_list,stringList)
-                registerForContextMenu(listTasks)
-                listTasks.onItemClickListener = this
+                if(stringList.isNotEmpty())
+                    sections.add(SectionHeader(stringList, "В любое время"))
+
+                if(stringListMorning.isNotEmpty())
+                sections.add(SectionHeader(stringListMorning, "Утро"))
+
+                if(stringListEvening.isNotEmpty())
+                sections.add(SectionHeader(stringListEvening, "Вечер"))
+
+                if(stringListDay.isNotEmpty())
+                sections.add(SectionHeader(stringListDay, "День"))
+
+                listTasks.adapter = Adapter(context!!, sections)
+
             },
         {
                 throwable->
             throwable.printStackTrace()
         })
-    }
 
-    /*появление кнопок при нажатие на элемент из листа*/
-    override fun onCreateContextMenu(
-        menu: ContextMenu,
-        v: View,
-        menuInfo: ContextMenu.ContextMenuInfo?
-    ) {
-        super.onCreateContextMenu(menu, v, menuInfo)
-        val inflater: MenuInflater = activity!!.menuInflater
-        inflater.inflate(R.menu.menu_task, menu)
-    }
-
-    override fun onContextItemSelected(item: MenuItem): Boolean {
-        val info: AdapterView.AdapterContextMenuInfo =
-            item.menuInfo as AdapterView.AdapterContextMenuInfo
-        val nameTask = listTasks.getItemAtPosition(info.position).toString()
-        when (item.itemId) {
-            R.id.edit -> {
-                val task = Task(name = nameTask, nameSubTasks = null, shouldRepeat = true)
-                pageViewModel.setTask(task)
-                //действия при изменении
-                val editTask: Fragment = EditTask()
-                val transaction: FragmentTransaction = fragmentManager!!.beginTransaction()
-
-                transaction.replace(R.id.linerLayout, editTask)
-                transaction.addToBackStack(null)
-                transaction.commit()
-                return true
-            }
-            R.id.deleted -> {
-                list!!.removeAt(0)
-                adapter!!.notifyDataSetChanged()
-                return true
-            }
-
-        }
-        return super.onContextItemSelected(item)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -367,19 +356,6 @@ class WindowTask : Fragment(), NavigationView.OnNavigationItemSelectedListener,
         return true
     }
 
-    override fun onItemClick(adapterView: AdapterView<*>?, view: View?, position: Int, id: Long) {
-
-/*придумать как получить все данные о текущей задачи*/
-        MaterialAlertDialogBuilder(context)
-            .setTitle("Задача")
-            .setMessage("mze")
-            .setPositiveButton("Ok"
-            ) { dialogInterface, p1 ->
-                dialogInterface.dismiss()
-            }
-            .show()
-
-    }
 
     override fun onDestroy() {
         super.onDestroy()
@@ -387,32 +363,6 @@ class WindowTask : Fragment(), NavigationView.OnNavigationItemSelectedListener,
             disposable!!.dispose()
     }
 
-    private class Holder {
-        lateinit var nameTask: TextView
-    }
-
-    class MyListAdapter(var mCtx: Context, var resource: Int, var items: List<Task>) :
-        ArrayAdapter<Task>(mCtx, resource, items) {
-
-        private val layout = resource
-        @SuppressLint("ViewHolder")
-        override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
-            var mConvertView = convertView
-            val holder = Holder()
-            val inflater = LayoutInflater.from(context)
-            mConvertView = inflater.inflate(layout, parent, false)
-
-            holder.nameTask = mConvertView.findViewById(R.id.nameItemList)
-
-            val task: Task = items[position]
-
-            holder.nameTask.text = task.name
-
-            mConvertView.tag = holder
-
-            return mConvertView!!
-        }
-    }
 }
 
 
