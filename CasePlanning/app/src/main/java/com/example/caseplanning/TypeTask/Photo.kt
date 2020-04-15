@@ -15,9 +15,11 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageButton
 import android.widget.ImageView
-import android.widget.LinearLayout
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProviders
+import com.example.caseplanning.CreateTask.MyViewModel
+import com.example.caseplanning.DataBase.UriTypeTask
 import com.example.caseplanning.R
 
 /*написать комменты, проблема с видом фотографии, нет потверждения на правильность фотографии, нажатие на фотографию, чтобы открылась полность вся, загрузка из галереи */
@@ -26,7 +28,8 @@ class Photo : Fragment(){
     val CAMERA_REQUEST = 1001
     val PERMISSION_CODE = 1000
     lateinit var photo_image : ImageView
-    lateinit var outputUriFile : Uri
+    var outputUriFile : Uri? = null
+    lateinit var pageViewModel : MyViewModel
 
 
     override fun onCreateView(
@@ -59,6 +62,11 @@ class Photo : Fragment(){
         return view
     }
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        pageViewModel = ViewModelProviders.of(requireActivity()).get(MyViewModel::class.java)
+    }
+
     /*открываем камеру*/
     fun openCamera(){
 
@@ -75,10 +83,13 @@ class Photo : Fragment(){
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == CAMERA_REQUEST && resultCode == RESULT_OK){
+            photo_image.rotation += 90
             //фотка сделана, извлекаем картинку
             photo_image.setImageURI(outputUriFile)
+            pageViewModel.setUri(UriTypeTask(photoUri = outputUriFile))
+
         }else{
-            Log.d("Ощибка", "Не получилось сохранить фотографию")
+            Log.d("Ошибка", "Не получилось сохранить фотографию")
         }
     }
 

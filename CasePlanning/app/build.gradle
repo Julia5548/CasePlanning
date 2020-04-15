@@ -88,5 +88,6 @@ dependencies {
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
 
     /*секции для списка*/
-    compile 'com.github.IntruderShanky:Sectioned-RecyclerView:2.1.1'
+    implementation 'com.github.IntruderShanky:Sectioned-RecyclerView:2.1.1'
+    implementation 'com.github.chrisbanes:PhotoView:2.3.0'
 }

@@ -5,7 +5,6 @@ import android.app.Activity
 import android.content.ContentValues
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.media.MediaRecorder
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -16,6 +15,9 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.*
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProviders
+import com.example.caseplanning.CreateTask.MyViewModel
+import com.example.caseplanning.DataBase.UriTypeTask
 import com.example.caseplanning.R
 
 class Video : Fragment(){
@@ -24,6 +26,7 @@ class Video : Fragment(){
     val PERMISSION_CODE = 1000
     lateinit var videoFie : VideoView
     lateinit var outputUriFile : Uri
+    lateinit var pageViewModel:MyViewModel
 
 
     override fun onCreateView(
@@ -55,6 +58,11 @@ class Video : Fragment(){
 
         return view
     }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        pageViewModel = ViewModelProviders.of(requireActivity()).get(MyViewModel::class.java)
+    }
     fun openCamera(){
 
         val values = ContentValues()
@@ -72,11 +80,10 @@ class Video : Fragment(){
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == CAMERA_REQUEST && resultCode == Activity.RESULT_OK){
             //фотка сделана, извлекаем картинку
-            val mediaController = MediaController(activity)
-            videoFie.setMediaController(mediaController)
-            mediaController.setAnchorView(videoFie)
             videoFie.setVideoURI(outputUriFile)
-            videoFie.suspend()
+            videoFie.seekTo(1)
+            pageViewModel.setUri(UriTypeTask(videoUri = outputUriFile))
+           // videoFie.suspend()
             //videoFie.start()
         }else{
             Log.d("Popka", "RUNNNN")

@@ -7,8 +7,6 @@
     <ImageView
             android:id="@+id/photoImage"
             android:layout_width="100dp"
-            android:layout_height="100dp"
-            android:rotation="90"
-            />
+            android:layout_height="100dp" />
 
 </RelativeLayout>

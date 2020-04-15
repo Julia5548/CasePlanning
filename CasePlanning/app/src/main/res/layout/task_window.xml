@@ -41,18 +41,11 @@
         </LinearLayout>
 
         <include
-                android:id="@+id/type_task"
-                layout="@layout/type_task"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_below="@+id/addTask" />
-
-        <include
                 android:id="@+id/color_date"
                 layout="@layout/color_date"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_below="@id/type_task" />
+                android:layout_below="@id/addTask" />
 
         <include
                 android:id="@+id/period"
@@ -92,11 +85,25 @@
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/SubTasks" />
 
+        <include
+                android:id="@+id/type_task"
+                layout="@layout/type_task"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/replay" />
+
+        <include
+                android:id = "@+id/audio"
+                layout="@layout/audio"
+                android:layout_below="@+id/type_task"
+                android:layout_height="wrap_content"
+                android:layout_width="wrap_content"/>
+
         <LinearLayout
                 android:id="@+id/type"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_below="@+id/replay"
+                android:layout_below="@+id/audio"
                 android:orientation="horizontal">
 
             <include

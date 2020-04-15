@@ -16,16 +16,14 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentTransaction
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
-import butterknife.ButterKnife
-import butterknife.OnCheckedChanged
-import butterknife.OnClick
-import butterknife.Optional
+import butterknife.*
 import com.example.caseplanning.DataBase.DataBaseTask
 import com.example.caseplanning.DataBase.Task
+import com.example.caseplanning.Increase.PhotoIncrease
+import com.example.caseplanning.Increase.VideoIncrease
 import com.example.caseplanning.MainWindowCasePlanning
 import com.example.caseplanning.R
-import com.example.caseplanning.TypeTask.Photo
-import com.example.caseplanning.TypeTask.Video
+import com.example.caseplanning.TypeTask.*
 import kotlinx.android.synthetic.main.add_sub_tasks.view.*
 import kotlinx.android.synthetic.main.type_task.*
 
@@ -46,7 +44,7 @@ class CreateTaskWindow : Fragment() {
 
         val viewFragment = inflater.inflate(R.layout.task_window, container, false)
 
-        val toolbar = viewFragment.findViewById<Toolbar>(R.id.toolbarCreateTask)
+        val toolbar: Toolbar = viewFragment.findViewById(R.id.toolbarCreateTask)
 
         val activity = activity as AppCompatActivity?
         activity!!.setSupportActionBar(toolbar)
@@ -86,7 +84,7 @@ class CreateTaskWindow : Fragment() {
         val editTextTask = view.findViewById<EditText>(R.id.editTextTask)
         val textReplay = view.findViewById<TextView>(R.id.textChoose)
 
-        if(task != null) {
+        if (task != null) {
             editTextTask.setText(task!!.name)
 
             val radioButtonMorning = view.findViewById<RadioButton>(R.id.radio_morning)
@@ -94,21 +92,21 @@ class CreateTaskWindow : Fragment() {
             val radioButtonEvening = view.findViewById<RadioButton>(R.id.radio_evening)
             val radioButtonOnceAnytime = view.findViewById<RadioButton>(R.id.radio_onceAnytime)
 
-           when(task!!.period){
-               radioButtonMorning.text.toString() ->
-                   radioButtonMorning.isChecked = true
-               radioButtonDay.text.toString() ->
-                   radioButtonDay.isChecked = true
-               radioButtonEvening.text.toString() ->
-                   radioButtonEvening.isChecked = true
-               radioButtonOnceAnytime.text.toString() ->
+            when (task!!.period) {
+                radioButtonMorning.text.toString() ->
+                    radioButtonMorning.isChecked = true
+                radioButtonDay.text.toString() ->
+                    radioButtonDay.isChecked = true
+                radioButtonEvening.text.toString() ->
+                    radioButtonEvening.isChecked = true
+                radioButtonOnceAnytime.text.toString() ->
                     radioButtonOnceAnytime.isChecked = true
-           }
+            }
         }
 
 
         if (arguments != null) {
-             textReplay.text = arguments!!.getString("Replay")
+            textReplay.text = arguments!!.getString("Replay")
         }
     }
 
@@ -140,54 +138,31 @@ class CreateTaskWindow : Fragment() {
         transaction.add(R.id.video, video)
         transaction.commit()
     }
-/*
-      /*добавление аудио задачи*/
-      @OnClick(R.id.audio)
-      fun onClickAddAudio() {
 
-          val audio = AudioTask()
-          val transaction: FragmentTransaction = fragmentManager!!.beginTransaction()
+    /*добавление аудио задачи*/
+    @OnClick(R.id.audio)
+    fun onClickAddAudio() {
 
-          transaction.add(R.id.typeTask, audio)
-          transaction.commit()
+        val audio = AudioTask()
+        val transaction: FragmentTransaction = fragmentManager!!.beginTransaction()
 
-      }
-
-      /*добавление задачи в виде списка*/
-      @OnClick(R.id.to_do)
-      fun onClickAddToDoTask() {
-
-          val toDoTask = ToDoTask()
-          val transaction: FragmentTransaction = fragmentManager!!.beginTransaction()
-
-          transaction.add(R.id.typeTask, toDoTask)
-          transaction.commit()
-
-      }
-
-      /*добавление задачи в виде текста*/
-      @OnClick(R.id.text)
-      fun onClickAddTextTask() {
-
-          val textTask = TextTask()
-          val transaction: FragmentTransaction = fragmentManager!!.beginTransaction()
-
-          transaction.add(R.id.typeTask, textTask)
-          transaction.commit()
-
-      }*/
+        transaction.add(R.id.audio, audio)
+        transaction.commit()
+    }
 
     @OnCheckedChanged
         (
         R.id.radio_morning,
         R.id.radio_day,
         R.id.radio_evening,
-        R.id.radio_onceAnytime)
-    fun onRadioButtonCheckChanged(button: CompoundButton, checked : Boolean){
-        if(checked){
+        R.id.radio_onceAnytime
+    )
+    fun onRadioButtonCheckChanged(button: CompoundButton, checked: Boolean) {
+        if (checked) {
             textPeriod = button.text.toString()
         }
     }
+
     /*выбор повторения задачи*/
     @OnClick(R.id.textChoose)
     fun onClickChooseReplay() {
@@ -203,32 +178,26 @@ class CreateTaskWindow : Fragment() {
         pageViewModel.setTask(task)
     }
 
-/*      /*увелечение фотографии*/
-      fun photoZoom() {
-          val photoIncrease: Fragment = PhotoIncrease()
-          val transaction: FragmentTransaction = fragmentManager!!.beginTransaction()
+    /*увелечение фотографии*/
+    @OnClick(R.id.photoImage)
+    fun photoZoom() {
+        val photoIncrease: Fragment = PhotoIncrease()
+        val transaction: FragmentTransaction = fragmentManager!!.beginTransaction()
 
-          transaction.replace(R.id.relativeLayout, photoIncrease)
-          transaction.addToBackStack(null)
-          transaction.commit()
-      }
+        transaction.replace(R.id.linerLayout, photoIncrease)
+        transaction.addToBackStack(null)
+        transaction.commit()
+    }
 
-      /*Добавить подзадачу*/
-      @OnClick(R.id.btnAddSubTask)
-      fun onClickAddSubTask() {
+    @OnTouch(R.id.videoFile)
+    fun videoZoom(){
+        val videoIncrease: Fragment = VideoIncrease()
+        val transaction = fragmentManager!!.beginTransaction()
 
-          val listViewSubTask = view!!.findViewById<ListView>(R.id.listSubTask)
-          val subTask = SubTasks()
-          val listSubTask = subTask.createSubTask(listViewSubTask)
-
-          val adapter = ArrayAdapter<String>(
-              activity!!.applicationContext,
-              android.R.layout.simple_list_item_1,
-              listSubTask
-          )
-          listViewSubTask.adapter = adapter
-      }
-*/
+        transaction.replace(R.id.linerLayout, videoIncrease)
+        transaction.addToBackStack(null)
+        transaction.commit()
+    }
 
     /*динамическое добавление подзадач*/
     @OnClick(R.id.addSubTasks)
@@ -349,8 +318,10 @@ class CreateTaskWindow : Fragment() {
             )
             Log.d("Element", listSubTasks[position])
         }
-        return Task(name = textTask!!,
+        return Task(
+            name = textTask!!,
             period = textPeriod,
-            replay = replay)
+            replay = replay
+        )
     }
 }

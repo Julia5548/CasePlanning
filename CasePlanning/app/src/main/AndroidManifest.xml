@@ -18,7 +18,9 @@
             android:supportsRtl="true"
             android:theme="@style/AppTheme">
         <activity android:name=".ResetPassword"></activity>
-        <activity android:name=".MainWindowCasePlanning"></activity>
+        <activity android:name=".MainWindowCasePlanning"
+                android:screenOrientation="fullSensor">
+        </activity>
         <activity android:name=".SignUp"></activity>
         <activity android:name=".CreateTask.CreateTaskWindow"></activity>
         <activity android:name=".MainActivity">
