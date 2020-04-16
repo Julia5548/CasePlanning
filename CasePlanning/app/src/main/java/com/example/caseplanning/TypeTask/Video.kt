@@ -82,7 +82,7 @@ class Video : Fragment(){
             //фотка сделана, извлекаем картинку
             videoFie.setVideoURI(outputUriFile)
             videoFie.seekTo(1)
-            pageViewModel.setUri(UriTypeTask(videoUri = outputUriFile))
+            pageViewModel.uri.value = UriTypeTask(videoUri = outputUriFile)
            // videoFie.suspend()
             //videoFie.start()
         }else{

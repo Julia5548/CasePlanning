@@ -1,5 +1,7 @@
 package com.example.caseplanning.CreateTask
 
+import android.annotation.SuppressLint
+import android.app.TimePickerDialog
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
@@ -12,6 +14,7 @@ import androidx.annotation.RequiresApi
 import androidx.appcompat.app.ActionBar
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
+import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentTransaction
 import androidx.lifecycle.Observer
@@ -24,8 +27,11 @@ import com.example.caseplanning.Increase.VideoIncrease
 import com.example.caseplanning.MainWindowCasePlanning
 import com.example.caseplanning.R
 import com.example.caseplanning.TypeTask.*
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.android.synthetic.main.add_sub_tasks.view.*
+import kotlinx.android.synthetic.main.data_add.*
 import kotlinx.android.synthetic.main.type_task.*
+import java.util.*
 
 class CreateTaskWindow : Fragment() {
 
@@ -35,6 +41,7 @@ class CreateTaskWindow : Fragment() {
     private lateinit var pageViewModel: MyViewModel
     var textPeriod = ""
 
+    @SuppressLint("SetTextI18n")
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -59,6 +66,13 @@ class CreateTaskWindow : Fragment() {
         val relativeLayoutVideo = viewFragment.findViewById<RelativeLayout>(R.id.video)
         relativeLayoutVideo.visibility = LinearLayout.GONE
 
+
+        val date = viewFragment.findViewById<TextView>(R.id.setupData)
+        pageViewModel.day.observe(requireActivity(), Observer {
+            day->
+            date.text ="${day.day}.${day.month}.${day.year}"
+        })
+
         return viewFragment
     }
 
@@ -74,7 +88,7 @@ class CreateTaskWindow : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         var task: Task? = null
 
-        pageViewModel.getTask().observe(requireActivity(), Observer<Task> { tasks ->
+        pageViewModel.task.observe(requireActivity(), Observer<Task> { tasks ->
             task = Task(
                 name = tasks.name,
                 period = tasks.period
@@ -110,6 +124,28 @@ class CreateTaskWindow : Fragment() {
         }
     }
 
+    @SuppressLint("SetTextI18n")
+    @OnClick(R.id.addData)
+    fun onClickData(){
+        val date = view!!.findViewById<TextView>(R.id.setupData)
+        val view = layoutInflater.inflate(R.layout.data_add, null)
+        MaterialAlertDialogBuilder(context)
+            .setTitle("Выберите дату")
+            .setView(view)
+            .setPositiveButton("Ок"){
+                dialogInterface, id ->
+                val datePicker = view.findViewById<DatePicker>(R.id.dataPicker)
+                date.text = "${datePicker.dayOfMonth}.${datePicker.month + 1}.${datePicker.year}"
+
+                Toast.makeText(context, "Дата установлена", Toast.LENGTH_SHORT).show()
+                dialogInterface.dismiss()
+            }
+            .setNegativeButton("Отмена"){
+                dialogInterface, id ->
+                dialogInterface.dismiss()
+            }
+            .show()
+    }
 
     /*добавление фото задачи*/
     @OnClick(R.id.btnAddPhoto)
@@ -175,7 +211,7 @@ class CreateTaskWindow : Fragment() {
         transaction.commit()
 
         val task = saveDataTask()
-        pageViewModel.setTask(task)
+        pageViewModel.task.value = task
     }
 
     /*увелечение фотографии*/
@@ -285,6 +321,20 @@ class CreateTaskWindow : Fragment() {
         }
     }
 
+    @OnClick(R.id.timer)
+    fun onClickTimer(){
+
+        val timer = view!!.findViewById<TextView>(R.id.timer)
+        val dialogFragment = TimePicker(timer)
+        dialogFragment.show(fragmentManager!!, "time picker")
+    }
+    @OnClick(R.id.reminder)
+    fun onClickNotification(){
+
+        val notification = view!!.findViewById<TextView>(R.id.reminder)
+        val dialogFragment = TimePicker(notification)
+        dialogFragment.show(fragmentManager!!, "time picker")
+    }
     /*получаем данные введенные пользователем в editText и передаем в активити WindowTask*/
     @OnClick(R.id.add)
     fun onclickAdd() {
@@ -294,7 +344,7 @@ class CreateTaskWindow : Fragment() {
         dataBaseTask.createTask(task)
 
         val pageViewModel = ViewModelProviders.of(activity!!).get(MyViewModel::class.java)
-        pageViewModel.setTask(task)
+        pageViewModel.task.value = task
 
         val intent = Intent(activity!!.applicationContext, MainWindowCasePlanning()::class.java)
         startActivity(intent)
@@ -309,6 +359,15 @@ class CreateTaskWindow : Fragment() {
         val textReplay = view!!.findViewById<TextView>(R.id.textChoose)
         val replay = textReplay.text.toString()
 
+        val date = view!!.findViewById<TextView>(R.id.setupData)
+
+        val timer = view!!.findViewById<TextView>(R.id.timer)
+
+        val notification = view!!.findViewById<TextView>(R.id.reminder)
+
+        val comment = view!!.findViewById<EditText>(R.id.comment)
+
+
         for (position in 0 until listSubTasksView.size) {
             listSubTasks.add(
                 listSubTasksView[position]
@@ -321,7 +380,14 @@ class CreateTaskWindow : Fragment() {
         return Task(
             name = textTask!!,
             period = textPeriod,
-            replay = replay
+            replay = replay,
+            day = date.text.toString(),
+            timer = timer.text.toString(),
+            notification = notification.text.toString(),
+            comment = comment.text.toString(),
+            listSubTasks = listSubTasks
         )
     }
+
+
 }

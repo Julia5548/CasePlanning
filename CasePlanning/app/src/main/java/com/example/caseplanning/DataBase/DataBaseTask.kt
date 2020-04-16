@@ -41,7 +41,7 @@ class DataBaseTask {
                             val table = dataSnapshot.getValue(listTaskGenerate)
                             if (table != null) {
                                 for (task in table) {
-                                    tasks.add(Task(name = task.value.name, replay = task.value.replay, period = task.value.period))
+                                    tasks.add(Task(name = task.value.name, replay = task.value.replay, period = task.value.period, day = task.value.day))
                                 }
                             }
                         }

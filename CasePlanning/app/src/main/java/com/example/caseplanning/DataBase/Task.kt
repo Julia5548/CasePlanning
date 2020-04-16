@@ -1,6 +1,8 @@
 package com.example.caseplanning.DataBase
 
 import com.google.firebase.database.IgnoreExtraProperties
+import java.util.*
+import kotlin.collections.ArrayList
 
 @IgnoreExtraProperties
 data class Task (
@@ -8,16 +10,13 @@ data class Task (
     var color: String ? = "",
     var day: String ? = "",
     var period : String = "",
-    var nameSubTasks:ArrayList<String>? = arrayListOf(),
+    var listSubTasks:ArrayList<String>? = arrayListOf(),
     var replay : String = "",
-
     var photo: String ? = "",
     var audio: String ? = "",
     var video: String ? = "",
-    var text: String ? = "",
+    var comment: String ? = "",
+    var timer:String ="",
+    var notification:String = ""
 
-
-    var timeStart: String ? = "",
-    var timeEnd: String ? = "",
-    var shouldRepeat: Boolean = false
 )

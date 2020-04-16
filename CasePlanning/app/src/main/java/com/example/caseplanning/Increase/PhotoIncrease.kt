@@ -34,7 +34,7 @@ class PhotoIncrease : Fragment() {
         val activity = activity as AppCompatActivity?
         activity!!.supportActionBar!!.hide()
 
-        pageViewModel.getUri().observe(requireActivity(), Observer {
+        pageViewModel.uri.observe(requireActivity(), Observer {
             uri->
             photoView.setImageURI(uri.photoUri)
         })

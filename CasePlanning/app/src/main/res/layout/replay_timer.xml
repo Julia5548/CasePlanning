@@ -20,7 +20,6 @@
                 android:textSize="20sp" />
 
         <TextView
-                android:id="@+id/timer"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/textChoose"
@@ -33,13 +32,12 @@
                 android:layout_height="wrap_content"
                 android:layout_below="@id/textChoose"
                 android:layout_alignParentEnd="true"
-                android:layout_alignParentRight="true"
+                android:id="@+id/timer"
                 android:padding="5dp"
                 android:text="@string/indicate"
                 android:textSize="20sp" />
 
         <TextView
-                android:id="@+id/reminder"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/timer"
@@ -50,9 +48,9 @@
         <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:id="@+id/reminder"
                 android:layout_below="@+id/timer"
                 android:layout_alignParentEnd="true"
-                android:layout_alignParentRight="true"
                 android:padding="5dp"
                 android:text="@string/set"
                 android:textSize="20sp" />

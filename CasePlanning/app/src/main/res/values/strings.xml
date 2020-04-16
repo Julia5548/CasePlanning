@@ -19,7 +19,7 @@
     <string name="addtext">addText</string>
     <string name="colorselection">colorSelection</string>
     <string name="color">Цвет</string>
-    <string name="data">Выберите день:</string>
+    <string name="data">Дата:</string>
     <string name="calendar">Открыть календарь</string>
     <string name="periodDay">Период дня:</string>
     <string name="chooseReplay"><![CDATA[Нет >]]></string>
@@ -50,4 +50,5 @@
     <string name="edit">Изменить</string>
     <string name="tasks">Задачи</string>
     <string name="comment">Комментарий</string>
+    <string name="time">Время</string>
 </resources>

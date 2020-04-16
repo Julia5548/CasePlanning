@@ -30,7 +30,7 @@ class VideoIncrease : Fragment(){
         val videoFile = view.findViewById<VideoView>(R.id.videoView)
 
         var uri : Uri? = null
-        pageViewModel.getUri().observe(requireActivity(), Observer {
+        pageViewModel.uri.observe(requireActivity(), Observer {
             uriTypeTask->
             uri = uriTypeTask.videoUri
         })

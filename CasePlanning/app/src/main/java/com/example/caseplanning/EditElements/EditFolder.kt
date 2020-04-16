@@ -9,7 +9,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.ViewModelProviders
-import androidx.lifecycle.Observer;
+import androidx.lifecycle.Observer
 import com.example.caseplanning.CreateTask.MyViewModel
 import com.example.caseplanning.R
 import java.lang.Exception
@@ -41,7 +41,7 @@ class EditFolder (val context : Context?,
                 val nameNewFolder = nameFolder.text.toString()
                 Toast.makeText(context, "Наименование папки успешно изменено", Toast.LENGTH_SHORT)
                     .show()
-                pageViewModel.setnameFolder(nameNewFolder)
+                pageViewModel.mName.value = nameNewFolder
                 list[this.id] = nameNewFolder
                 adapter!!.notifyDataSetChanged()
             } catch (e: Exception) {

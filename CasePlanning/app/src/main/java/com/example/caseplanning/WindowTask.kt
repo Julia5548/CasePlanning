@@ -8,6 +8,7 @@ import android.widget.*
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
+import androidx.core.view.get
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentTransaction
@@ -32,6 +33,7 @@ import com.miguelcatalan.materialsearchview.MaterialSearchView
 import com.shrikanthravi.collapsiblecalendarview.widget.CollapsibleCalendar
 import com.example.caseplanning.adapter.AdapterSection
 import com.example.caseplanning.adapter.SectionHeader
+import com.shrikanthravi.collapsiblecalendarview.data.Day
 import io.reactivex.disposables.Disposable
 
 
@@ -149,14 +151,59 @@ class WindowTask : Fragment(), NavigationView.OnNavigationItemSelectedListener{
                     throwable.printStackTrace()
                 })
 
-        val calendarView: CollapsibleCalendar = viewFragment.findViewById(R.id.linearLayoutCalendar)
-
-        listTask(viewFragment)
+        calendar(viewFragment)
 
         return viewFragment
     }
 
-    private fun listTask(viewFragment: View) {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        setHasOptionsMenu(true)
+        super.onCreate(savedInstanceState)
+        pageViewModel = ViewModelProviders.of(requireActivity()).get(MyViewModel::class.java)
+    }
+
+    private fun calendar(view:View) {
+
+        val calendarView: CollapsibleCalendar = view.findViewById(R.id.linearLayoutCalendar)
+        val day = calendarView.selectedDay
+
+        val date = "${day!!.day}.${day.month}.${day.year}"
+        listTask(view, date)
+
+        pageViewModel.day.value = com.example.caseplanning.DataBase.Day(day = day.day.toString(), month = day.month.toString(), year = day.year.toString())
+
+        calendarView.setCalendarListener(object : CollapsibleCalendar.CalendarListener {
+            override fun onClickListener() {
+            }
+
+            override fun onDataUpdate() {
+                }
+
+            override fun onDayChanged() {
+            }
+
+            override fun onDaySelect() {
+                val day = calendarView.selectedDay
+
+                val date = "${day!!.day}.${day.month+1}.${day.year}"
+                listTask(view, date)
+
+            }
+
+            override fun onItemClick(v: View) {
+            }
+
+            override fun onMonthChange() {
+            }
+
+            override fun onWeekChange(position: Int) {
+            }
+
+        })
+
+    }
+
+    private fun listTask(viewFragment: View, day: String) {
 
 
         listTasks = viewFragment.findViewById<RecyclerView>(R.id.listViewTask)
@@ -176,12 +223,14 @@ class WindowTask : Fragment(), NavigationView.OnNavigationItemSelectedListener{
                 val stringList = arrayListOf<Task>()
 
                 for (tasks in task) {
-                    when(tasks.period){
-                        "Утро" -> stringListMorning.add(Task(name = tasks.name!!))
-                        "День" ->stringListDay.add(Task(name = tasks.name!!))
-                        "Вечер"-> stringListEvening.add(Task(name = tasks.name!!))
-                        "Один раз в любое время" -> stringList.add(Task(name = tasks.name!!))
-                        else ->  stringList.add(Task(name = tasks.name!!))
+                    if (day == tasks.day) {
+                        when (tasks.period) {
+                            "Утро" -> stringListMorning.add(Task(name = tasks.name!!))
+                            "День" -> stringListDay.add(Task(name = tasks.name!!))
+                            "Вечер" -> stringListEvening.add(Task(name = tasks.name!!))
+                            "Один раз в любое время" -> stringList.add(Task(name = tasks.name!!))
+                            else -> stringList.add(Task(name = tasks.name!!))
+                        }
                     }
                 }
 
@@ -207,11 +256,6 @@ class WindowTask : Fragment(), NavigationView.OnNavigationItemSelectedListener{
 
     }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        setHasOptionsMenu(true)
-        super.onCreate(savedInstanceState)
-        pageViewModel = ViewModelProviders.of(requireActivity()).get(MyViewModel::class.java)
-    }
 
     //inflate the menu
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {

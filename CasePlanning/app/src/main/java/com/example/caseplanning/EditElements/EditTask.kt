@@ -67,9 +67,9 @@ class EditTask : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         var task : Task? = null
 
-        pageViewModel.getTask().observe(requireActivity(), Observer<Task> {
+        pageViewModel.task.observe(requireActivity(), Observer<Task> {
             tasks->
-            task = Task(name = tasks.name, nameSubTasks = tasks.nameSubTasks, shouldRepeat = tasks.shouldRepeat)
+            task = Task(name = tasks.name, listSubTasks =tasks.listSubTasks)
         })
         if (task != null) {
             val editTextTask = view.findViewById<EditText>(R.id.editTextTask)
@@ -95,8 +95,8 @@ class EditTask : Fragment() {
                 .toString())
             Log.d("Element", listSubTasks[position])
         }
-        val task = Task(name = textTask!!,nameSubTasks = listSubTasks, shouldRepeat = true)
-        pageViewModel.setTask(task)
+        val task = Task(name = textTask!!,listSubTasks = listSubTasks)
+        pageViewModel.task.value = task
         val intent = Intent(activity!!.applicationContext, MainWindowCasePlanning()::class.java)
         intent.putExtra("nameTask", textTask)
         startActivity(intent)

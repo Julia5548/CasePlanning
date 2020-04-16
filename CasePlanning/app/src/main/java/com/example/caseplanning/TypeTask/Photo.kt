@@ -86,7 +86,7 @@ class Photo : Fragment(){
             photo_image.rotation += 90
             //фотка сделана, извлекаем картинку
             photo_image.setImageURI(outputUriFile)
-            pageViewModel.setUri(UriTypeTask(photoUri = outputUriFile))
+            pageViewModel.uri.value = UriTypeTask(photoUri = outputUriFile)
 
         }else{
             Log.d("Ошибка", "Не получилось сохранить фотографию")
