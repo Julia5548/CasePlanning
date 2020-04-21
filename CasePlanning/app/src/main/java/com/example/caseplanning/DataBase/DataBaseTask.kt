@@ -12,6 +12,7 @@ import kotlin.collections.HashMap
 class DataBaseTask {
 
     /*чтение данных из бд*/
+
     private fun readData() : Observable<List<Task>> {
 
         val databaseReference = FirebaseDatabase.getInstance().reference.child(FirebaseAuth.getInstance().currentUser!!.uid).child("Tasks")

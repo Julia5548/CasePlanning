@@ -354,9 +354,6 @@ class CreateTaskWindow : Fragment() {
         transaction.replace(R.id.linerLayout, replay)
         transaction.addToBackStack(null)
         transaction.commit()
-
-        val task = saveDataTask()
-        pageViewModel!!.task.value = task
     }
 
     /*динамическое добавление подзадач*/
@@ -621,6 +618,26 @@ class CreateTaskWindow : Fragment() {
         )
     }
 
+    override fun onPause() {
+        super.onPause()
+
+        val task = saveDataTask()
+        pageViewModel!!.task.value = task
+
+        Log.d("OnPAUSE", "onPause")
+    }
+
+    override fun onStop() {
+        super.onStop()
+
+        listSubTask = null
+        listSubTasksView = null
+        btnDeleted = null
+        btnOkSubTasks = null
+        pageViewModel = null
+
+        Log.d("onStop", "onStop")
+    }
     override fun onDestroy() {
         super.onDestroy()
         listSubTask = null

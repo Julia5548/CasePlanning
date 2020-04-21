@@ -4,11 +4,10 @@ import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.*
-import android.widget.*
+import android.widget.TextView
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
-import androidx.core.view.get
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentTransaction
@@ -21,19 +20,13 @@ import com.example.caseplanning.CreateTask.CreateTaskWindow
 import com.example.caseplanning.CreateTask.MyViewModel
 import com.example.caseplanning.DataBase.DataBaseTask
 import com.example.caseplanning.DataBase.Task
-import com.example.caseplanning.DataBase.Users
 import com.example.caseplanning.Sidebar.*
-import com.google.android.material.navigation.NavigationView
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.DatabaseError
-import com.google.firebase.database.FirebaseDatabase
-import com.google.firebase.database.ValueEventListener
-import com.miguelcatalan.materialsearchview.MaterialSearchView
-import com.shrikanthravi.collapsiblecalendarview.widget.CollapsibleCalendar
 import com.example.caseplanning.adapter.AdapterSection
 import com.example.caseplanning.adapter.SectionHeader
-import com.shrikanthravi.collapsiblecalendarview.data.Day
+import com.google.android.material.navigation.NavigationView
+import com.google.firebase.auth.FirebaseAuth
+import com.miguelcatalan.materialsearchview.MaterialSearchView
+import com.shrikanthravi.collapsiblecalendarview.widget.CollapsibleCalendar
 import io.reactivex.disposables.Disposable
 
 
@@ -387,15 +380,19 @@ class WindowTask : Fragment(), NavigationView.OnNavigationItemSelectedListener{
         return true
     }
 
-    override fun onPause() {
-        super.onPause()
-        if (!disposable.isDisposed)
-            disposable.dispose()
-        mToggle = null
-        search!!.removeAllViews()
-        search = null
-        mDrawerLayout = null
+     override fun onStop() {
+        super.onStop()
+         super.onPause()
+         if (!disposable.isDisposed)
+             disposable.dispose()
+         mToggle = null
+         search!!.removeAllViews()
+         search = null
+         mDrawerLayout = null
+         Log.d("onStop", "onStop")
     }
+
+
     override fun onDestroy() {
         super.onDestroy()
         if (!disposable.isDisposed)
