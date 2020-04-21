@@ -14,7 +14,7 @@ class AdapterRecyclerViewAccess(val context : Context, data:ArrayList<String>) :
 
     val mData: ArrayList<String> = data
 
-    class ViewHolder(itemView: View):RecyclerView.ViewHolder(itemView){
+    inner class ViewHolder(itemView: View):RecyclerView.ViewHolder(itemView){
 
         val dataUser : TextView = itemView.findViewById(R.id.nameItemList)
         val buttonAccess : Button = itemView.findViewById(R.id.buttonAccess)

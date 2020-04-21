@@ -1,36 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        android:orientation="vertical" android:layout_width="match_parent"
-        android:visibility="gone"
-        android:layout_height="wrap_content">
-    <RelativeLayout
-            android:layout_width="match_parent"
-            android:orientation="horizontal"
-            android:id="@+id/recordAudio"
-            android:layout_height="wrap_content">
-   <ImageButton
-           android:layout_width="50dp"
-           android:layout_height="50dp"
-           android:id="@+id/playRecordAndStopRecord"
-           android:background="@null"
-           android:contentDescription="@string/record"
-           android:src = "@drawable/ic_mic_black_24dp"/>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
 
-</RelativeLayout>
-    <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/recordAudio"
-            android:orientation="horizontal">
         <ImageButton
+                android:id="@+id/playRecordAndStopRecord"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:background="@null"
+                android:contentDescription="@string/record"
+                android:src="@drawable/ic_mic_black_24dp"/>
+
+
+        <ImageButton
+                android:id="@+id/playAndStopAudio"
                 android:layout_width="50dp"
                 android:layout_height="50dp"
                 android:background="@null"
                 android:contentDescription="@string/playAudio"
-                android:src="@drawable/ic_play_arrow_black_24dp"
-                android:id="@+id/playAndStopAudio"/>
-
-    </RelativeLayout>
+                android:src="@drawable/ic_play_arrow_black_24dp" />
 
 
-</RelativeLayout>
+</LinearLayout>

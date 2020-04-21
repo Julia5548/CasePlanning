@@ -28,10 +28,9 @@ import com.example.caseplanning.R
 
 class EditTask : Fragment() {
 
-    private var textTask: String? = null
-    val listSubTasks = arrayListOf<String>()
-    val listSubTasksView = arrayListOf<View>()
-    private lateinit var pageViewModel : MyViewModel
+
+    private var pageViewModel : MyViewModel? = null
+    var listSubTasksView : ArrayList<View>? = arrayListOf<View>()
 
 
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
@@ -67,7 +66,7 @@ class EditTask : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         var task : Task? = null
 
-        pageViewModel.task.observe(requireActivity(), Observer<Task> {
+        pageViewModel!!.task.observe(requireActivity(), Observer<Task> {
             tasks->
             task = Task(name = tasks.name, listSubTasks =tasks.listSubTasks)
         })
@@ -86,17 +85,19 @@ class EditTask : Fragment() {
     @OnClick(R.id.edit)
     fun onclickEdit() {
 
+        val listSubTasks = arrayListOf<String>()
+
         val editTextTask = view!!.findViewById<EditText>(R.id.editTextTask)
-        textTask = editTextTask.text.toString()
-        for (position in 0 until listSubTasksView.size){
-            listSubTasks.add(listSubTasksView[position]
+        val textTask = editTextTask.text.toString()
+        for (position in 0 until listSubTasksView!!.size){
+            listSubTasks.add(listSubTasksView!![position]
                 .findViewById<EditText>(R.id.editTextSubTasks)
                 .text
                 .toString())
             Log.d("Element", listSubTasks[position])
         }
-        val task = Task(name = textTask!!,listSubTasks = listSubTasks)
-        pageViewModel.task.value = task
+        val task = Task(name = textTask,listSubTasks = listSubTasks)
+        pageViewModel!!.task.value = task
         val intent = Intent(activity!!.applicationContext, MainWindowCasePlanning()::class.java)
         intent.putExtra("nameTask", textTask)
         startActivity(intent)
@@ -123,7 +124,7 @@ class EditTask : Fragment() {
         if (relativeLayoutSubTasks.parent != null) {
             (relativeLayoutSubTasks.parent as ViewGroup).removeView(relativeLayoutSubTasks)
         }
-        listSubTasksView.add(viewFr)
+        listSubTasksView!!.add(viewFr)
         linerLayoutSubTask.addView(relativeLayoutSubTasks)
 
         val btnDeleted = viewFr.findViewById<ImageButton>(R.id.btnDeleted)
@@ -138,8 +139,8 @@ class EditTask : Fragment() {
 
         // relativeLayoutSubTasks.visibility = RelativeLayout.GONE
         (view.parent as LinearLayout).removeView(view)
-        listSubTasksView.remove(view)
-        Log.d("Size", "${listSubTasksView.size}")
+        listSubTasksView!!.remove(view)
+        Log.d("Size", "${listSubTasksView!!.size}")
     }
 
     /*создает подзадачу*/
@@ -188,6 +189,12 @@ class EditTask : Fragment() {
                 btnOkSubTasks
             )
         }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        listSubTasksView = null
+        pageViewModel = null
     }
 
 }

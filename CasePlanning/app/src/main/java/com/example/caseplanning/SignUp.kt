@@ -1,6 +1,7 @@
 package com.example.caseplanning
 
 import android.content.Intent
+import android.content.pm.ActivityInfo
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.EditText
@@ -26,7 +27,7 @@ class SignUp : AppCompatActivity() {
 
 
 
-    private lateinit var mAuth : FirebaseAuth
+    private var mAuth : FirebaseAuth? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -44,7 +45,8 @@ class SignUp : AppCompatActivity() {
         actionBar!!.setDisplayHomeAsUpEnabled(true)
         actionBar.setHomeButtonEnabled(true)
 
-        toolbar.setTitleTextColor(android.graphics.Color.WHITE)
+
+        requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LOCKED
     }
 
     @OnClick(R.id.btn_link_signUp)
@@ -58,12 +60,12 @@ class SignUp : AppCompatActivity() {
         val password = passwordEdit.text.toString()
 
 
-        mAuth.createUserWithEmailAndPassword(email,password)
+        mAuth!!.createUserWithEmailAndPassword(email,password)
             .addOnCompleteListener(this
             ) { task ->
                 if (task.isSuccessful){
 
-                    val user = mAuth.currentUser
+                    val user = mAuth!!.currentUser
                     user?.sendEmailVerification()?.addOnCompleteListener(this)
                     { taskTwo ->
                         if (taskTwo.isSuccessful) {
@@ -100,5 +102,10 @@ class SignUp : AppCompatActivity() {
             else ->
                 return super.onOptionsItemSelected(item)
         }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        mAuth = null
     }
 }

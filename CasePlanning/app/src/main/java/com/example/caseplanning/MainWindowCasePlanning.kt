@@ -3,6 +3,7 @@ package com.example.caseplanning
 
 import android.annotation.SuppressLint
 import android.app.Fragment
+import android.content.pm.ActivityInfo
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.FragmentTransaction
@@ -10,8 +11,6 @@ import androidx.fragment.app.FragmentTransaction
 
 @Suppress("DEPRECATION")
 class MainWindowCasePlanning : AppCompatActivity() {
-
-    private var fragmentTransaction : FragmentTransaction?  = null
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -22,23 +21,7 @@ class MainWindowCasePlanning : AppCompatActivity() {
             .add(R.id.linerLayout, WindowTask())
             .commitAllowingStateLoss()
 
+        requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LOCKED
+
     }
-
-   /* override fun onPostResume() {
-        if (supportFragmentManager.findFragmentById(R.id.linerLayout) != null)
-        {
-            supportFragmentManager
-                .beginTransaction()
-                .remove(
-                    supportFragmentManager
-                        .findFragmentById(R.id.linerLayout)!!
-                )
-                .commit()
-        }
-            supportFragmentManager.beginTransaction()
-                .add(R.id.linerLayout, WindowTask())
-                .commitAllowingStateLoss()
-
-        super.onPostResume()
-    }*/
 }

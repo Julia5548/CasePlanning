@@ -2,8 +2,10 @@ package com.example.caseplanning.TypeTask
 
 import android.Manifest
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
 import android.media.MediaPlayer
 import android.media.MediaRecorder
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.Environment
@@ -13,12 +15,15 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageButton
 import android.widget.Toast
-import androidx.annotation.RequiresApi
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProviders
 import butterknife.ButterKnife
 import butterknife.OnClick
+import com.example.caseplanning.CreateTask.MyViewModel
+import com.example.caseplanning.DataBase.UriTypeTask
 import com.example.caseplanning.R
 import java.io.File
 import java.lang.Exception
@@ -30,6 +35,10 @@ class AudioTask : Fragment() {
     private var mediaPlayer: MediaPlayer? = null
     private lateinit var fileName: String
     val PERMISSION_CODE = 1000
+    var videoUri : Uri? = null
+    var photoUri : String? = null
+
+    private lateinit var pageViewModel :MyViewModel
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -42,26 +51,41 @@ class AudioTask : Fragment() {
 
         fileName = "${Environment.getExternalStorageDirectory().absolutePath}/record.mp3"
 
+        pageViewModel.uri.observe(requireActivity(), Observer {
+                uri->
+            if(uri != null) {
+                videoUri = uri.videoUri
+                photoUri = uri.photoUri
+            }
+        })
+
         return view
     }
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        pageViewModel = ViewModelProviders.of(requireActivity()).get(MyViewModel::class.java)
+
+    }
     /*запись и остановка аудио*/
     @OnClick(R.id.playRecordAndStopRecord)
     fun onClickStartRecording() {
 
+        pageViewModel.uri.value = UriTypeTask(audioUri = fileName, photoUri = photoUri, videoUri = videoUri)
+
         val playAndStopRecord = view!!.findViewById<ImageButton>(R.id.playRecordAndStopRecord)
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (context!!.checkSelfPermission(Manifest.permission.RECORD_AUDIO)
-                != PackageManager.PERMISSION_GRANTED &&
-                context!!.checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+            if (ContextCompat.checkSelfPermission(requireActivity(), Manifest.permission.RECORD_AUDIO)
+                != PackageManager.PERMISSION_GRANTED ||
+                ContextCompat.checkSelfPermission(requireActivity(),Manifest.permission.WRITE_EXTERNAL_STORAGE)
                 != PackageManager.PERMISSION_GRANTED
             ) {
                 val permission: Array<String> = arrayOf(
                     Manifest.permission.RECORD_AUDIO,
                     Manifest.permission.WRITE_EXTERNAL_STORAGE
                 )
-                requestPermissions(permission, 0)
+                ActivityCompat.requestPermissions(requireActivity(),permission, 0)
             } else {
                 if (playAndStopRecord.tag == null) {
                     playAndStopRecord.tag = 1
@@ -112,11 +136,11 @@ class AudioTask : Fragment() {
             mediaRecorder = null
         }
     }
-
-    /*остановка записи аудио*/
+            /*остановка записи аудио*/
     fun stopRecording() {
         if (mediaRecorder != null) {
             mediaRecorder!!.stop()
+
         } else {
             Log.d("Tag", "Audio stop is not possible")
         }

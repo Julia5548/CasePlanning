@@ -10,4 +10,10 @@
     <color name="sand_default">#F0B000</color>
     <color name="sand_disabled">#6AF493DF</color>
     <color name="sand_checked">#FFD0A0</color>
+    <color name="yellow">#FFEB00</color>
+    <color name="green">#9FEE00</color>
+    <color name="azure">#87CEEB</color>
+    <color name="indigo">#4B0082</color>
+    <color name="orchid">#DA70D6</color>
+
 </resources>

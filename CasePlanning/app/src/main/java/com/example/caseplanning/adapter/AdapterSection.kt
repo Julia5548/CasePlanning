@@ -24,13 +24,13 @@ class AdapterSection(val context: Context, data: ArrayList<SectionHeader>) :
     val dataBaseTask = DataBaseTask()
     var disposable : Disposable? =  null
 
-    class ChildViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+    inner class ChildViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
         val dataChild: TextView = itemView.findViewById(R.id.nameItemList)
         var cardItem = itemView.findViewById<CardView>(R.id.card_view)
     }
 
-    class SectionViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView){
+    inner class SectionViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView){
 
         val dataSection : TextView = itemView.findViewById(R.id.sectionData)
     }

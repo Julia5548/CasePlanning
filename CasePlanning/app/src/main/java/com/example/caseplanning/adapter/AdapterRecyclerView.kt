@@ -7,13 +7,12 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.caseplanning.R
-import kotlinx.android.synthetic.main.card_list.view.*
 
-class AdapterRecyclerViewFolder(val context: Context, data:ArrayList<String>):RecyclerView.Adapter<AdapterRecyclerViewFolder.ViewHolder>() {
+class AdapterRecyclerView(val context: Context, data:ArrayList<String>):RecyclerView.Adapter<AdapterRecyclerView.ViewHolder>() {
 
     val mData : ArrayList<String> = data
 
-    class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView){
+    inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView){
 
         val dataFolder = itemView.findViewById<TextView>(R.id.nameItemList)
     }

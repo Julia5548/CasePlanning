@@ -5,6 +5,7 @@ import android.app.Activity
 import android.content.ContentValues
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -15,19 +16,25 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.*
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
+import butterknife.ButterKnife
+import butterknife.OnTouch
+import com.example.caseplanning.CreateTask.CreateTaskWindow
 import com.example.caseplanning.CreateTask.MyViewModel
 import com.example.caseplanning.DataBase.UriTypeTask
+import com.example.caseplanning.Increase.VideoIncrease
 import com.example.caseplanning.R
 
-class Video : Fragment(){
+class Video : Fragment() {
 
     val CAMERA_REQUEST = 1
-    val PERMISSION_CODE = 1000
-    lateinit var videoFie : VideoView
-    lateinit var outputUriFile : Uri
-    lateinit var pageViewModel:MyViewModel
-
+    val PERMISSION_CODE = 1001
+    var videoFie: VideoView? = null
+    var outputUriFile: Uri? = null
+    var pageViewModel: MyViewModel? = null
+    var photoUri: String? = null
+    var audioFile: String? = null
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -35,25 +42,42 @@ class Video : Fragment(){
         savedInstanceState: Bundle?
     ): View? {
 
-        val view  = inflater.inflate(R.layout.video, container, false)
+        val view = inflater.inflate(R.layout.video, container, false)
 
         videoFie = view.findViewById<VideoView>(R.id.videoFile)
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
-            if (context!!.checkSelfPermission(Manifest.permission.CAMERA)
-                ==  PackageManager.PERMISSION_DENIED ||
-                context!!.checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                == PackageManager.PERMISSION_DENIED){
-                val permission : Array<String> = arrayOf(
-                    Manifest.permission.CAMERA,
-                    Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                requestPermissions(permission, PERMISSION_CODE)
-            }else{
+        ButterKnife.bind(this, view)
+
+        pageViewModel!!.uri.observe(requireActivity(), Observer { uri ->
+            if (uri != null) {
+                outputUriFile = uri.videoUri
+                photoUri = uri.photoUri
+                audioFile = uri.audioUri
+            }
+        })
+
+        if (outputUriFile == null) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                if (context!!.checkSelfPermission(Manifest.permission.CAMERA)
+                    == PackageManager.PERMISSION_DENIED ||
+                    context!!.checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                    == PackageManager.PERMISSION_DENIED
+                ) {
+                    val permission: Array<String> = arrayOf(
+                        Manifest.permission.CAMERA,
+                        Manifest.permission.WRITE_EXTERNAL_STORAGE
+                    )
+                    requestPermissions(permission, PERMISSION_CODE)
+                } else {
+                    openCamera()
+                }
+
+            } else {
                 openCamera()
             }
-
-        }else{
-            openCamera()
+        } else {
+            videoFie!!.setVideoURI(outputUriFile)
+            videoFie!!.seekTo(1)
         }
 
         return view
@@ -63,14 +87,15 @@ class Video : Fragment(){
         super.onCreate(savedInstanceState)
         pageViewModel = ViewModelProviders.of(requireActivity()).get(MyViewModel::class.java)
     }
-    fun openCamera(){
+
+    fun openCamera() {
 
         val values = ContentValues()
         values.put(MediaStore.Video.Media.TITLE, "New Task")
         values.put(MediaStore.Video.Media.DESCRIPTION, "From the camera")
         outputUriFile = activity!!.contentResolver.insert(
-            MediaStore.Video.
-                Media.EXTERNAL_CONTENT_URI, values)!!
+            MediaStore.Video.Media.EXTERNAL_CONTENT_URI, values
+        )!!
         val intent = Intent(MediaStore.ACTION_VIDEO_CAPTURE)
         intent.putExtra(MediaStore.EXTRA_OUTPUT, outputUriFile)
         startActivityForResult(intent, CAMERA_REQUEST)
@@ -78,15 +103,14 @@ class Video : Fragment(){
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == CAMERA_REQUEST && resultCode == Activity.RESULT_OK){
+        if (requestCode == CAMERA_REQUEST && resultCode == Activity.RESULT_OK) {
             //фотка сделана, извлекаем картинку
-            videoFie.setVideoURI(outputUriFile)
-            videoFie.seekTo(1)
-            pageViewModel.uri.value = UriTypeTask(videoUri = outputUriFile)
-           // videoFie.suspend()
-            //videoFie.start()
-        }else{
-            Log.d("Popka", "RUNNNN")
+            videoFie!!.setVideoURI(outputUriFile)
+            videoFie!!.seekTo(1)
+            pageViewModel!!.uri.value =
+                UriTypeTask(videoUri = outputUriFile, photoUri = photoUri, audioUri = audioFile)
+        } else {
+            Log.d("Ошибка", "Не удалось сохранить видео")
         }
     }
 
@@ -95,15 +119,39 @@ class Video : Fragment(){
         permissions: Array<out String>,
         grantResults: IntArray
     ) {
-        when(requestCode){
+        when (requestCode) {
             PERMISSION_CODE -> {
-                if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED){
+                if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     openCamera()
-                }else{
-                    Toast.makeText(activity!!.applicationContext, "В доступе было отказано",
-                        Toast.LENGTH_SHORT).show()
+                } else {
+                    Toast.makeText(
+                        activity!!.applicationContext, "В доступе было отказано",
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
             }
         }
+    }
+
+    @OnTouch(R.id.videoFile)
+    fun videoZoom() {
+        val videoIncrease: Fragment = VideoIncrease()
+        val transaction = fragmentManager!!.beginTransaction()
+
+        transaction.replace(R.id.linerLayout, videoIncrease)
+        transaction.addToBackStack(null)
+        transaction.commit()
+
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+
+        pageViewModel = null
+        videoFie?.setVideoURI(null)
+        outputUriFile = null
+        audioFile = null
+        photoUri = null
+
     }
 }

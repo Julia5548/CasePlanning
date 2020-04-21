@@ -1,5 +1,6 @@
 package com.example.caseplanning
 
+import android.content.pm.ActivityInfo
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
@@ -13,7 +14,7 @@ import com.google.firebase.auth.FirebaseAuth
 
 class ResetPassword : AppCompatActivity() {
 
-    private lateinit var mAuth: FirebaseAuth
+    private var mAuth: FirebaseAuth? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -27,6 +28,9 @@ class ResetPassword : AppCompatActivity() {
         val actionBar = supportActionBar
         actionBar!!.setDisplayHomeAsUpEnabled(true)
         actionBar.setHomeButtonEnabled(true)
+
+
+        requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LOCKED
 
         //initialize FireBase Auth
         mAuth = FirebaseAuth.getInstance()
@@ -44,7 +48,7 @@ class ResetPassword : AppCompatActivity() {
             emailResetPassword.requestFocus()
         } else {
             //отправка сосбщения на почту для сбрроса пароля
-            mAuth.sendPasswordResetEmail(email)
+            mAuth!!.sendPasswordResetEmail(email)
                 .addOnCompleteListener(this) { task ->
                     if (task.isSuccessful) {
                         Toast.makeText(
@@ -69,6 +73,11 @@ class ResetPassword : AppCompatActivity() {
             else ->
                 super.onOptionsItemSelected(item)
         }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        mAuth = null
     }
 
 }

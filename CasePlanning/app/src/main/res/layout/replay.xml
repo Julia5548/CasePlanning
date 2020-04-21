@@ -11,10 +11,12 @@
             android:layout_height="wrap_content">
 
     </androidx.appcompat.widget.Toolbar>
+
     <ListView
             android:layout_width="match_parent"
             android:layout_below="@+id/toolbar"
             android:id = "@+id/listViewReplay"
             android:layout_height="match_parent">
     </ListView>
+
 </RelativeLayout>

@@ -20,10 +20,11 @@ class EditFolder (val context : Context?,
                  var list : ArrayList<String>,
                  var id : Int){
 
-    private val layoutInflater : LayoutInflater = LayoutInflater.from(context)
 
     fun createDialog(name : String?){
-      val pageViewModel  = ViewModelProviders.of(activity!!).get(MyViewModel::class.java)
+         val layoutInflater : LayoutInflater = LayoutInflater.from(context)
+
+        val pageViewModel  = ViewModelProviders.of(activity!!).get(MyViewModel::class.java)
         val view = layoutInflater.inflate(R.layout.edit_folder, null)
         val mBuilder = AlertDialog.Builder(activity)
         val nameFolder = view.findViewById<EditText>(R.id.editNameFolder)

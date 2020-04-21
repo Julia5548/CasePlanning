@@ -40,16 +40,11 @@ import io.reactivex.disposables.Disposable
 class WindowTask : Fragment(), NavigationView.OnNavigationItemSelectedListener{
 
 
-    private lateinit var mAuth: FirebaseAuth
-    private lateinit var search: MaterialSearchView
-    private var dataBaseTask : DataBaseTask?= DataBaseTask()
-    lateinit var listTasks: RecyclerView
-    var list: ArrayList<String>? = null
-    var adapterSection : AdapterSection? = null
-    private lateinit var mDrawerLayout: DrawerLayout
-    private lateinit var mToggle: ActionBarDrawerToggle
+    private var search: MaterialSearchView? = null
+    private  var mDrawerLayout: DrawerLayout? = null
+    private var mToggle: ActionBarDrawerToggle? = null
     private lateinit var pageViewModel: MyViewModel
-    private  var disposable:Disposable? = null
+    private lateinit var disposable:Disposable
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -68,11 +63,9 @@ class WindowTask : Fragment(), NavigationView.OnNavigationItemSelectedListener{
 
         ButterKnife.bind(this, viewFragment)
 
-        mAuth = FirebaseAuth.getInstance()
-
         /*кнопка поиска*/
         search = viewFragment.findViewById<MaterialSearchView>(R.id.search)
-        search.closeSearch()
+        search!!.closeSearch()
 
         /*боковое меню*/
         mDrawerLayout = viewFragment.findViewById(R.id.drawerLayout)
@@ -80,16 +73,15 @@ class WindowTask : Fragment(), NavigationView.OnNavigationItemSelectedListener{
             activity, mDrawerLayout,
             R.string.Open, R.string.Close
         )
-        mDrawerLayout.addDrawerListener(mToggle)
+        mDrawerLayout!!.addDrawerListener(mToggle!!)
         /*проверяем состояние*/
-        mToggle.syncState()
+        mToggle!!.syncState()
         /*добавление стрелки для закрытия бокового меню, делает ее кликабельной*/
         actionBar.setDisplayHomeAsUpEnabled(true)
 
         /*подключение обработчика события кнопок бокового меню*/
         val navigationView = viewFragment.findViewById<NavigationView>(R.id.navigationView)
         navigationView.setNavigationItemSelectedListener(this)
-
         /*  val intent: Intent = activity.intent
           textTask = intent.getStringExtra("nameTask")*/
 
@@ -98,6 +90,8 @@ class WindowTask : Fragment(), NavigationView.OnNavigationItemSelectedListener{
         val nameUser = navHeader.findViewById<TextView>(R.id.nameUser)
 
 
+
+        val dataBaseTask : DataBaseTask?= DataBaseTask()
 
         disposable = dataBaseTask!!
             .retrieveDataUser()
@@ -111,9 +105,9 @@ class WindowTask : Fragment(), NavigationView.OnNavigationItemSelectedListener{
                 })
 
 
-        val email_find = "negodyaeva.yulya@gmail.com"
+     /*   val email_find = "negodyaeva.yulya@gmail.com"
         val list1 = arrayListOf<String>()
-         disposable = dataBaseTask!!
+         disposable = dataBaseTask
             .retrieveDataUid()
             .subscribe ({ uids ->
                 for (uid in uids) {
@@ -149,7 +143,7 @@ class WindowTask : Fragment(), NavigationView.OnNavigationItemSelectedListener{
                 {
                     throwable->
                     throwable.printStackTrace()
-                })
+                })*/
 
         calendar(viewFragment)
 
@@ -206,12 +200,16 @@ class WindowTask : Fragment(), NavigationView.OnNavigationItemSelectedListener{
     private fun listTask(viewFragment: View, day: String) {
 
 
-        listTasks = viewFragment.findViewById<RecyclerView>(R.id.listViewTask)
+       val listTasks = viewFragment.findViewById<RecyclerView>(R.id.listViewTask)
 
         val sections : ArrayList<SectionHeader> = arrayListOf()
 
         val layoutManager = LinearLayoutManager(context)
-        listTasks.layoutManager = layoutManager
+        listTasks!!.layoutManager = layoutManager
+
+
+        val dataBaseTask : DataBaseTask?= DataBaseTask()
+
 
         /*подписываемся и выводим данные из бд, при выходе надо удалить подписчиков*/
         disposable = dataBaseTask!!
@@ -262,8 +260,8 @@ class WindowTask : Fragment(), NavigationView.OnNavigationItemSelectedListener{
         inflater.inflate(R.menu.search, menu)
 
         val searchItem = menu.findItem(R.id.search)
-        search.setMenuItem(searchItem)
-        search.setOnQueryTextListener(object : MaterialSearchView.OnQueryTextListener {
+        search!!.setMenuItem(searchItem)
+        search!!.setOnQueryTextListener(object : MaterialSearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(query: String?): Boolean {
                 /*поиск задач*/
                 return true
@@ -275,7 +273,7 @@ class WindowTask : Fragment(), NavigationView.OnNavigationItemSelectedListener{
             }
 
         })
-        search.setOnSearchViewListener(object : MaterialSearchView.SearchViewListener {
+        search!!.setOnSearchViewListener(object : MaterialSearchView.SearchViewListener {
             override fun onSearchViewClosed() {
                 /*поиск*/
                 /* currentText = ""
@@ -304,7 +302,7 @@ class WindowTask : Fragment(), NavigationView.OnNavigationItemSelectedListener{
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        if (mToggle.onOptionsItemSelected(item)) {
+        if (mToggle!!.onOptionsItemSelected(item)) {
             return true
         }
         return super.onOptionsItemSelected(item)
@@ -378,7 +376,8 @@ class WindowTask : Fragment(), NavigationView.OnNavigationItemSelectedListener{
             }
             /*выход пользователя из системы*/
             R.id.signOut -> {
-                dataBaseTask!!.dispose()
+                val mAuth = FirebaseAuth.getInstance()
+
                 mAuth.signOut()
                 val intent = Intent(activity!!.applicationContext, MainActivity::class.java)
                 //intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
@@ -388,11 +387,22 @@ class WindowTask : Fragment(), NavigationView.OnNavigationItemSelectedListener{
         return true
     }
 
-
+    override fun onPause() {
+        super.onPause()
+        if (!disposable.isDisposed)
+            disposable.dispose()
+        mToggle = null
+        search!!.removeAllViews()
+        search = null
+        mDrawerLayout = null
+    }
     override fun onDestroy() {
         super.onDestroy()
-        if (disposable != null && disposable!!.isDisposed)
-            disposable!!.dispose()
+        if (!disposable.isDisposed)
+            disposable.dispose()
+        mToggle = null
+        search = null
+        mDrawerLayout = null
     }
 
 }

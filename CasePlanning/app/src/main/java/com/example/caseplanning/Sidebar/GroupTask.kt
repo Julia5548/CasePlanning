@@ -1,6 +1,7 @@
 package com.example.caseplanning.Sidebar
 
 import android.content.Intent
+import android.graphics.drawable.Icon
 import android.os.Bundle
 import android.view.*
 import android.widget.*
@@ -23,7 +24,7 @@ import com.example.caseplanning.DataBase.Task
 import com.example.caseplanning.MainActivity
 import com.example.caseplanning.R
 import com.example.caseplanning.WindowTask
-import com.example.caseplanning.adapter.AdapterRecyclerViewFolder
+import com.example.caseplanning.adapter.AdapterRecyclerView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.navigation.NavigationView
 import com.google.android.material.textfield.TextInputLayout
@@ -34,17 +35,9 @@ import io.reactivex.disposables.Disposable
 class GroupTask : Fragment(), NavigationView.OnNavigationItemSelectedListener,
     AdapterView.OnItemClickListener {
 
-    private lateinit var mAuth: FirebaseAuth
-    private lateinit var search: MaterialSearchView
-    private val dataBaseTask = DataBaseTask()
-    var nameFolder: String? = null
-    lateinit var listFolder: RecyclerView
-    var list: ArrayList<String>? = null
-    var adapter: ArrayAdapter<String>? = null
-    private lateinit var mDrawerLayout: DrawerLayout
-    var pageViewModel: MyViewModel = MyViewModel()
-    var id: Int? = null
-    lateinit var disposable:Disposable
+    var pageViewModel: MyViewModel? = null
+    var mDrawerLayout: DrawerLayout? = null
+    lateinit var disposable: Disposable
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -61,14 +54,13 @@ class GroupTask : Fragment(), NavigationView.OnNavigationItemSelectedListener,
 
         ButterKnife.bind(this, viewFragment)
 
-        mAuth = FirebaseAuth.getInstance()
 
         /*кнопка поиска*/
-        search = viewFragment.findViewById<MaterialSearchView>(R.id.search)
+        val search = viewFragment.findViewById<MaterialSearchView>(R.id.search)
         search.closeSearch()
 
         /*боковое меню*/
-        mDrawerLayout = viewFragment.findViewById(R.id.drawerLayout)
+         mDrawerLayout = viewFragment.findViewById<DrawerLayout>(R.id.drawerLayout)
         /*подключение обработчика события кнопок бокового меню*/
         val navigationView = viewFragment.findViewById<NavigationView>(R.id.navigationView)
         navigationView.setNavigationItemSelectedListener(this)
@@ -83,18 +75,18 @@ class GroupTask : Fragment(), NavigationView.OnNavigationItemSelectedListener,
             R.string.Open, R.string.Close
         )
 
-        mDrawerLayout.addDrawerListener(mToggle)
+        mDrawerLayout!!.addDrawerListener(mToggle)
         /*проверяем состояние*/
         mToggle.syncState()
 
+        val dataBaseTask = DataBaseTask()
         disposable = dataBaseTask
             .retrieveDataUser()
-            .subscribe( { user ->
+            .subscribe({ user ->
                 nameUser.text = user.name
                 emailUser.text = user.email
             },
-                {
-                        throwable->
+                { throwable ->
                     throwable.printStackTrace()
                 })
 
@@ -105,29 +97,29 @@ class GroupTask : Fragment(), NavigationView.OnNavigationItemSelectedListener,
 
     private fun listFolder(viewFragment: View) {
 
-
-        listFolder = viewFragment.findViewById<RecyclerView>(R.id.listViewFolder)
+        val dataBaseTask = DataBaseTask()
+        val listFolder = viewFragment.findViewById<RecyclerView>(R.id.listViewFolder)
         listFolder.layoutManager = LinearLayoutManager(context)
 
         /*подписываемся и выводим данные из бд, при выходе надо удалить подписчиков*/
-                disposable = dataBaseTask
-                     .retrieveDataFolders()
-                     .subscribe( {
-                         folders ->
-                         val nameFolderList = arrayListOf<String>()
-                         for (folder in folders)
-                             nameFolderList.add(folder.name)
-                         listFolder.adapter = AdapterRecyclerViewFolder(context!!, nameFolderList)
-                     },
-        {
-                throwable->
-            throwable.printStackTrace()
-        })
+        disposable = dataBaseTask
+            .retrieveDataFolders()
+            .subscribe({ folders ->
+                val nameFolderList = arrayListOf<String>()
+                for (folder in folders)
+                    nameFolderList.add(folder.name)
+                listFolder.adapter = AdapterRecyclerView(context!!, nameFolderList)
+            },
+                { throwable ->
+                    throwable.printStackTrace()
+                })
 
     }
 
     @OnClick(R.id.addFolder)
     fun onClickFolderCreate() {
+
+        val dataBaseTask = DataBaseTask()
         val view = layoutInflater.inflate(R.layout.create_folder, null)
         MaterialAlertDialogBuilder(context)
             .setTitle("Добавить папку")
@@ -165,8 +157,8 @@ class GroupTask : Fragment(), NavigationView.OnNavigationItemSelectedListener,
                 transaction.addToBackStack(null)
                 transaction.commit()
             }
-            R.id.tasks->{
-                val windowTask : Fragment = WindowTask()
+            R.id.tasks -> {
+                val windowTask: Fragment = WindowTask()
                 val transaction: FragmentTransaction = fragmentManager!!.beginTransaction()
 
                 transaction.replace(R.id.linerLayout, windowTask)
@@ -220,13 +212,14 @@ class GroupTask : Fragment(), NavigationView.OnNavigationItemSelectedListener,
             /*выход пользователя из системы*/
             R.id.signOut -> {
                 disposable.dispose()
+                val mAuth = FirebaseAuth.getInstance()
                 mAuth.signOut()
                 val intent = Intent(activity!!.applicationContext, MainActivity::class.java)
                 //intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
                 startActivity(intent)
             }
         }
-        mDrawerLayout.closeDrawer(GravityCompat.START)
+        mDrawerLayout!!.closeDrawer(GravityCompat.START)
         return true
     }
 
@@ -237,7 +230,15 @@ class GroupTask : Fragment(), NavigationView.OnNavigationItemSelectedListener,
         p3: Long
     ) {
 
-        this.id = id
+        val idItem = id
 
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        mDrawerLayout!!.removeAllViews()
+        pageViewModel = null
+        if(!disposable.isDisposed)
+            disposable.dispose()
     }
 }

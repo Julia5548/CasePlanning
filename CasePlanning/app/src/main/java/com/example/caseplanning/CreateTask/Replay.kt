@@ -38,6 +38,7 @@ class Replay : Fragment() {
     }
 
     fun listReplay(view: View) {
+
         val listReplay = view.findViewById<ListView>(R.id.listViewReplay)
         val listReplayString = arrayListOf(
             "Понедельник",

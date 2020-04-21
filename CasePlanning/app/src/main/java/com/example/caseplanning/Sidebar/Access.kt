@@ -30,10 +30,7 @@ import io.reactivex.disposables.Disposable
 class Access: Fragment(), NavigationView.OnNavigationItemSelectedListener {
 
 
-    private lateinit var mAuth: FirebaseAuth
-    private lateinit var search: MaterialSearchView
     lateinit var disposable: Disposable
-    private val dataBaseTask = DataBaseTask()
     private lateinit var mDrawerLayout: DrawerLayout
 
 
@@ -52,10 +49,10 @@ class Access: Fragment(), NavigationView.OnNavigationItemSelectedListener {
 
         ButterKnife.bind(this, viewFragment)
 
-        mAuth = FirebaseAuth.getInstance()
+
 
         /*кнопка поиска*/
-        search = viewFragment.findViewById<MaterialSearchView>(R.id.search)
+       val search = viewFragment.findViewById<MaterialSearchView>(R.id.search)
         search.closeSearch()
 
         /*боковое меню*/
@@ -77,6 +74,8 @@ class Access: Fragment(), NavigationView.OnNavigationItemSelectedListener {
         mDrawerLayout.addDrawerListener(mToggle)
         /*проверяем состояние*/
         mToggle.syncState()
+
+        val dataBaseTask = DataBaseTask()
 
         disposable = dataBaseTask
             .retrieveDataUser()
@@ -181,6 +180,7 @@ class Access: Fragment(), NavigationView.OnNavigationItemSelectedListener {
             }
             /*выход пользователя из системы*/
             R.id.signOut -> {
+                val mAuth = FirebaseAuth.getInstance()
                 mAuth.signOut()
                 val intent = Intent(activity!!.applicationContext, MainActivity::class.java)
                 //intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
@@ -189,5 +189,11 @@ class Access: Fragment(), NavigationView.OnNavigationItemSelectedListener {
 
         }
         return true
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        if(!disposable.isDisposed)
+            disposable.dispose()
     }
 }

@@ -6,93 +6,88 @@
         xmlns:app="http://schemas.android.com/apk/res-auto"
         android:id="@+id/signUpMainLinerLayout"
         android:orientation="vertical">
+
     <androidx.appcompat.widget.Toolbar
             android:id="@+id/toolbarSignUp"
-            android:layout_marginBottom="50dp"
             style="@style/Toolbar"/>
+
     <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_gravity="center"
             android:orientation="vertical">
 
         <com.google.android.material.textfield.TextInputLayout
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginEnd="5dp"
                 android:layout_marginStart="5dp"
+                android:layout_marginEnd="5dp"
+                android:gravity="center"
                 android:textColorHint="@color/colorPrimary">
 
             <EditText
-                    android:layout_width="match_parent"
-                    android:layout_gravity="center"
                     android:id="@+id/editUserName"
-                    android:layout_height="wrap_content"
-                    android:hint="@string/username"
-                    android:layout_marginStart="20dp"
-                    android:layout_marginEnd="20dp"
-                    android:layout_marginBottom="2dp"
-
-                    android:ems="10"/>
-        </com.google.android.material.textfield.TextInputLayout>
-
-        <com.google.android.material.textfield.TextInputLayout
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="5dp"
-                android:layout_marginStart="5dp"
-                android:textColorHint="@color/colorPrimary">
-            <EditText
-                    android:id = "@+id/editEmail"
                     android:layout_width="match_parent"
-                    android:layout_gravity="center"
-                    android:hint="@string/email"
+                    android:layout_height="wrap_content"
                     android:layout_marginStart="20dp"
                     android:layout_marginEnd="20dp"
                     android:layout_marginBottom="2dp"
+                    android:ems="10"
 
-                    android:inputType="textEmailAddress"
-                    android:ems="25"
-                    android:layout_height="wrap_content"/>
+                    android:hint="@string/username" />
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginEnd="5dp"
                 android:layout_marginStart="5dp"
+                android:layout_marginEnd="5dp"
                 android:textColorHint="@color/colorPrimary">
+
+            <EditText
+                    android:id="@+id/editEmail"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="20dp"
+                    android:layout_marginEnd="20dp"
+                    android:layout_marginBottom="2dp"
+                    android:ems="25"
+                    android:hint="@string/email"
+                    android:inputType="textEmailAddress" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="5dp"
+                android:layout_marginEnd="5dp"
+                android:textColorHint="@color/colorPrimary">
+
             <EditText
 
                     android:id="@+id/editPassword"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_gravity="center"
                     android:layout_marginStart="20dp"
                     android:layout_marginEnd="20dp"
                     android:layout_marginBottom="2dp"
 
+                    android:ems="50"
                     android:hint="@string/password"
-                    android:inputType="textPassword"
-                    android:ems="50"/>
+                    android:inputType="textPassword" />
         </com.google.android.material.textfield.TextInputLayout>
 
-    </LinearLayout>
-    <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical">
         <Button
                 android:id="@+id/btn_link_signUp"
-                android:layout_width="fill_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/sign_up"
-                android:layout_marginEnd="100dp"
-                android:layout_marginStart="100dp"
+                android:layout_gravity="center"
                 android:background="@drawable/shape_button"
-                android:textColor="@color/textWhite"/>
+                android:text="@string/sign_up"
+                android:textColor="@color/textWhite" />
 
     </LinearLayout>
 </LinearLayout>
