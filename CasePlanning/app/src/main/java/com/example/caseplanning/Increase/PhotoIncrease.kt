@@ -58,11 +58,11 @@ class PhotoIncrease : Fragment() {
         return view
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
+    override fun onDestroyView() {
+        super.onDestroyView()
         pageViewModel = null
 
-        Log.d("Destroyy", "onDestroy")
+        Log.d("onDestroyView", "onDestroyView")
     }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

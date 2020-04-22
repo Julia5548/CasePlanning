@@ -14,6 +14,7 @@ data class Task (
     var replay : String = "",
     var photo: String ? = "",
     var audio: String ? = "",
+    var timeAudio : String? ="",
     var video: String ? = "",
     var comment: String ? = "",
     var timer:String ="",

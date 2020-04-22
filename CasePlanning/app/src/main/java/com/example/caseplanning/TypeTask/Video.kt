@@ -35,6 +35,7 @@ class Video : Fragment() {
     var pageViewModel: MyViewModel? = null
     var photoUri: String? = null
     var audioFile: String? = null
+    var timeAudio: String? = null
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -53,6 +54,7 @@ class Video : Fragment() {
                 outputUriFile = uri.videoUri
                 photoUri = uri.photoUri
                 audioFile = uri.audioUri
+                timeAudio = uri.timeAudio
             }
         })
 
@@ -108,7 +110,7 @@ class Video : Fragment() {
             videoFie!!.setVideoURI(outputUriFile)
             videoFie!!.seekTo(1)
             pageViewModel!!.uri.value =
-                UriTypeTask(videoUri = outputUriFile, photoUri = photoUri, audioUri = audioFile)
+                UriTypeTask(videoUri = outputUriFile, photoUri = photoUri, audioUri = audioFile, timeAudio = timeAudio)
         } else {
             Log.d("Ошибка", "Не удалось сохранить видео")
         }
@@ -144,14 +146,15 @@ class Video : Fragment() {
 
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
+    override fun onDestroyView() {
+        super.onDestroyView()
 
         pageViewModel = null
         videoFie?.setVideoURI(null)
         outputUriFile = null
         audioFile = null
         photoUri = null
+        timeAudio = null
 
     }
 }

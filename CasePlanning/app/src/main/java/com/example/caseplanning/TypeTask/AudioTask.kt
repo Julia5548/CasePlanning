@@ -6,13 +6,16 @@ import android.graphics.Bitmap
 import android.media.MediaPlayer
 import android.media.MediaRecorder
 import android.net.Uri
+import android.opengl.Visibility
 import android.os.Build
 import android.os.Bundle
 import android.os.Environment
+import android.os.SystemClock
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Chronometer
 import android.widget.ImageButton
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
@@ -35,10 +38,13 @@ class AudioTask : Fragment() {
     private var mediaPlayer: MediaPlayer? = null
     private lateinit var fileName: String
     val PERMISSION_CODE = 1000
-    var videoUri : Uri? = null
-    var photoUri : String? = null
+    var videoUri: Uri? = null
+    var photoUri: String? = null
+     var chronometer: Chronometer? = null
+    var timeAudio: String? = null
+    var audioFile : String? = null
 
-    private lateinit var pageViewModel :MyViewModel
+    private var pageViewModel: MyViewModel? = null
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -49,15 +55,30 @@ class AudioTask : Fragment() {
 
         ButterKnife.bind(this, view)
 
-        fileName = "${Environment.getExternalStorageDirectory().absolutePath}/record.mp3"
+        chronometer = view!!.findViewById<Chronometer>(R.id.timerText)
 
-        pageViewModel.uri.observe(requireActivity(), Observer {
-                uri->
-            if(uri != null) {
+
+        fileName =
+            "${Environment.getExternalStorageDirectory().absolutePath}/${System.currentTimeMillis()}record.mp3"
+
+        pageViewModel!!.uri.observe(requireActivity(), Observer { uri ->
+            if (uri != null) {
                 videoUri = uri.videoUri
                 photoUri = uri.photoUri
+                timeAudio = uri.timeAudio
+                audioFile = uri.audioUri!!
             }
         })
+
+        if(audioFile != null){
+            val playAndStopRecord = view.findViewById<ImageButton>(R.id.playRecordAndStopRecord)
+
+            val playAndStopAudio = view.findViewById<ImageButton>(R.id.playAndStopAudio)
+            playAndStopRecord.visibility = ImageButton.GONE
+            playAndStopAudio.visibility = ImageButton.VISIBLE
+
+            fileName = audioFile!!
+        }
 
         return view
     }
@@ -67,25 +88,32 @@ class AudioTask : Fragment() {
         pageViewModel = ViewModelProviders.of(requireActivity()).get(MyViewModel::class.java)
 
     }
+
     /*запись и остановка аудио*/
     @OnClick(R.id.playRecordAndStopRecord)
     fun onClickStartRecording() {
 
-        pageViewModel.uri.value = UriTypeTask(audioUri = fileName, photoUri = photoUri, videoUri = videoUri)
-
         val playAndStopRecord = view!!.findViewById<ImageButton>(R.id.playRecordAndStopRecord)
 
+        val playAndStopAudio = view!!.findViewById<ImageButton>(R.id.playAndStopAudio)
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (ContextCompat.checkSelfPermission(requireActivity(), Manifest.permission.RECORD_AUDIO)
+            if (ContextCompat.checkSelfPermission(
+                    requireActivity(),
+                    Manifest.permission.RECORD_AUDIO
+                )
                 != PackageManager.PERMISSION_GRANTED ||
-                ContextCompat.checkSelfPermission(requireActivity(),Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                ContextCompat.checkSelfPermission(
+                    requireActivity(),
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE
+                )
                 != PackageManager.PERMISSION_GRANTED
             ) {
                 val permission: Array<String> = arrayOf(
                     Manifest.permission.RECORD_AUDIO,
                     Manifest.permission.WRITE_EXTERNAL_STORAGE
                 )
-                ActivityCompat.requestPermissions(requireActivity(),permission, 0)
+                ActivityCompat.requestPermissions(requireActivity(), permission, 0)
             } else {
                 if (playAndStopRecord.tag == null) {
                     playAndStopRecord.tag = 1
@@ -93,8 +121,8 @@ class AudioTask : Fragment() {
                     startRecording()
                 } else if (playAndStopRecord.tag == 1) {
                     stopRecording()
-                    playAndStopRecord.setImageResource(R.drawable.ic_mic_black_24dp)
-                    playAndStopRecord.tag = null
+                    playAndStopRecord.visibility = ImageButton.GONE
+                    playAndStopAudio.visibility = ImageButton.VISIBLE
                 }
             }
         } else {
@@ -105,9 +133,11 @@ class AudioTask : Fragment() {
                 startRecording()
             } else if (playAndStopRecord.tag == 1) {
                 stopRecording()
-                playAndStopRecord.setImageResource(R.drawable.ic_mic_black_24dp)
+                playAndStopRecord.visibility = ImageButton.GONE
+                playAndStopAudio.visibility = ImageButton.VISIBLE
             }
         }
+
     }
 
     /*запись аудио записи*/
@@ -125,6 +155,8 @@ class AudioTask : Fragment() {
             mediaRecorder!!.setOutputFile(fileName)
             mediaRecorder!!.prepare()
             mediaRecorder!!.start()
+            chronometer!!.base = SystemClock.elapsedRealtime()
+            chronometer!!.start()
         } catch (e: Exception) {
             e.printStackTrace()
         }
@@ -136,11 +168,16 @@ class AudioTask : Fragment() {
             mediaRecorder = null
         }
     }
-            /*остановка записи аудио*/
+
+    /*остановка записи аудио*/
     fun stopRecording() {
         if (mediaRecorder != null) {
             mediaRecorder!!.stop()
-
+            chronometer!!.stop()
+            timeAudio = chronometer!!.text.toString()
+            chronometer!!.base = SystemClock.elapsedRealtime()
+            pageViewModel!!.uri.value =
+                UriTypeTask(audioUri = fileName, photoUri = photoUri, videoUri = videoUri, timeAudio = timeAudio)
         } else {
             Log.d("Tag", "Audio stop is not possible")
         }
@@ -159,13 +196,32 @@ class AudioTask : Fragment() {
                 mediaPlayer!!.setDataSource(fileName)
                 mediaPlayer!!.prepare()
                 mediaPlayer!!.start()
+                chronometer!!.base = SystemClock.elapsedRealtime()
+                chronometer!!.start()
                 playAndStopAudio.setImageResource(R.drawable.ic_stop_black_24dp)
                 playAndStopAudio.tag = 1
-            }else if (playAndStopAudio.tag == 1){
+
+                chronometer!!.setOnChronometerTickListener {
+                    chronometer ->
+                    if (timeAudio != null) {
+                        if (chronometer.text.toString() == timeAudio) {
+                            chronometer.stop()
+                            timeAudio = null
+                            stopPlayAudio()
+                            playAndStopAudio.setImageResource(R.drawable.ic_play_arrow_black_24dp)
+                            playAndStopAudio.tag = null
+                        }
+                    }
+                }
+
+            } else if (playAndStopAudio.tag == 1) {
                 stopPlayAudio()
+                chronometer!!.stop()
+                chronometer!!.base = SystemClock.elapsedRealtime()
                 playAndStopAudio.setImageResource(R.drawable.ic_play_arrow_black_24dp)
                 playAndStopAudio.tag = null
             }
+
         } catch (e: Exception) {
             e.printStackTrace()
         }
@@ -184,6 +240,10 @@ class AudioTask : Fragment() {
 
         if (mediaPlayer != null)
             mediaPlayer!!.stop()
+
+        if(timeAudio == null){
+            chronometer!!.base = SystemClock.elapsedRealtime()
+        }
 
     }
 
@@ -204,6 +264,19 @@ class AudioTask : Fragment() {
                 }
             }
         }
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        mediaRecorder = null
+        mediaPlayer = null
+        videoUri = null
+        photoUri = null
+        pageViewModel = null
+        timeAudio = null
+        chronometer = null
+
+
     }
 
 }

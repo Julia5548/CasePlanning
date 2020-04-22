@@ -53,6 +53,7 @@ class Photo : Fragment() {
     var videoUri: Uri? = null
     val BYTES_PER_PX = 4.0f
     var audioFile: String? = null
+    var timeAudio: String? = null
     private var mCurrentFile: String? = null
     private var mPhotoFile: File? = null
     private var photoUri: Uri? = null
@@ -74,6 +75,7 @@ class Photo : Fragment() {
                 mCurrentFile = uri.photoUri
                 videoUri = uri.videoUri
                 audioFile = uri.audioUri
+                timeAudio = uri.timeAudio
             }
         })
 
@@ -152,7 +154,7 @@ class Photo : Fragment() {
             photo_image = view!!.findViewById<ImageButton>(R.id.photoImage)
 
             pageViewModel!!.uri.value =
-                UriTypeTask(photoUri = mCurrentFile, videoUri = videoUri, audioUri = audioFile)
+                UriTypeTask(photoUri = mCurrentFile, videoUri = videoUri, audioUri = audioFile, timeAudio = timeAudio)
 
             loadPhotoinGallery()
             loadPhoto()
@@ -228,8 +230,8 @@ class Photo : Fragment() {
 
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
+    override fun onDestroyView() {
+        super.onDestroyView()
         pageViewModel = null
         photo_image?.setImageBitmap(null)
         mBitmap = null
@@ -237,6 +239,7 @@ class Photo : Fragment() {
         mPhotoFile = null
         photoUri = null
         videoUri = null
+        timeAudio = null
     }
 
     private fun loadPhoto() {

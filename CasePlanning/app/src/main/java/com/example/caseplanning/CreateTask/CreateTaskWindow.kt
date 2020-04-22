@@ -33,8 +33,8 @@ import kotlinx.android.synthetic.main.to_do.*
 
 class CreateTaskWindow : Fragment() {
 
-    var listSubTask : ArrayList<String>? = arrayListOf<String>()
-    var listSubTasksView: ArrayList<View>? = arrayListOf<View>()
+    var listSubTask: ArrayList<String>? = null
+    var listSubTasksView: ArrayList<View>? = null
     private var pageViewModel: MyViewModel? = null
     var textPeriod = ""
     var colorName = ""
@@ -58,6 +58,9 @@ class CreateTaskWindow : Fragment() {
 
         val actionBar: ActionBar? = activity.supportActionBar
         actionBar!!.title = "Создать"
+
+        listSubTask = arrayListOf()
+        listSubTasksView = arrayListOf()
 
         ButterKnife.bind(this, viewFragment)
 
@@ -87,6 +90,7 @@ class CreateTaskWindow : Fragment() {
                 task = Task(
                     name = tasks.name,
                     period = tasks.period,
+                    replay = tasks.replay,
                     photo = tasks.photo,
                     video = tasks.video,
                     audio = tasks.audio,
@@ -187,6 +191,11 @@ class CreateTaskWindow : Fragment() {
                     radioButtonOnceAnytime.isChecked = true
             }
 
+            if (arguments != null) {
+                textReplay.text = arguments!!.getString("Replay")
+            } else {
+                textReplay.text = task!!.replay
+            }
 
             for (subTask in task!!.listSubTasks!!) {
                 listSubTask!!.add(subTask)
@@ -196,9 +205,6 @@ class CreateTaskWindow : Fragment() {
             }
         }
 
-        if (arguments != null) {
-            textReplay.text = arguments!!.getString("Replay")
-        }
     }
 
     @SuppressLint("SetTextI18n")
@@ -395,7 +401,9 @@ class CreateTaskWindow : Fragment() {
                 editTextSubTasks.setText(subTask)
 
                 if (relativeLayoutSubTasks.parent != null) {
-                    (relativeLayoutSubTasks.parent as ViewGroup).removeView(relativeLayoutSubTasks)
+                    (relativeLayoutSubTasks.parent as ViewGroup).removeView(
+                        relativeLayoutSubTasks
+                    )
                 }
 
                 btnDeleted = viewFr.findViewById<ImageButton>(R.id.btnDeleted)
@@ -431,11 +439,8 @@ class CreateTaskWindow : Fragment() {
                     btnOkSubTasks!!
                 )
             }
-
-
             val btnAddSubTask = view!!.findViewById<TextView>(R.id.addSubTasks)
             btnAddSubTask.isEnabled = false
-
         }
 
         Log.d("Size", "${listSubTasksView!!.size}")
@@ -570,6 +575,7 @@ class CreateTaskWindow : Fragment() {
         var photoUri: String? = null
         var videoUri: Uri? = null
         var audioUri: String? = null
+        var timeAudio: String? = null
 
         pageViewModel!!.uri.observe(requireActivity(), Observer { uri ->
 
@@ -577,6 +583,8 @@ class CreateTaskWindow : Fragment() {
                 photoUri = uri.photoUri
                 videoUri = uri.videoUri
                 audioUri = uri.audioUri
+                timeAudio = uri.timeAudio
+
             }
         })
 
@@ -613,6 +621,7 @@ class CreateTaskWindow : Fragment() {
             comment = comment.text.toString(),
             listSubTasks = listSubTask!!,
             audio = audioUri,
+            timeAudio = timeAudio,
             video = videoUri.toString(),
             photo = photoUri
         )
@@ -627,17 +636,6 @@ class CreateTaskWindow : Fragment() {
         Log.d("OnPAUSE", "onPause")
     }
 
-    override fun onStop() {
-        super.onStop()
-
-        listSubTask = null
-        listSubTasksView = null
-        btnDeleted = null
-        btnOkSubTasks = null
-        pageViewModel = null
-
-        Log.d("onStop", "onStop")
-    }
     override fun onDestroy() {
         super.onDestroy()
         listSubTask = null

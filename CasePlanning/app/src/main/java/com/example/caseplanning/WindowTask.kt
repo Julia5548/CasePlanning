@@ -393,8 +393,8 @@ class WindowTask : Fragment(), NavigationView.OnNavigationItemSelectedListener{
     }
 
 
-    override fun onDestroy() {
-        super.onDestroy()
+    override fun onDestroyView() {
+        super.onDestroyView()
         if (!disposable.isDisposed)
             disposable.dispose()
         mToggle = null
