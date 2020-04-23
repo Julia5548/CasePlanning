@@ -14,10 +14,9 @@
             card_view:cardCornerRadius="2dp"
             card_view:contentPadding="10dp">
 
-        <LinearLayout
+        <RelativeLayout
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:orientation="horizontal">
+                android:layout_height="match_parent">
 
 
             <TextView
@@ -25,7 +24,18 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="5dp" />
-        </LinearLayout>
+
+            <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="&#8942;"
+                    android:textColor="#FF5374"
+                    android:id="@+id/txtOptionDigit"
+                    android:padding="7dp"
+                    android:textSize="35sp"
+                    android:layout_alignParentTop="true"
+                    android:layout_alignParentEnd="true" />
+        </RelativeLayout>
 
     </com.google.android.material.card.MaterialCardView>
 

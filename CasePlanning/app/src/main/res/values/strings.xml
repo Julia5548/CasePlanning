@@ -51,4 +51,6 @@
     <string name="tasks">Задачи</string>
     <string name="comment">Комментарий</string>
     <string name="time">Время</string>
+    <string name="delete">Удалить</string>
+    <string name="tomorrow">Завтра</string>
 </resources>

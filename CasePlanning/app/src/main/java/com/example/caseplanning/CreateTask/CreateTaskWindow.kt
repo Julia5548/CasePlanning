@@ -37,7 +37,7 @@ class CreateTaskWindow : Fragment() {
     var listSubTasksView: ArrayList<View>? = null
     private var pageViewModel: MyViewModel? = null
     var textPeriod = ""
-    var colorName = ""
+    var colorName = "textBlack"
     private var btnDeleted: ImageButton? = null
     private var btnOkSubTasks: ImageButton? = null
 

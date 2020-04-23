@@ -8,10 +8,12 @@ import android.widget.TextView
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
+import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentTransaction
 import androidx.lifecycle.ViewModelProviders
+import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import butterknife.ButterKnife
@@ -23,6 +25,7 @@ import com.example.caseplanning.DataBase.Task
 import com.example.caseplanning.Sidebar.*
 import com.example.caseplanning.adapter.AdapterSection
 import com.example.caseplanning.adapter.SectionHeader
+import com.example.caseplanning.adapter.SwipeController
 import com.google.android.material.navigation.NavigationView
 import com.google.firebase.auth.FirebaseAuth
 import com.miguelcatalan.materialsearchview.MaterialSearchView
@@ -238,7 +241,6 @@ class WindowTask : Fragment(), NavigationView.OnNavigationItemSelectedListener{
                     sections.add(SectionHeader(stringListDay, "День"))
 
                 listTasks.adapter = AdapterSection(context!!, sections)
-
             },
         {
                 throwable->
@@ -377,6 +379,7 @@ class WindowTask : Fragment(), NavigationView.OnNavigationItemSelectedListener{
                 startActivity(intent)
             }
         }
+        mDrawerLayout!!.closeDrawer(GravityCompat.START)
         return true
     }
 
@@ -388,6 +391,7 @@ class WindowTask : Fragment(), NavigationView.OnNavigationItemSelectedListener{
          mToggle = null
          search!!.removeAllViews()
          search = null
+         mDrawerLayout!!.closeDrawer(GravityCompat.START)
          mDrawerLayout = null
          Log.d("onStop", "onStop")
     }
@@ -399,6 +403,7 @@ class WindowTask : Fragment(), NavigationView.OnNavigationItemSelectedListener{
             disposable.dispose()
         mToggle = null
         search = null
+        mDrawerLayout?.closeDrawer(GravityCompat.START)
         mDrawerLayout = null
     }
 
