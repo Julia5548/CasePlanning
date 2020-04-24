@@ -1,6 +1,8 @@
 package com.example.caseplanning.DataBase
 
+import android.util.Log
 import com.androidhuman.rxfirebase2.database.RxFirebaseDatabase
+import com.androidhuman.rxfirebase2.database.dataChanges
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.database.*
@@ -13,56 +15,73 @@ class DataBaseTask {
 
     /*чтение данных из бд*/
 
-    private fun readData() : Observable<List<Task>> {
+    private fun readData(): Observable<List<Task>> {
 
-        val databaseReference = FirebaseDatabase.getInstance().reference.child(FirebaseAuth.getInstance().currentUser!!.uid).child("Tasks")
+        val databaseReference =
+            FirebaseDatabase.getInstance().reference.child(FirebaseAuth.getInstance().currentUser!!.uid)
+                .child("Tasks")
         /*подключаем класс подписки, оформляем подписчика */
-        return object: Observable<List<Task>>() {
+        return object : Observable<List<Task>>() {
             override fun subscribeActual(observer: Observer<in List<Task>>?) {
                 /*подкллючаем RxFirebaseDatabase подключаем изменения данных и подписчиков,
                 получаем данные из данных*/
                 val disposal = RxFirebaseDatabase
                     .dataChanges(databaseReference)
                     .subscribe(fun(dataSnapshot: DataSnapshot) {
-                        val listTaskGenerate: GenericTypeIndicator<HashMap<String,Task>> =
-                            object : GenericTypeIndicator<HashMap<String,Task>>() {}
+                        val listTaskGenerate: GenericTypeIndicator<HashMap<String, Task>> =
+                            object : GenericTypeIndicator<HashMap<String, Task>>() {}
                         val tasks = arrayListOf<Task>()
                         if (dataSnapshot.exists()) {
                             val table = dataSnapshot.getValue(listTaskGenerate)
                             if (table != null) {
                                 for (task in table) {
-                                    tasks.add(Task(name = task.value.name, replay = task.value.replay, period = task.value.period, day = task.value.day))
+                                    tasks.add(
+                                        Task(
+                                            name = task.value.name,
+                                            listSubTasks = task.value.listSubTasks,
+                                            photo = task.value.photo,
+                                            audio = task.value.audio,
+                                            timeAudio = task.value.timeAudio,
+                                            video = task.value.video,
+                                            comment = task.value.comment,
+                                            timer = task.value.timer,
+                                            notification = task.value.notification,
+                                            color = task.value.color,
+                                            replay = task.value.replay,
+                                            period = task.value.period,
+                                            day = task.value.day,
+                                            idTasks = task.key
+                                        )
+                                    )
                                 }
                             }
                         }
 /*получаем очередной список*/
                         observer!!.onNext(tasks)
                     },
-                        {
-                                throwable->
+                        { throwable ->
                             throwable.printStackTrace()
                         })
             }
         }
     }
 
-    fun readUid() : Observable<List<UID>>{
-        return object : Observable<List<UID>>(){
+    fun readUid(): Observable<List<UID>> {
+        return object : Observable<List<UID>>() {
             override fun subscribeActual(observer: Observer<in List<UID>>?) {
                 val disposal = RxFirebaseDatabase
                     .dataChanges(FirebaseDatabase.getInstance().reference)
-                    .subscribe(fun (dataSnapshot : DataSnapshot){
+                    .subscribe(fun(dataSnapshot: DataSnapshot) {
                         val uids = arrayListOf<UID>()
                         if (dataSnapshot.exists()) {
-                            for (uid in dataSnapshot.children){
+                            for (uid in dataSnapshot.children) {
                                 val uid_user = uid.key
-                                uids.add(UID(id=uid_user))
-                                }
+                                uids.add(UID(id = uid_user))
                             }
-                            observer!!.onNext(uids)
+                        }
+                        observer!!.onNext(uids)
                     },
-                        {
-                                throwable->
+                        { throwable ->
                             throwable.printStackTrace()
                         })
 
@@ -70,59 +89,62 @@ class DataBaseTask {
         }
     }
 
-    fun readUser() : Observable<Users>{
-        val databaseReference = FirebaseDatabase.getInstance().reference.child(FirebaseAuth.getInstance().currentUser!!.uid).child("Users")
+    fun readUser(): Observable<Users> {
+        val databaseReference =
+            FirebaseDatabase.getInstance().reference.child(FirebaseAuth.getInstance().currentUser!!.uid)
+                .child("Users")
         /*подключаем класс подписки, оформляем подписчика */
-        return object: Observable<Users>() {
+        return object : Observable<Users>() {
             override fun subscribeActual(observer: Observer<in Users>?) {
                 /*подкллючаем RxFirebaseDatabase подключаем изменения данных и подписчиков,
                 получаем данные из данных*/
                 val disposal = RxFirebaseDatabase
                     .dataChanges(databaseReference)
                     .subscribe(fun(dataSnapshot: DataSnapshot) {
-                        var users  = Users()
+                        var users = Users()
                         if (dataSnapshot.exists()) {
                             users = dataSnapshot.getValue(Users::class.java)!!
-                            }
+                        }
 /*получаем очередной список*/
                         observer!!.onNext(users)
                     },
-                        {
-                                throwable->
+                        { throwable ->
                             throwable.printStackTrace()
                         })
             }
         }
     }
 
-    private fun readFolder() : Observable<List<Folder>>{
+    private fun readFolder(): Observable<List<Folder>> {
 
-        val databaseReference = FirebaseDatabase.getInstance().reference.child(FirebaseAuth.getInstance().currentUser!!.uid).child("Folders")
-        return object : Observable<List<Folder>>(){
+        val databaseReference =
+            FirebaseDatabase.getInstance().reference.child(FirebaseAuth.getInstance().currentUser!!.uid)
+                .child("Folders")
+        return object : Observable<List<Folder>>() {
             override fun subscribeActual(observer: Observer<in List<Folder>>?) {
-             val disposal = RxFirebaseDatabase
-                 .dataChanges(databaseReference)
-                 .subscribe(fun (dataSnapshot : DataSnapshot){
-                     val genericList = object:GenericTypeIndicator<HashMap<String,Folder>>(){}
-                     val folders = arrayListOf<Folder>()
-                     if(dataSnapshot.exists()){
-                         val table = dataSnapshot.getValue(genericList)
-                         for ((_, value) in table!!){
-                             folders.add(value)
-                         }
-                     }
-                     observer!!.onNext(folders)
-                 },
-                     {
-                             throwable->
-                         throwable.printStackTrace()
-                     })
+                val disposal = RxFirebaseDatabase
+                    .dataChanges(databaseReference)
+                    .subscribe(fun(dataSnapshot: DataSnapshot) {
+                        val genericList =
+                            object : GenericTypeIndicator<HashMap<String, Folder>>() {}
+                        val folders = arrayListOf<Folder>()
+                        if (dataSnapshot.exists()) {
+                            val table = dataSnapshot.getValue(genericList)
+                            for ((_, value) in table!!) {
+                                folders.add(value)
+                            }
+                        }
+                        observer!!.onNext(folders)
+                    },
+                        { throwable ->
+                            throwable.printStackTrace()
+                        })
             }
         }
     }
 
-    fun createUser(name:String?, email:String?){
-        val  users = Users(name = name, email = email)
+    fun createUser(name: String?, email: String?) {
+        val users = Users(name = name, email = email)
         FirebaseDatabase
             .getInstance()
             .reference
@@ -131,7 +153,7 @@ class DataBaseTask {
             .setValue(users)
     }
 
-    fun createTask(task:Task) {
+    fun createTask(task: Task) {
 
         FirebaseDatabase
             .getInstance()
@@ -142,7 +164,7 @@ class DataBaseTask {
             .setValue(task)
     }
 
-    fun createFolder(folder : Folder){
+    fun createFolder(folder: Folder) {
         FirebaseDatabase
             .getInstance()
             .reference
@@ -152,22 +174,42 @@ class DataBaseTask {
             .setValue(folder)
     }
 
-    fun retrieveData() : Observable<List<Task>> {
+    fun updateDataTask(task: Task, key: String) {
+        val databaseReference = FirebaseDatabase
+            .getInstance()
+            .reference
+            .child(FirebaseAuth.getInstance().currentUser!!.uid)
+            .child("Tasks")
+            .child(key)
+            .setValue(task)
+    }
+
+    fun deletedDataTask(key: String){
+        val databaseReference = FirebaseDatabase
+            .getInstance()
+            .reference
+            .child(FirebaseAuth.getInstance().currentUser!!.uid)
+            .child("Tasks")
+            .child(key)
+            .removeValue()
+    }
+
+    fun retrieveData(): Observable<List<Task>> {
 
         return readData()
     }
 
-    fun retrieveDataUser() : Observable<Users> {
+    fun retrieveDataUser(): Observable<Users> {
 
         return readUser()
     }
 
-    fun retrieveDataUid() : Observable<List<UID>> {
+    fun retrieveDataUid(): Observable<List<UID>> {
 
-        return  readUid()
+        return readUid()
     }
 
-    fun retrieveDataFolders() : Observable<List<Folder>>{
+    fun retrieveDataFolders(): Observable<List<Folder>> {
 
         return readFolder()
     }

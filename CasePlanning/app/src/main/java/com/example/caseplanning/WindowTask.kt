@@ -13,7 +13,6 @@ import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentTransaction
 import androidx.lifecycle.ViewModelProviders
-import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import butterknife.ButterKnife
@@ -25,10 +24,10 @@ import com.example.caseplanning.DataBase.Task
 import com.example.caseplanning.Sidebar.*
 import com.example.caseplanning.adapter.AdapterSection
 import com.example.caseplanning.adapter.SectionHeader
-import com.example.caseplanning.adapter.SwipeController
 import com.google.android.material.navigation.NavigationView
 import com.google.firebase.auth.FirebaseAuth
 import com.miguelcatalan.materialsearchview.MaterialSearchView
+import com.shrikanthravi.collapsiblecalendarview.data.Day
 import com.shrikanthravi.collapsiblecalendarview.widget.CollapsibleCalendar
 import io.reactivex.disposables.Disposable
 
@@ -100,47 +99,6 @@ class WindowTask : Fragment(), NavigationView.OnNavigationItemSelectedListener{
                     throwable.printStackTrace()
                 })
 
-
-     /*   val email_find = "negodyaeva.yulya@gmail.com"
-        val list1 = arrayListOf<String>()
-         disposable = dataBaseTask
-            .retrieveDataUid()
-            .subscribe ({ uids ->
-                for (uid in uids) {
-                    list1.add(uid.id!!)
-                }
-                for (uid_user in list1) {
-                    FirebaseDatabase.getInstance()
-                        .reference
-                        .child(uid_user)
-                        .child("Users")
-                        .addListenerForSingleValueEvent(object : ValueEventListener {
-                            override fun onCancelled(p0: DatabaseError) {
-                                Log.d("Error", "Error trying to get classified ads for")
-                            }
-
-                            override fun onDataChange(dataSnapshot: DataSnapshot) {
-                                if (dataSnapshot.exists()) {
-                                    val user = dataSnapshot.getValue(Users::class.java)
-                                    if (email_find == user!!.email) {
-                                        Log.d("эта хрень", "существует")
-                                    } else {
-                                        Log.d("эта хрень", "no существует")
-                                    }
-
-                                } else {
-                                    Log.d("ошибка", "пользователя не существует")
-                                }
-                            }
-                        })
-                }
-
-            },
-                {
-                    throwable->
-                    throwable.printStackTrace()
-                })*/
-
         calendar(viewFragment)
 
         return viewFragment
@@ -152,15 +110,15 @@ class WindowTask : Fragment(), NavigationView.OnNavigationItemSelectedListener{
         pageViewModel = ViewModelProviders.of(requireActivity()).get(MyViewModel::class.java)
     }
 
-    private fun calendar(view:View) {
+    open fun calendar(view:View) {
 
         val calendarView: CollapsibleCalendar = view.findViewById(R.id.linearLayoutCalendar)
-        val day = calendarView.selectedDay
+        var day = calendarView.selectedDay
 
         val date = "${day!!.day}.${day.month}.${day.year}"
         listTask(view, date)
 
-        pageViewModel.day.value = com.example.caseplanning.DataBase.Day(day = day.day.toString(), month = day.month.toString(), year = day.year.toString())
+        pageViewModel.day.value = date
 
         calendarView.setCalendarListener(object : CollapsibleCalendar.CalendarListener {
             override fun onClickListener() {
@@ -173,11 +131,11 @@ class WindowTask : Fragment(), NavigationView.OnNavigationItemSelectedListener{
             }
 
             override fun onDaySelect() {
-                val day = calendarView.selectedDay
+                 day = calendarView.selectedDay
 
-                val date = "${day!!.day}.${day.month+1}.${day.year}"
+                val date = "${day!!.day}.${day!!.month+1}.${day!!.year}"
                 listTask(view, date)
-
+                pageViewModel.day.value = date
             }
 
             override fun onItemClick(v: View) {
@@ -191,9 +149,10 @@ class WindowTask : Fragment(), NavigationView.OnNavigationItemSelectedListener{
 
         })
 
+
     }
 
-    private fun listTask(viewFragment: View, day: String) {
+    private fun listTask(viewFragment: View, date: String) {
 
 
        val listTasks = viewFragment.findViewById<RecyclerView>(R.id.listViewTask)
@@ -217,13 +176,13 @@ class WindowTask : Fragment(), NavigationView.OnNavigationItemSelectedListener{
                 val stringList = arrayListOf<Task>()
 
                 for (tasks in task) {
-                    if (day == tasks.day) {
+                    if (date == tasks.day) {
                         when (tasks.period) {
-                            "Утро" -> stringListMorning.add(Task(name = tasks.name!!))
-                            "День" -> stringListDay.add(Task(name = tasks.name!!))
-                            "Вечер" -> stringListEvening.add(Task(name = tasks.name!!))
-                            "Один раз в любое время" -> stringList.add(Task(name = tasks.name!!))
-                            else -> stringList.add(Task(name = tasks.name!!))
+                            "Утро" -> stringListMorning.add(Task(name = tasks.name!!, day = tasks.day))
+                            "День" -> stringListDay.add(Task(name = tasks.name!!, day = tasks.day))
+                            "Вечер" -> stringListEvening.add(Task(name = tasks.name!!, day = tasks.day))
+                            "Один раз в любое время" -> stringList.add(Task(name = tasks.name!!, day = tasks.day))
+                            else -> stringList.add(Task(name = tasks.name!!, day = tasks.day))
                         }
                     }
                 }
@@ -240,7 +199,7 @@ class WindowTask : Fragment(), NavigationView.OnNavigationItemSelectedListener{
                 if(stringListDay.isNotEmpty())
                     sections.add(SectionHeader(stringListDay, "День"))
 
-                listTasks.adapter = AdapterSection(context!!, sections)
+                listTasks.adapter = AdapterSection(context!!, sections, date)
             },
         {
                 throwable->
@@ -389,9 +348,8 @@ class WindowTask : Fragment(), NavigationView.OnNavigationItemSelectedListener{
          if (!disposable.isDisposed)
              disposable.dispose()
          mToggle = null
-         search!!.removeAllViews()
          search = null
-         mDrawerLayout!!.closeDrawer(GravityCompat.START)
+         mDrawerLayout?.closeDrawer(GravityCompat.START)
          mDrawerLayout = null
          Log.d("onStop", "onStop")
     }

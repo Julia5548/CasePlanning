@@ -2,8 +2,6 @@ package com.example.caseplanning.CreateTask
 
 import android.annotation.SuppressLint
 import android.content.Intent
-import android.graphics.Bitmap
-import android.graphics.Color
 import android.graphics.PorterDuff
 import android.net.Uri
 import android.os.Build
@@ -29,7 +27,6 @@ import com.example.caseplanning.MainWindowCasePlanning
 import com.example.caseplanning.R
 import com.example.caseplanning.TypeTask.*
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import kotlinx.android.synthetic.main.to_do.*
 
 class CreateTaskWindow : Fragment() {
 
@@ -65,9 +62,10 @@ class CreateTaskWindow : Fragment() {
         ButterKnife.bind(this, viewFragment)
 
         val date = viewFragment.findViewById<TextView>(R.id.setupData)
-        pageViewModel!!.day.observe(requireActivity(), Observer { day ->
-            if (day != null)
-                date.text = "${day.day}.${day.month}.${day.year}"
+        pageViewModel!!.day.observe(this, Observer { day ->
+            if (day != null) {
+                date.text = day
+            }
         })
 
         return viewFragment
@@ -354,12 +352,34 @@ class CreateTaskWindow : Fragment() {
     @OnClick(R.id.textChoose)
     fun onClickChooseReplay() {
 
-        val replay = Replay()
-        val transaction: FragmentTransaction = fragmentManager!!.beginTransaction()
+        val textReplay = view!!.findViewById<TextView>(R.id.textChoose)
+        val view = layoutInflater.inflate(R.layout.replay, null)
+        val replayList = view.findViewById<ListView>(R.id.listViewReplay)
+        val replay = arrayListOf<String>(
+            "Понедельник",
+            "Вторник",
+            "Среда",
+            "Четверг",
+            "Пятница",
+            "Суббота",
+            "Воскресенье"
+        )
+        replayList.adapter =
+            ArrayAdapter<String>(context!!, android.R.layout.simple_list_item_1, replay)
 
-        transaction.replace(R.id.linerLayout, replay)
-        transaction.addToBackStack(null)
-        transaction.commit()
+        val materialAlertDialogBuilder = MaterialAlertDialogBuilder(context)
+            .setTitle("Выберите день недели")
+            .setView(view)
+            .setNegativeButton("Отмена") { dialogInterface, id ->
+                dialogInterface.dismiss()
+            }
+            .show()
+
+        replayList.setOnItemClickListener { adapterView, view, position, id ->
+
+            textReplay.text = replayList.getItemAtPosition(position).toString()
+            materialAlertDialogBuilder.dismiss()
+        }
     }
 
     /*динамическое добавление подзадач*/

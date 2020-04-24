@@ -6,6 +6,7 @@ import kotlin.collections.ArrayList
 
 @IgnoreExtraProperties
 data class Task (
+    var idTasks : String? = "",
     var name: String? = "",
     var color: String ? = "",
     var day: String ? = "",
