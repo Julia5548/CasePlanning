@@ -7,31 +7,28 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.FrameLayout
-import android.widget.PopupMenu
-import android.widget.TextView
-import android.widget.Toast
+import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.cardview.widget.CardView
+import androidx.core.net.toUri
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProviders
+import androidx.fragment.app.FragmentManager
+import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.example.caseplanning.CreateTask.MyViewModel
 import com.example.caseplanning.DataBase.DataBaseTask
 import com.example.caseplanning.DataBase.Task
 import com.example.caseplanning.EditElements.EditTask
+import com.example.caseplanning.EditElements.PhotoEdit
 import com.example.caseplanning.R
-import com.example.caseplanning.WindowTask
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.example.caseplanning.mainWindow.FragmentDialog
 import com.intrusoft.sectionedrecyclerview.SectionRecyclerViewAdapter
-import com.shrikanthravi.collapsiblecalendarview.data.Day
 import io.reactivex.disposables.Disposable
 import java.lang.Exception
 import java.util.*
 import kotlin.collections.ArrayList
 
 
-class AdapterSection(val context: Context, data: ArrayList<SectionHeader>, day: String?) :
+class AdapterSection(val context: Context, data: ArrayList<SectionHeader>, day: String?, fragmentManager: FragmentManager) :
     SectionRecyclerViewAdapter<SectionHeader, Task, AdapterSection.SectionViewHolder, AdapterSection.ChildViewHolder>(
         context,
         data
@@ -99,7 +96,7 @@ class AdapterSection(val context: Context, data: ArrayList<SectionHeader>, day: 
                             val calendar = Calendar.getInstance()
                             val countDay = calendar.getActualMaximum(Calendar.DAY_OF_MONTH)
                             val date = mDay.split(".")
-                            var tomorrowDay = date[0].toInt()+1
+                            var tomorrowDay = date[0].toInt() + 1
                             var month = date[1].toInt()
                             var year = date[2].toInt()
                             var nextDate = "${tomorrowDay}.${month}.${year}"
@@ -118,7 +115,7 @@ class AdapterSection(val context: Context, data: ArrayList<SectionHeader>, day: 
                                 year += 1
                                 nextDate = "${tomorrowDay}.${month}.${year}"
                             }
-                            val disposable = dataBaseTask
+                            disposable = dataBaseTask
                                 .retrieveData()
                                 .subscribe { tasks ->
                                     for (taskData in tasks) {
@@ -202,25 +199,21 @@ class AdapterSection(val context: Context, data: ArrayList<SectionHeader>, day: 
             popupMenu.show()
         }
 
-        childViewHolder.cardItem.setOnClickListener { view ->
-            disposable = dataBaseTask
+
+        childViewHolder.cardItem.setOnClickListener { viewHolder ->
+
+            val disposable = dataBaseTask
                 .retrieveData()
                 .subscribe({ tasks ->
-                    for (task in tasks) {
-                        if (task.name == childViewHolder.dataChild.text) {
-                            MaterialAlertDialogBuilder(context)
-                                .setTitle(task.name)
-                                .setMessage(
-                                    "Период: ${task.period} \n" +
-                                            "Повтор: ${task.replay}"
-                                )
-                                .setPositiveButton(
-                                    "Ok"
-                                ) { dialogInterface, p1 ->
-                                    dialogInterface.dismiss()
-                                    disposable!!.isDisposed
-                                }
-                                .show()
+
+                    for (taskData in tasks) {
+                        if (taskData.name == task.name && taskData.day == task.day) {
+
+                            FragmentDialog(taskData).show(
+                                (context as AppCompatActivity).supportFragmentManager,
+                                "Dialog"
+                            )
+
                         }
                     }
                 },
@@ -229,6 +222,8 @@ class AdapterSection(val context: Context, data: ArrayList<SectionHeader>, day: 
                     })
         }
 
-    }
+        if (disposable != null && !disposable!!.isDisposed)
+            disposable!!.dispose()
 
+    }
 }

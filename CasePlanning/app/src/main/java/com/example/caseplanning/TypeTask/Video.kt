@@ -15,6 +15,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
+import androidx.core.net.toUri
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
@@ -33,9 +34,9 @@ class Video : Fragment() {
     var videoFie: VideoView? = null
     var outputUriFile: Uri? = null
     var pageViewModel: MyViewModel? = null
-    var photoUri: String? = null
-    var audioFile: String? = null
-    var timeAudio: String? = null
+    var photoUri: String? = ""
+    var audioFile: String? = ""
+    var timeAudio: String? = ""
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -51,12 +52,13 @@ class Video : Fragment() {
 
         pageViewModel!!.uri.observe(requireActivity(), Observer { uri ->
             if (uri != null) {
-                outputUriFile = uri.videoUri
+                outputUriFile = uri.videoUri?.toUri()
                 photoUri = uri.photoUri
                 audioFile = uri.audioUri
                 timeAudio = uri.timeAudio
             }
         })
+
 
         if (outputUriFile == null) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -110,7 +112,7 @@ class Video : Fragment() {
             videoFie!!.setVideoURI(outputUriFile)
             videoFie!!.seekTo(1)
             pageViewModel!!.uri.value =
-                UriTypeTask(videoUri = outputUriFile, photoUri = photoUri, audioUri = audioFile, timeAudio = timeAudio)
+                UriTypeTask(videoUri = outputUriFile.toString(), photoUri = photoUri, audioUri = audioFile, timeAudio = timeAudio)
         } else {
             Log.d("Ошибка", "Не удалось сохранить видео")
         }

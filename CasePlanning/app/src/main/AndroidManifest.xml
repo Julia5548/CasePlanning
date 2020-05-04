@@ -31,7 +31,7 @@
 
         <activity android:name=".ResetPassword" />
         <activity
-                android:name=".MainWindowCasePlanning"
+                android:name=".mainWindow.MainWindowCasePlanning"
                 android:largeHeap="true"></activity>
         <activity android:name=".SignUp" />
         <activity android:name=".MainActivity">

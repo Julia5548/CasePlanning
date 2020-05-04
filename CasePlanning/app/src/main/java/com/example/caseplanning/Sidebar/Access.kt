@@ -20,7 +20,7 @@ import butterknife.ButterKnife
 import com.example.caseplanning.DataBase.DataBaseTask
 import com.example.caseplanning.MainActivity
 import com.example.caseplanning.R
-import com.example.caseplanning.WindowTask
+import com.example.caseplanning.mainWindow.WindowTask
 import com.example.caseplanning.adapter.AdapterRecyclerViewAccess
 import com.google.android.material.navigation.NavigationView
 import com.google.firebase.auth.FirebaseAuth
@@ -127,7 +127,8 @@ class Access: Fragment(), NavigationView.OnNavigationItemSelectedListener {
             }
 
             R.id.tasks -> {
-                val windowTask: Fragment = WindowTask()
+                val windowTask: Fragment =
+                    WindowTask()
                 val transaction: FragmentTransaction = fragmentManager!!.beginTransaction()
 
                 transaction.replace(R.id.linerLayout, windowTask)

@@ -15,5 +15,6 @@
     <color name="azure">#87CEEB</color>
     <color name="indigo">#4B0082</color>
     <color name="orchid">#DA70D6</color>
+    <color name="colorToolbar">#1D5C8F</color>
 
 </resources>

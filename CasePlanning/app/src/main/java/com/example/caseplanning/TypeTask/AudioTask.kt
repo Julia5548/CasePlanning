@@ -38,11 +38,11 @@ class AudioTask : Fragment() {
     private var mediaPlayer: MediaPlayer? = null
     private lateinit var fileName: String
     val PERMISSION_CODE = 1000
-    var videoUri: Uri? = null
-    var photoUri: String? = null
+    var videoUri: String? = ""
+    var photoUri: String? = ""
      var chronometer: Chronometer? = null
-    var timeAudio: String? = null
-    var audioFile : String? = null
+    var timeAudio: String? = ""
+    var audioFile : String? = ""
 
     private var pageViewModel: MyViewModel? = null
 
@@ -69,6 +69,7 @@ class AudioTask : Fragment() {
                 audioFile = uri.audioUri!!
             }
         })
+
 
         if(audioFile != null){
             val playAndStopRecord = view.findViewById<ImageButton>(R.id.playRecordAndStopRecord)

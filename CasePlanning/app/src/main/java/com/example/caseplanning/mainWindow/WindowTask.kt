@@ -1,4 +1,4 @@
-package com.example.caseplanning
+package com.example.caseplanning.mainWindow
 
 import android.content.Intent
 import android.os.Bundle
@@ -21,13 +21,14 @@ import com.example.caseplanning.CreateTask.CreateTaskWindow
 import com.example.caseplanning.CreateTask.MyViewModel
 import com.example.caseplanning.DataBase.DataBaseTask
 import com.example.caseplanning.DataBase.Task
+import com.example.caseplanning.MainActivity
+import com.example.caseplanning.R
 import com.example.caseplanning.Sidebar.*
 import com.example.caseplanning.adapter.AdapterSection
 import com.example.caseplanning.adapter.SectionHeader
 import com.google.android.material.navigation.NavigationView
 import com.google.firebase.auth.FirebaseAuth
 import com.miguelcatalan.materialsearchview.MaterialSearchView
-import com.shrikanthravi.collapsiblecalendarview.data.Day
 import com.shrikanthravi.collapsiblecalendarview.widget.CollapsibleCalendar
 import io.reactivex.disposables.Disposable
 
@@ -66,7 +67,8 @@ class WindowTask : Fragment(), NavigationView.OnNavigationItemSelectedListener{
         mDrawerLayout = viewFragment.findViewById(R.id.drawerLayout)
         mToggle = ActionBarDrawerToggle(
             activity, mDrawerLayout,
-            R.string.Open, R.string.Close
+            R.string.Open,
+            R.string.Close
         )
         mDrawerLayout!!.addDrawerListener(mToggle!!)
         /*проверяем состояние*/
@@ -199,7 +201,7 @@ class WindowTask : Fragment(), NavigationView.OnNavigationItemSelectedListener{
                 if(stringListDay.isNotEmpty())
                     sections.add(SectionHeader(stringListDay, "День"))
 
-                listTasks.adapter = AdapterSection(context!!, sections, date)
+                listTasks.adapter = AdapterSection(context!!, sections, date, fragmentManager!!)
             },
         {
                 throwable->
@@ -214,8 +216,8 @@ class WindowTask : Fragment(), NavigationView.OnNavigationItemSelectedListener{
         inflater.inflate(R.menu.search, menu)
 
         val searchItem = menu.findItem(R.id.search)
-        search!!.setMenuItem(searchItem)
-        search!!.setOnQueryTextListener(object : MaterialSearchView.OnQueryTextListener {
+        search?.setMenuItem(searchItem)
+        search?.setOnQueryTextListener(object : MaterialSearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(query: String?): Boolean {
                 /*поиск задач*/
                 return true
@@ -276,8 +278,9 @@ class WindowTask : Fragment(), NavigationView.OnNavigationItemSelectedListener{
                 transaction.addToBackStack(null)
                 transaction.commit()
             }
-            R.id.tasks->{
-                val windowTask : Fragment = WindowTask()
+            R.id.tasks ->{
+                val windowTask : Fragment =
+                    WindowTask()
                 val transaction: FragmentTransaction = fragmentManager!!.beginTransaction()
 
                 transaction.replace(R.id.linerLayout, windowTask)

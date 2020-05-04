@@ -1,7 +1,6 @@
 package com.example.caseplanning.Sidebar
 
 import android.content.Intent
-import android.graphics.drawable.Icon
 import android.os.Bundle
 import android.view.*
 import android.widget.*
@@ -23,7 +22,7 @@ import com.example.caseplanning.DataBase.Folder
 import com.example.caseplanning.DataBase.Task
 import com.example.caseplanning.MainActivity
 import com.example.caseplanning.R
-import com.example.caseplanning.WindowTask
+import com.example.caseplanning.mainWindow.WindowTask
 import com.example.caseplanning.adapter.AdapterRecyclerView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.navigation.NavigationView
@@ -158,7 +157,8 @@ class GroupTask : Fragment(), NavigationView.OnNavigationItemSelectedListener,
                 transaction.commit()
             }
             R.id.tasks -> {
-                val windowTask: Fragment = WindowTask()
+                val windowTask: Fragment =
+                    WindowTask()
                 val transaction: FragmentTransaction = fragmentManager!!.beginTransaction()
 
                 transaction.replace(R.id.linerLayout, windowTask)

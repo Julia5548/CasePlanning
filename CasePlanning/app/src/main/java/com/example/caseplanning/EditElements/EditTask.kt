@@ -3,7 +3,6 @@ package com.example.caseplanning.EditElements
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.graphics.PorterDuff
-import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.preference.PreferenceManager
@@ -16,18 +15,16 @@ import androidx.annotation.RequiresApi
 import androidx.appcompat.app.ActionBar
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
-import androidx.core.net.toUri
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentTransaction
 import androidx.lifecycle.ViewModelProviders
 import butterknife.*
 import com.example.caseplanning.CreateTask.MyViewModel
 import com.example.caseplanning.CreateTask.TimePicker
 import com.example.caseplanning.DataBase.DataBaseTask
 import com.example.caseplanning.DataBase.Task
-import com.example.caseplanning.MainWindowCasePlanning
+import com.example.caseplanning.DataBase.UriTypeTask
+import com.example.caseplanning.mainWindow.MainWindowCasePlanning
 import com.example.caseplanning.R
-import com.example.caseplanning.TypeTask.*
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 
 class EditTask : Fragment() {
@@ -35,7 +32,6 @@ class EditTask : Fragment() {
 
     var listSubTask: ArrayList<String>? = null
     var listSubTasksView: ArrayList<View>? = null
-    private var key: String? = null
     private var pageViewModel: MyViewModel? = null
     var textPeriod = ""
     var tasksData: Task? = null
@@ -59,7 +55,7 @@ class EditTask : Fragment() {
         activity!!.setSupportActionBar(toolbar)
 
         val actionBar: ActionBar? = activity.supportActionBar
-        actionBar!!.title = "Создать"
+        actionBar!!.title = "Изменить"
 
         listSubTask = arrayListOf()
         listSubTasksView = arrayListOf()
@@ -91,23 +87,10 @@ class EditTask : Fragment() {
         val comment = view.findViewById<EditText>(R.id.comment)
         val day = view.findViewById<TextView>(R.id.setupData)
 
-        if (fragmentManager!!.findFragmentById(R.id.photo) != null) {
-            fragmentManager!!.beginTransaction().replace(R.id.photo, Photo()).commit()
-        }
-
-        if (fragmentManager!!.findFragmentById(R.id.audio) != null) {
-            fragmentManager!!.beginTransaction().replace(R.id.audio, AudioTask()).commit()
-        }
-
-        if (fragmentManager!!.findFragmentById(R.id.video) != null) {
-            fragmentManager!!.beginTransaction().replace(R.id.video, Video()).commit()
-        }
-
         val dataBase = DataBaseTask()
         var taskList = arrayListOf<String>()
         if (arguments != null) {
             taskList = arguments!!.getStringArrayList("dataTask")!!
-            arguments = null
         }
         val disposable = dataBase
             .retrieveData()
@@ -117,7 +100,6 @@ class EditTask : Fragment() {
                         getTask(task)
                     }
                 }
-
                 if (tasksData != null) {
 
                     editTextTask.setText(tasksData!!.name)
@@ -199,8 +181,14 @@ class EditTask : Fragment() {
                         }
                     }
 
+                    if (fragmentManager!!.findFragmentById(R.id.photo) == null && tasksData!!.photo != "") {
+                        fragmentManager!!.beginTransaction()
+                            .replace(R.id.photo, PhotoEdit(tasksData!!.photo))
+                            .commit()
+                    }
                 }
             }
+
     }
 
     @SuppressLint("SetTextI18n")
@@ -298,39 +286,6 @@ class EditTask : Fragment() {
             }
             materialAlertDialogBuilder.dismiss()
         }
-    }
-
-    /*добавление фото задачи*/
-    @OnClick(R.id.btnAddPhoto)
-    fun onClickAddPhoto() {
-
-        val photo: Fragment = Photo()
-        val transaction: FragmentTransaction = fragmentManager!!.beginTransaction()
-
-        transaction.add(R.id.photo, photo)
-        transaction.commit()
-    }
-
-    /*добавление видео задачи*/
-    @OnClick(R.id.btnAddVideo)
-    fun onClickAddVideo() {
-
-        val video: Fragment = Video()
-        val transaction: FragmentTransaction = fragmentManager!!.beginTransaction()
-
-        transaction.add(R.id.video, video)
-        transaction.commit()
-    }
-
-    /*добавление аудио задачи*/
-    @OnClick(R.id.addAudio)
-    fun onClickAddAudio() {
-
-        val audio = AudioTask()
-        val transaction: FragmentTransaction = fragmentManager!!.beginTransaction()
-
-        transaction.add(R.id.audio, audio)
-        transaction.commit()
     }
 
     @OnCheckedChanged
@@ -586,17 +541,17 @@ class EditTask : Fragment() {
 
     private fun saveDataTask(): Task {
 
-        var photoUri: String? = null
-        var videoUri: Uri? = null
-        var audioUri: String? = null
-        var timeAudio: String? = null
+        var photoUri: String? = ""
+        var videoUri: String? = ""
+        var audioUri: String? = ""
+        var timeAudio: String? = ""
 
 
         if (tasksData != null) {
             photoUri = tasksData!!.photo
             audioUri = tasksData!!.audio
             timeAudio = tasksData!!.timeAudio
-            videoUri = tasksData!!.video!!.toUri()
+            videoUri = tasksData!!.video
         }
         val editTextTask = view!!.findViewById<EditText>(R.id.editTextTask)
         val textReplay = view!!.findViewById<TextView>(R.id.textChoose)
@@ -641,8 +596,10 @@ class EditTask : Fragment() {
         super.onPause()
         val task = saveDataTask()
         pageViewModel?.task?.value = task
+        pageViewModel?.uri?.value = UriTypeTask(photoUri = task.photo, videoUri = task.video, audioUri = task.audio, timeAudio = task.timeAudio )
 
-        Log.d("OnPAUSE", "onPause")
+
+        Log.d("OnPAUSEEdit", "onPause")
     }
 
     override fun onDestroy() {

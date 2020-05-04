@@ -14,12 +14,12 @@ class AdapterRecyclerView(val context: Context, data:ArrayList<String>):Recycler
 
     inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView){
 
-        val dataFolder = itemView.findViewById<TextView>(R.id.nameItemList)
+        val nameItem = itemView.findViewById<TextView>(R.id.nameItemList)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
 
-        val view = LayoutInflater.from(context).inflate(R.layout.card_list, parent, false)
+        val view = LayoutInflater.from(context).inflate(R.layout.card_list_subtask, parent, false)
 
         return ViewHolder(view)
     }
@@ -28,7 +28,7 @@ class AdapterRecyclerView(val context: Context, data:ArrayList<String>):Recycler
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
 
-        holder.dataFolder.text = mData[position]
+        holder.nameItem.text = mData[position]
 
     }
 }

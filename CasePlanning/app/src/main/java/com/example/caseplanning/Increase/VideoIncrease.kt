@@ -9,6 +9,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.MediaController
 import android.widget.VideoView
+import androidx.core.net.toUri
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
@@ -39,7 +40,7 @@ class VideoIncrease : Fragment() {
 
         pageViewModel!!.uri.observe(requireActivity(), Observer { uriTypeTask ->
             if (uriTypeTask != null)
-                videoUri = uriTypeTask.videoUri
+                videoUri = uriTypeTask.videoUri?.toUri()
         })
 
         var mediaController: MediaController? = null

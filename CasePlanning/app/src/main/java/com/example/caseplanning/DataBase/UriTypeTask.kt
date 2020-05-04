@@ -4,10 +4,10 @@ import android.graphics.Bitmap
 import android.net.Uri
 
 data class UriTypeTask (
-    var audioUri : String? = null,
-    var timeAudio: String? = null,
-    var photoUri : String? = null,
-    var videoUri : Uri? = null
+    var audioUri : String? = "",
+    var timeAudio: String? = "",
+    var photoUri : String? = "",
+    var videoUri : String? = ""
 
 
 )

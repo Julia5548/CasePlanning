@@ -3,7 +3,6 @@ package com.example.caseplanning.CreateTask
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.graphics.PorterDuff
-import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.preference.PreferenceManager
@@ -23,7 +22,7 @@ import androidx.lifecycle.ViewModelProviders
 import butterknife.*
 import com.example.caseplanning.DataBase.DataBaseTask
 import com.example.caseplanning.DataBase.Task
-import com.example.caseplanning.MainWindowCasePlanning
+import com.example.caseplanning.mainWindow.MainWindowCasePlanning
 import com.example.caseplanning.R
 import com.example.caseplanning.TypeTask.*
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -592,10 +591,10 @@ class CreateTaskWindow : Fragment() {
 
     private fun saveDataTask(): Task {
 
-        var photoUri: String? = null
-        var videoUri: Uri? = null
-        var audioUri: String? = null
-        var timeAudio: String? = null
+        var photoUri: String? = ""
+        var videoUri: String? = ""
+        var audioUri: String? = ""
+        var timeAudio: String? = ""
 
         pageViewModel!!.uri.observe(requireActivity(), Observer { uri ->
 
@@ -642,7 +641,7 @@ class CreateTaskWindow : Fragment() {
             listSubTasks = listSubTask!!,
             audio = audioUri,
             timeAudio = timeAudio,
-            video = videoUri.toString(),
+            video = videoUri,
             photo = photoUri
         )
     }

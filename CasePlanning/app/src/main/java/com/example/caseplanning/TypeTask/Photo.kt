@@ -14,6 +14,7 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.Environment
+import android.provider.ContactsContract
 import android.provider.MediaStore
 import android.util.Log
 import android.view.LayoutInflater
@@ -32,6 +33,7 @@ import butterknife.ButterKnife
 import butterknife.OnClick
 import com.example.caseplanning.CreateTask.CreateTaskWindow
 import com.example.caseplanning.CreateTask.MyViewModel
+import com.example.caseplanning.DataBase.DataBaseTask
 import com.example.caseplanning.DataBase.UriTypeTask
 import com.example.caseplanning.Increase.PhotoIncrease
 import com.example.caseplanning.R
@@ -50,10 +52,10 @@ class Photo : Fragment() {
     val PERMISSION_CODE = 1000
     var photo_image: ImageView? = null
     private var pageViewModel: MyViewModel? = null
-    var videoUri: Uri? = null
+    var videoUri: String? = ""
     val BYTES_PER_PX = 4.0f
-    var audioFile: String? = null
-    var timeAudio: String? = null
+    var audioFile: String? = ""
+    var timeAudio: String? = ""
     private var mCurrentFile: String? = null
     private var mPhotoFile: File? = null
     private var photoUri: Uri? = null
@@ -78,7 +80,6 @@ class Photo : Fragment() {
                 timeAudio = uri.timeAudio
             }
         })
-
         if (mCurrentFile == null) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 if (context!!.checkSelfPermission(Manifest.permission.CAMERA)
@@ -114,7 +115,6 @@ class Photo : Fragment() {
 
         return view
     }
-
 
     /*открываем камеру*/
     fun openCamera() {

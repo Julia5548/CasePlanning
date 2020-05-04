@@ -44,15 +44,16 @@ class PhotoIncrease : Fragment() {
 
         pageViewModel!!.uri.observe(requireActivity(), Observer {
             path->
-            val photoPath = path.photoUri
-            val options = BitmapFactory.Options()
-            options.inJustDecodeBounds = false
-            options.inSampleSize = 5
-            val bitmap = BitmapFactory.decodeFile(photoPath, options)
-            val byteArrayOutputStream = ByteArrayOutputStream()
-            bitmap.compress(Bitmap.CompressFormat.JPEG, 10, byteArrayOutputStream)
-            photoView.setImageBitmap(bitmap)
-
+            if(path != null) {
+                val photoPath = path.photoUri
+                val options = BitmapFactory.Options()
+                options.inJustDecodeBounds = false
+                options.inSampleSize = 5
+                val bitmap = BitmapFactory.decodeFile(photoPath, options)
+                val byteArrayOutputStream = ByteArrayOutputStream()
+                bitmap.compress(Bitmap.CompressFormat.JPEG, 10, byteArrayOutputStream)
+                photoView.setImageBitmap(bitmap)
+            }
         })
 
         return view

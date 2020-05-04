@@ -1,12 +1,10 @@
-package com.example.caseplanning
+package com.example.caseplanning.mainWindow
 
 
-import android.annotation.SuppressLint
-import android.app.Fragment
 import android.content.pm.ActivityInfo
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import androidx.fragment.app.FragmentTransaction
+import com.example.caseplanning.R
 
 
 @Suppress("DEPRECATION")
@@ -18,7 +16,10 @@ class MainWindowCasePlanning : AppCompatActivity() {
         setContentView(R.layout.activity_main_window_case_planning)
 
         supportFragmentManager.beginTransaction()
-            .add(R.id.linerLayout, WindowTask())
+            .add(
+                R.id.linerLayout,
+                WindowTask()
+            )
             .commitAllowingStateLoss()
 
         requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LOCKED
