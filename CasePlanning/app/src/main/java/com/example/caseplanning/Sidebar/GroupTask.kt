@@ -37,6 +37,9 @@ class GroupTask : Fragment(), NavigationView.OnNavigationItemSelectedListener,
     var pageViewModel: MyViewModel? = null
     var mDrawerLayout: DrawerLayout? = null
     lateinit var disposable: Disposable
+    private var actionBar: ActionBar? = null
+    private var cancel : MenuItem? = null
+    private var edit : MenuItem? = null
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -48,7 +51,7 @@ class GroupTask : Fragment(), NavigationView.OnNavigationItemSelectedListener,
         val toolbar = viewFragment.findViewById<Toolbar>(R.id.toolbarGroup)
         val activity = activity as AppCompatActivity?
         activity!!.setSupportActionBar(toolbar)
-        val actionBar: ActionBar? = activity.supportActionBar
+        actionBar = activity.supportActionBar
         actionBar!!.title = "Группы задач"
 
         ButterKnife.bind(this, viewFragment)
@@ -94,6 +97,11 @@ class GroupTask : Fragment(), NavigationView.OnNavigationItemSelectedListener,
         return viewFragment
     }
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setHasOptionsMenu(true)
+    }
+
     private fun listFolder(viewFragment: View) {
 
         val dataBaseTask = DataBaseTask()
@@ -113,6 +121,34 @@ class GroupTask : Fragment(), NavigationView.OnNavigationItemSelectedListener,
                     throwable.printStackTrace()
                 })
 
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        inflater.inflate(R.menu.edit, menu)
+        cancel= menu.findItem(R.id.cancel_edit)
+        edit = menu.findItem(R.id.edit)
+        return super.onCreateOptionsMenu(menu, inflater)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId){
+            R.id.edit->{
+                if(item.title == "Удалить"){
+                    item.title = "Изменить"
+                    cancel?.isVisible = false
+                }else {
+                    item.title = "Удалить"
+                    cancel?.isVisible = true
+                }
+                true
+            }
+            R.id.cancel_edit->{
+                edit?.title = "Изменить"
+                cancel?.isVisible = false
+                true
+            }
+            else-> return super.onOptionsItemSelected(item)
+        }
     }
 
     @OnClick(R.id.addFolder)

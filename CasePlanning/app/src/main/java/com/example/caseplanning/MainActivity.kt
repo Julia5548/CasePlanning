@@ -84,10 +84,9 @@ class MainActivity : AppCompatActivity() {
                         updateUI(user)
                     } else {
                         Log.w("TAG: ", "signInWithEmail: failure", task.exception)
-                        //СДЕЛАТЬ КАК ОТДЕЛЬНОЕ ОКОШКО
                         Toast.makeText(
                             applicationContext,
-                            "Authentication failed",
+                            "Не удалось найти пользователя. Логин или пароль неверен",
                             Toast.LENGTH_SHORT
                         ).show()
                         updateUI(user = null)
@@ -110,7 +109,7 @@ class MainActivity : AppCompatActivity() {
                 startActivity(intentMainWindowCasePlanning)
                 Toast.makeText(
                     applicationContext,
-                    "$user добро пожаловать в систему по планировке дел",
+                    "Добро пожаловать в систему по планировке дел",
                     Toast.LENGTH_SHORT
                 ).show()
             }
@@ -135,8 +134,6 @@ class MainActivity : AppCompatActivity() {
 
     /*обработчик нажатия на кнопки меню*/
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-
-
         return when (item.itemId) {
             R.id.signUp -> {
                 val intentSignUp = Intent(this, SignUp::class.java)

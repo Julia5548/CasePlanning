@@ -77,4 +77,9 @@ class Timer(var time: String) : Fragment() {
         if (mediaPlayer != null)
             mediaPlayer!!.stop()
     }
+
+    @OnClick(R.id.closeTimer)
+    fun closeTimer(){
+        fragmentManager?.popBackStack()
+    }
 }

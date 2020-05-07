@@ -4,6 +4,14 @@
         android:background="@color/textBlack"
         android:layout_width="match_parent" android:layout_height="match_parent">
 
+    <ImageButton
+            android:layout_width="wrap_content"
+            android:src = "@drawable/ic_close_black_24dp"
+            android:background="@null"
+            android:layout_alignParentEnd="true"
+            android:padding="10dp"
+            android:id="@+id/closeTimer"
+            android:layout_height="wrap_content"/>
 
     <Chronometer
             android:id="@+id/chronometer"
