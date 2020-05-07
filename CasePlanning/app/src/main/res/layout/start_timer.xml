@@ -1,22 +1,46 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
+<RelativeLayout
         xmlns:android="http://schemas.android.com/apk/res/android"
         android:background="@color/textBlack"
-        android:gravity="center"
         android:layout_width="match_parent" android:layout_height="match_parent">
 
+
     <Chronometer
+            android:id="@+id/chronometer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_above="@+id/clock"
+            android:layout_centerInParent="true"
+            android:text="00:00"
+            android:textColor="@color/textWhite"
+            android:textSize="35sp" />
+
+    <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id  = "@+id/clock"
+            android:layout_marginTop="15dp"
+            android:layout_centerInParent="true"
+            android:src="@drawable/timer_clock" />
+
+    <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textColor="@color/textWhite"
-            android:layout_gravity="center"/>
+            android:layout_centerInParent="true"
+            android:id = "@+id/startTimer"
+            android:text="Пуск"
+            android:textSize="40sp"
+            android:layout_centerVertical="true"/>
 
-    <LinearLayout
+    <TextView
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content">
-    <ImageView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
-    </LinearLayout>
-
-</LinearLayout>
+            android:layout_height="wrap_content"
+            android:textColor="@color/textWhite"
+            android:layout_centerInParent="true"
+            android:text="Стоп"
+            android:id="@+id/stopTimer"
+            android:visibility="invisible"
+            android:textSize="40sp"
+            android:layout_centerVertical="true"/>
+</RelativeLayout>

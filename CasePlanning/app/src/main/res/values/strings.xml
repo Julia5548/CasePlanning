@@ -49,10 +49,10 @@
     <string name="acсess">Разрешить</string>
     <string name="edit">Изменить</string>
     <string name="tasks">Задачи</string>
-    <string name="comment">Комментарий</string>
+    <string name="comment"><u>Комментарий:</u></string>
     <string name="time">Время</string>
     <string name="delete">Удалить</string>
     <string name="tomorrow">Завтра</string>
-    <string name="subTask">Подзадачи</string>
+    <string name="subTask"><u>Подзадачи</u></string>
     <string name="start">Запустить</string>
 </resources>

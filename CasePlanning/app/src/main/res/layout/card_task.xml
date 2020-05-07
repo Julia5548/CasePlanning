@@ -2,8 +2,7 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="#8CFFA091">
+        android:layout_height="match_parent">
 
     <LinearLayout
             android:layout_width="match_parent"
@@ -13,38 +12,44 @@
         <com.google.android.material.appbar.MaterialToolbar
                 android:id="@+id/relativeLayoutStart"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="#85E8797D">
+                android:elevation="5dp"
+                android:background="@drawable/toolbar_task"
+                android:layout_height="218dp">
 
             <RelativeLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content">
 
                 <TextView
-                        android:id="@+id/periodDay"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_margin="5dp"
-                        android:text="Не выбрано"
-                        android:textColor="@color/textWhite" />
-
-                <TextView
                         android:id="@+id/day"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_margin="5dp"
-                        android:layout_toEndOf="@+id/periodDay"
+                        android:layout_marginStart="5dp"
+                        android:textSize="20sp"
                         android:text="20.4.2020"
                         android:textColor="@color/textWhite" />
+
+
+                <TextView
+                        android:id="@+id/periodDay"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentBottom="true"
+                        android:layout_marginStart="5dp"
+                        android:text="Не выбрано"
+                        android:paddingBottom="8dp"
+                        android:textColor="#19655E"
+                        android:textSize="20sp" />
 
                 <TextView
                         android:id="@+id/nameTask"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_below="@+id/periodDay"
-                        android:layout_margin="5dp"
+                        android:layout_centerInParent="true"
+                        android:text="Купить чипсы"
                         android:textColor="@color/textWhite"
-                        android:textSize="17sp" />
+                        android:shadowRadius="5"
+                        android:textSize="25sp" />
 
 
                 <TextView
@@ -52,47 +57,29 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_alignParentEnd="true"
-                        android:layout_margin="5dp"
+                        android:layout_marginEnd="16dp"
+                        android:textSize="20sp"
                         android:text="Не выбрано"
                         android:textColor="@color/textWhite" />
+
+                <TextView
+                        android:id="@+id/loadTimer"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentEnd="true"
+                        android:layout_alignParentBottom="true"
+                       android:paddingBottom="8dp"
+                        android:layout_marginEnd="16dp"
+                        android:text="Нет"
+                        android:textColor="#19655E"
+                        android:textSize="20sp" />
+
             </RelativeLayout>
 
 
         </com.google.android.material.appbar.MaterialToolbar>
 
         <RelativeLayout
-                android:id="@+id/relativeLayoutTimer"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content">
-
-            <TextView
-                    android:id="@id/timer"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_margin="5dp"
-                    android:text="@string/timer"
-                    android:textSize="17sp" />
-
-            <TextView
-                    android:id="@+id/loadTimer"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_margin="5dp"
-                    android:layout_toEndOf="@+id/timer"
-                    android:text="Нет" />
-
-            <TextView
-                    android:id="@+id/startTimer"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentEnd="true"
-                    android:layout_margin="5dp"
-                    android:text="@string/start"
-                    android:textColor="#FF85C7"
-                    android:textSize="17sp" />
-        </RelativeLayout>
-
-        <LinearLayout
                 android:id="@+id/commentLinearlayout"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -101,49 +88,93 @@
             <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_margin="5dp"
+                    android:layout_marginStart="21dp"
+                    android:id = "@+id/comment"
                     android:text="@string/comment"
-                    android:textSize="17sp" />
+                    android:textSize="20sp" />
 
             <TextView
-                    android:id="@+id/comment"
+                    android:id="@+id/contentComment"
+                    android:layout_toEndOf="@+id/comment"
                     android:layout_width="wrap_content"
+                    android:textSize="20sp"
+                    android:layout_marginStart="9dp"
                     android:layout_height="wrap_content"
-                    android:layout_margin="5dp"
                     android:text="нет" />
-        </LinearLayout>
+        </RelativeLayout>
 
-        <LinearLayout
+        <RelativeLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal">
 
+            <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="20sp"
+                    android:text = "Фото"
+                    android:visibility="gone"
+                    android:id = "@+id/photoText"
+                    android:layout_marginStart="35dp"
+                    android:layout_marginTop="7dp"/>
+
             <ImageView
                     android:id="@+id/imageViewPhoto"
-                    android:layout_width="150dp"
-                    android:layout_height="150dp"
-                    android:visibility="gone" />
+                    android:layout_width="78dp"
+                    android:layout_height="84dp"
+                    android:visibility="gone"
+                    android:layout_below="@+id/photoText"
+                    android:layout_marginStart="21dp"
+                    android:layout_marginEnd="22dp"
+                    android:layout_marginTop="7dp"
+                    android:contentDescription="@string/addphoto" />
+
+            <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="20sp"
+                    android:text = "Видео"
+                    android:visibility="gone"
+                    android:layout_toEndOf="@+id/photoText"
+                    android:id = "@+id/videoText"
+                    android:layout_marginStart="49dp"
+                    android:layout_marginTop="7dp"/>
 
             <VideoView
                     android:id="@+id/videoView"
-                    android:layout_width="60dp"
-                    android:layout_height="100dp"
-                    android:visibility="gone" />
+                    android:layout_width="78dp"
+                    android:layout_height="84dp"
+                    android:visibility="gone"
+                    android:layout_toEndOf="@+id/imageViewPhoto"
+                    android:layout_below="@+id/videoText"
+                    android:layout_marginTop="7dp"/>
 
-        </LinearLayout>
+        </RelativeLayout>
 
-        <LinearLayout
+        <RelativeLayout
                 android:id="@+id/linerLayoutAudio"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal">
 
+            <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="21dp"
+                    android:textSize="20sp"
+                    android:visibility="gone"
+                    android:text="Аудио"
+                    android:id = "@+id/textAudio"/>
+
             <ImageButton
                     android:id="@+id/startAndStopPlay"
-                    android:layout_width="50dp"
-                    android:layout_height="50dp"
-                    android:background="@null"
+                    android:layout_width="27dp"
+                    android:layout_below="@+id/textAudio"
+                    android:layout_marginStart="21dp"
+                    android:layout_marginTop="7dp"
                     android:visibility="gone"
+                    android:layout_height="26dp"
+                    android:background="@null"
                     android:contentDescription="@string/playAudio"
                     android:src="@drawable/ic_play_arrow_black_24dp" />
 
@@ -151,11 +182,13 @@
                     android:id="@+id/chronometerAudio"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_alignParentBottom="true"
+                    android:paddingBottom="5dp"
+                    android:layout_alignParentEnd="true"
                     android:visibility="gone"
-                    android:layout_margin="10dp"
                     android:text="00:00"
                     android:textSize="20sp" />
-        </LinearLayout>
+        </RelativeLayout>
 
 
         <LinearLayout
@@ -168,16 +201,18 @@
             <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_margin="5dp"
+                    android:layout_marginStart="21dp"
+                    android:layout_marginTop="7dp"
                     android:text="@string/subTask"
-                    android:textSize="17sp" />
+                    android:textSize="20sp" />
 
 
             <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/recyclerViewSubTask"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_margin="5dp" />
+                    android:layout_marginStart="21dp"
+                    android:layout_marginTop="7dp" />
 
         </LinearLayout>
     </LinearLayout>

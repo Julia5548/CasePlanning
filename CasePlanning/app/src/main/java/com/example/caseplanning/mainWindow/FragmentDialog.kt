@@ -1,7 +1,7 @@
 package com.example.caseplanning.mainWindow
 
 import android.app.Dialog
-import android.app.FragmentTransaction
+import android.content.DialogInterface
 import android.graphics.BitmapFactory
 import android.graphics.drawable.BitmapDrawable
 import android.media.MediaPlayer
@@ -11,24 +11,22 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
+import androidx.appcompat.app.AlertDialog
 import androidx.core.net.toUri
 import androidx.fragment.app.DialogFragment
-import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import butterknife.OnClick
+import butterknife.ButterKnife
 import com.example.caseplanning.DataBase.Task
-import com.example.caseplanning.EditElements.PhotoEdit
 import com.example.caseplanning.R
 import com.example.caseplanning.adapter.AdapterRecyclerView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import kotlinx.android.synthetic.main.task_window.*
 import java.lang.Exception
 
-class FragmentDialog(val dataTask: Task?) : DialogFragment() {
+class FragmentDialog(val dataTask: Task?) : DialogFragment(), DialogInterface.OnClickListener {
 
     private var mediaPlayer: MediaPlayer? = null
-
+    private var time: String = ""
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -42,31 +40,49 @@ class FragmentDialog(val dataTask: Task?) : DialogFragment() {
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
 
         val view = LayoutInflater.from(context).inflate(R.layout.card_task, null, false)
-
+        ButterKnife.bind(this, view)
         if (view.parent != null) {
             (view.parent as ViewGroup).removeView(view)
         }
-        createdView(view)
-        return MaterialAlertDialogBuilder(context)
+
+        val materialAlertDialogBuilder = MaterialAlertDialogBuilder(context, R.style.RoundShapeTheme)
             .setView(view)
-            .setPositiveButton("Ok", null)
+            .setPositiveButton("Ok", this)
+            .setNeutralButton("Открыть таймер", this)
             .create()
+        createdView(view, materialAlertDialogBuilder)
+
+        return materialAlertDialogBuilder
     }
 
-    private fun createdView(view: View) {
 
+    override fun onClick(dialog: DialogInterface?, which: Int) {
 
+        when(which){
+            Dialog.BUTTON_NEUTRAL->{
+                fragmentManager!!.beginTransaction().replace(R.id.linerLayout, Timer(time)).addToBackStack(null).commit()
+                dialog!!.dismiss()
+            }
+            Dialog.BUTTON_POSITIVE -> dialog!!.dismiss()
+        }
+    }
+    private fun createdView(
+        view: View,
+        dialog: AlertDialog
+    ) {
         val nameTask = view.findViewById<TextView>(R.id.nameTask)
         val periodDay = view.findViewById<TextView>(R.id.periodDay)
         val date = view.findViewById<TextView>(R.id.day)
         val replayDay = view.findViewById<TextView>(R.id.replay_day)
         val listSubTask = view.findViewById<RecyclerView>(R.id.recyclerViewSubTask)
         val timer = view.findViewById<TextView>(R.id.loadTimer)
-        val startTimer = view.findViewById<TextView>(R.id.startTimer)
-        val comment = view.findViewById<TextView>(R.id.comment)
+        val comment = view.findViewById<TextView>(R.id.contentComment)
         var subTasks = arrayListOf<String>()
         var photo: ImageView? = null
         val video = view.findViewById<VideoView>(R.id.videoView)
+        val photoText = view.findViewById<TextView>(R.id.photoText)
+        val videoText = view.findViewById<TextView>(R.id.videoText)
+        val audioText = view.findViewById<TextView>(R.id.textAudio)
         val playAudio = view.findViewById<ImageButton>(R.id.startAndStopPlay)
         val chronometer = view.findViewById<Chronometer>(R.id.chronometerAudio)
 
@@ -94,8 +110,11 @@ class FragmentDialog(val dataTask: Task?) : DialogFragment() {
             }
             if (dataTask.timer != "Указать >") {
                 timer.text = dataTask.timer
+                time = "01:00"
             } else {
-                startTimer.isEnabled = false
+                dialog.setOnShowListener { dialogInterface ->
+                    (dialogInterface as AlertDialog).getButton(AlertDialog.BUTTON_NEUTRAL).isEnabled = false
+                }
             }
             if (dataTask.comment != "")
                 comment.text = dataTask.comment
@@ -106,7 +125,7 @@ class FragmentDialog(val dataTask: Task?) : DialogFragment() {
                 }
                 photo = view.findViewById<ImageButton>(R.id.imageViewPhoto)
                 photo!!.visibility = ImageButton.VISIBLE
-
+                photoText.visibility = TextView.VISIBLE
 
                 val options = BitmapFactory.Options()
                 options.inJustDecodeBounds = false
@@ -117,28 +136,25 @@ class FragmentDialog(val dataTask: Task?) : DialogFragment() {
 
             if (dataTask.video != "") {
                 video.visibility = VideoView.VISIBLE
+                videoText.visibility = TextView.VISIBLE
                 video.setVideoURI(dataTask.video!!.toUri())
             }
-            if (dataTask.audio != "" && dataTask.timeAudio == ""){
+            if (dataTask.audio != "" && dataTask.timeAudio == "") {
 
                 playAudio.visibility = ImageButton.VISIBLE
                 chronometer.visibility = Chronometer.VISIBLE
+                audioText.visibility = TextView.VISIBLE
 
                 playAudio.setOnClickListener {
 
                     playAudio(chronometer, dataTask.timeAudio!!, dataTask.audio!!)
                 }
-
-
-
             }
         }
-
-
     }
 
     /*воспроизведение и остновка аудио*/
-    fun playAudio(mChronometer:Chronometer, timeAudio:String, fileName : String) {
+    fun playAudio(mChronometer: Chronometer, timeAudio: String, fileName: String) {
 
         val playAndStopAudio = view!!.findViewById<ImageButton>(R.id.startAndStopPlay)
         try {
@@ -155,8 +171,7 @@ class FragmentDialog(val dataTask: Task?) : DialogFragment() {
                 playAndStopAudio.setImageResource(R.drawable.ic_stop_black_24dp)
                 playAndStopAudio.tag = 1
 
-                mChronometer.setOnChronometerTickListener {
-                        chronometer ->
+                mChronometer.setOnChronometerTickListener { chronometer ->
                     if (time != "") {
                         if (chronometer.text.toString() == time) {
                             chronometer.stop()
@@ -186,7 +201,6 @@ class FragmentDialog(val dataTask: Task?) : DialogFragment() {
             mediaPlayer!!.release()
             mediaPlayer = null
         }
-
     }
 
     /*остановка воспроизведение аудио*/
@@ -195,15 +209,9 @@ class FragmentDialog(val dataTask: Task?) : DialogFragment() {
         if (mediaPlayer != null)
             mediaPlayer!!.stop()
 
-        if(timeAudio == ""){
+        if (timeAudio == "") {
             chronometer.base = SystemClock.elapsedRealtime()
         }
 
     }
-
-    @OnClick(R.id.startTimer)
-    fun startTimer(){
-        fragmentManager!!.beginTransaction().replace(R.id.linerLayout, Timer()).addToBackStack(null).commit()
-    }
-
 }
