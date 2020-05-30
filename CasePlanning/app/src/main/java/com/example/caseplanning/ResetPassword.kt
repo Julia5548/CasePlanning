@@ -24,7 +24,7 @@ class ResetPassword : AppCompatActivity() {
 
         val toolbar = findViewById<Toolbar>(R.id.toolbarResetPassword)
         setSupportActionBar(toolbar)
-        supportActionBar!!.title = "Reset Password"
+        supportActionBar!!.title = "Восстановление пароля"
         val actionBar = supportActionBar
         actionBar!!.setDisplayHomeAsUpEnabled(true)
         actionBar.setHomeButtonEnabled(true)

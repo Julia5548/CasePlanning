@@ -32,19 +32,19 @@ class SignUp : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_sign_up)
+
         val toolbar = findViewById<Toolbar>(R.id.toolbarSignUp)
         setSupportActionBar(toolbar)
-        toolbar!!.title = "Регистрация"
-
-        ButterKnife.bind(this)
-        //initialize FireBase Auth
-        mAuth = FirebaseAuth.getInstance()
+        supportActionBar!!.title = "Регистрация"
 
         //кнопка назад
         val actionBar = supportActionBar
         actionBar!!.setDisplayHomeAsUpEnabled(true)
         actionBar.setHomeButtonEnabled(true)
 
+        ButterKnife.bind(this)
+        //initialize FireBase Auth
+        mAuth = FirebaseAuth.getInstance()
 
         requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LOCKED
     }

@@ -24,7 +24,7 @@ import com.example.caseplanning.DataBase.Task
 import com.example.caseplanning.MainActivity
 import com.example.caseplanning.R
 import com.example.caseplanning.Sidebar.*
-import com.example.caseplanning.adapter.AdapterSection
+import com.example.caseplanning.adapter.AdapterSectionTask
 import com.example.caseplanning.adapter.SectionHeader
 import com.google.android.material.navigation.NavigationView
 import com.google.firebase.auth.FirebaseAuth
@@ -112,7 +112,7 @@ class WindowTask : Fragment(), NavigationView.OnNavigationItemSelectedListener{
         pageViewModel = ViewModelProviders.of(requireActivity()).get(MyViewModel::class.java)
     }
 
-    open fun calendar(view:View) {
+    fun calendar(view:View) {
 
         val calendarView: CollapsibleCalendar = view.findViewById(R.id.linearLayoutCalendar)
         var day = calendarView.selectedDay
@@ -150,8 +150,6 @@ class WindowTask : Fragment(), NavigationView.OnNavigationItemSelectedListener{
             }
 
         })
-
-
     }
 
     private fun listTask(viewFragment: View, date: String) {
@@ -163,7 +161,6 @@ class WindowTask : Fragment(), NavigationView.OnNavigationItemSelectedListener{
 
         val layoutManager = LinearLayoutManager(context)
         listTasks!!.layoutManager = layoutManager
-
 
         val dataBaseTask : DataBaseTask?= DataBaseTask()
 
@@ -201,7 +198,7 @@ class WindowTask : Fragment(), NavigationView.OnNavigationItemSelectedListener{
                 if(stringListDay.isNotEmpty())
                     sections.add(SectionHeader(stringListDay, "День"))
 
-                listTasks.adapter = AdapterSection(context!!, sections, date, fragmentManager!!)
+                listTasks.adapter = AdapterSectionTask(context!!, sections, date)
             },
         {
                 throwable->

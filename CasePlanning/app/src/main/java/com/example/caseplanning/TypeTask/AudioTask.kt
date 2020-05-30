@@ -57,7 +57,6 @@ class AudioTask : Fragment() {
 
         chronometer = view!!.findViewById<Chronometer>(R.id.timerText)
 
-
         fileName =
             "${Environment.getExternalStorageDirectory().absolutePath}/${System.currentTimeMillis()}record.mp3"
 
@@ -70,8 +69,7 @@ class AudioTask : Fragment() {
             }
         })
 
-
-        if(audioFile != null){
+        if(audioFile != ""){
             val playAndStopRecord = view.findViewById<ImageButton>(R.id.playRecordAndStopRecord)
 
             val playAndStopAudio = view.findViewById<ImageButton>(R.id.playAndStopAudio)

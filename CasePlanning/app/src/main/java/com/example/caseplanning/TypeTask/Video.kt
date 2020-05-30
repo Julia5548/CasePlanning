@@ -44,6 +44,7 @@ class Video : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
 
+        var videoUri:String? = ""
         val view = inflater.inflate(R.layout.video, container, false)
 
         videoFie = view.findViewById<VideoView>(R.id.videoFile)
@@ -52,10 +53,15 @@ class Video : Fragment() {
 
         pageViewModel!!.uri.observe(requireActivity(), Observer { uri ->
             if (uri != null) {
-                outputUriFile = uri.videoUri?.toUri()
+                videoUri = uri.videoUri
                 photoUri = uri.photoUri
                 audioFile = uri.audioUri
                 timeAudio = uri.timeAudio
+                if(videoUri != ""){
+                    outputUriFile = videoUri!!.toUri()
+                }else{
+                    outputUriFile = null
+                }
             }
         })
 

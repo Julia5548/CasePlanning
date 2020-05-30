@@ -52,7 +52,7 @@
                 android:layout_gravity="end|bottom"
                 android:layout_margin="16dp"
                 android:src="@drawable/ic_add"
-                app:backgroundTint="@color/red"
+                app:backgroundTint="@color/azure"
                 tools:ignore="RtlHardcoded" />
 
     </RelativeLayout>

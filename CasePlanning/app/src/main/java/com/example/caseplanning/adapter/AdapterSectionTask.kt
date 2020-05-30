@@ -10,15 +10,12 @@ import android.view.ViewGroup
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.cardview.widget.CardView
-import androidx.core.net.toUri
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
-import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.caseplanning.DataBase.DataBaseTask
 import com.example.caseplanning.DataBase.Task
 import com.example.caseplanning.EditElements.EditTask
-import com.example.caseplanning.EditElements.PhotoEdit
 import com.example.caseplanning.R
 import com.example.caseplanning.mainWindow.FragmentDialog
 import com.intrusoft.sectionedrecyclerview.SectionRecyclerViewAdapter
@@ -28,8 +25,8 @@ import java.util.*
 import kotlin.collections.ArrayList
 
 
-class AdapterSection(val context: Context, data: ArrayList<SectionHeader>, day: String?, fragmentManager: FragmentManager) :
-    SectionRecyclerViewAdapter<SectionHeader, Task, AdapterSection.SectionViewHolder, AdapterSection.ChildViewHolder>(
+class AdapterSectionTask(val context: Context, data: ArrayList<SectionHeader>, day: String?) :
+    SectionRecyclerViewAdapter<SectionHeader, Task, AdapterSectionTask.SectionViewHolder, AdapterSectionTask.ChildViewHolder>(
         context,
         data
     ) {

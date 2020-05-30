@@ -1,14 +1,10 @@
 package com.example.caseplanning.DataBase
 
-import android.util.Log
 import com.androidhuman.rxfirebase2.database.RxFirebaseDatabase
-import com.androidhuman.rxfirebase2.database.dataChanges
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.database.*
 import io.reactivex.Observable
 import io.reactivex.Observer
-import io.reactivex.disposables.Disposable
 import kotlin.collections.HashMap
 
 class DataBaseTask {
@@ -130,8 +126,12 @@ class DataBaseTask {
                         val folders = arrayListOf<Folder>()
                         if (dataSnapshot.exists()) {
                             val table = dataSnapshot.getValue(genericList)
-                            for ((_, value) in table!!) {
-                                folders.add(value)
+                            for ((key, value) in table!!) {
+                                folders.add(Folder(
+                                    id = key,
+                                    name = value.name,
+                                    tasks = value.tasks
+                                ))
                             }
                         }
                         observer!!.onNext(folders)
@@ -190,6 +190,16 @@ class DataBaseTask {
             .reference
             .child(FirebaseAuth.getInstance().currentUser!!.uid)
             .child("Tasks")
+            .child(key)
+            .removeValue()
+    }
+
+    fun deletedDataFolder(key:String){
+        FirebaseDatabase
+            .getInstance()
+            .reference
+            .child(FirebaseAuth.getInstance().currentUser!!.uid)
+            .child("Folders")
             .child(key)
             .removeValue()
     }

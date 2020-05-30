@@ -19,7 +19,7 @@ class AdapterRecyclerView(val context: Context, data:ArrayList<String>):Recycler
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
 
-        val view = LayoutInflater.from(context).inflate(R.layout.card_list_subtask, parent, false)
+        val view = LayoutInflater.from(context).inflate(R.layout.card_folder, parent, false)
 
         return ViewHolder(view)
     }

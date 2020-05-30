@@ -1,10 +1,19 @@
 package com.example.caseplanning.Sidebar
 
+import android.content.DialogInterface
 import android.content.Intent
+import android.graphics.Color
 import android.os.Bundle
-import android.view.*
-import android.widget.*
-import androidx.appcompat.app.ActionBar
+import android.util.Log
+import android.view.LayoutInflater
+import android.view.MenuItem
+import android.view.View
+import android.view.ViewGroup
+import android.widget.AdapterView
+import android.widget.RelativeLayout
+import android.widget.TextView
+import android.widget.Toast
+import androidx.annotation.NonNull
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
@@ -12,6 +21,7 @@ import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentTransaction
+import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import butterknife.ButterKnife
@@ -22,10 +32,12 @@ import com.example.caseplanning.DataBase.Folder
 import com.example.caseplanning.DataBase.Task
 import com.example.caseplanning.MainActivity
 import com.example.caseplanning.R
-import com.example.caseplanning.mainWindow.WindowTask
 import com.example.caseplanning.adapter.AdapterRecyclerView
+import com.example.caseplanning.adapter.SwipeToDeleteCallback
+import com.example.caseplanning.mainWindow.WindowTask
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.navigation.NavigationView
+import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.textfield.TextInputLayout
 import com.google.firebase.auth.FirebaseAuth
 import com.miguelcatalan.materialsearchview.MaterialSearchView
@@ -37,9 +49,7 @@ class GroupTask : Fragment(), NavigationView.OnNavigationItemSelectedListener,
     var pageViewModel: MyViewModel? = null
     var mDrawerLayout: DrawerLayout? = null
     lateinit var disposable: Disposable
-    private var actionBar: ActionBar? = null
-    private var cancel : MenuItem? = null
-    private var edit : MenuItem? = null
+    var mAdapter: AdapterRecyclerView? = null
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -51,18 +61,17 @@ class GroupTask : Fragment(), NavigationView.OnNavigationItemSelectedListener,
         val toolbar = viewFragment.findViewById<Toolbar>(R.id.toolbarGroup)
         val activity = activity as AppCompatActivity?
         activity!!.setSupportActionBar(toolbar)
-        actionBar = activity.supportActionBar
+        val actionBar = activity.supportActionBar
         actionBar!!.title = "Группы задач"
 
         ButterKnife.bind(this, viewFragment)
-
 
         /*кнопка поиска*/
         val search = viewFragment.findViewById<MaterialSearchView>(R.id.search)
         search.closeSearch()
 
         /*боковое меню*/
-         mDrawerLayout = viewFragment.findViewById<DrawerLayout>(R.id.drawerLayout)
+        mDrawerLayout = viewFragment.findViewById<DrawerLayout>(R.id.drawerLayout)
         /*подключение обработчика события кнопок бокового меню*/
         val navigationView = viewFragment.findViewById<NavigationView>(R.id.navigationView)
         navigationView.setNavigationItemSelectedListener(this)
@@ -115,40 +124,58 @@ class GroupTask : Fragment(), NavigationView.OnNavigationItemSelectedListener,
                 val nameFolderList = arrayListOf<String>()
                 for (folder in folders)
                     nameFolderList.add(folder.name)
-                listFolder.adapter = AdapterRecyclerView(context!!, nameFolderList)
+                mAdapter = AdapterRecyclerView(context!!, nameFolderList)
+                listFolder.adapter = mAdapter
+                enableSwipeToDeleteAndUndo(listFolder)
             },
                 { throwable ->
                     throwable.printStackTrace()
                 })
-
     }
 
-    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
-        inflater.inflate(R.menu.edit, menu)
-        cancel= menu.findItem(R.id.cancel_edit)
-        edit = menu.findItem(R.id.edit)
-        return super.onCreateOptionsMenu(menu, inflater)
-    }
+    private fun enableSwipeToDeleteAndUndo(listFolder: RecyclerView) {
+        val dataBaseTask = DataBaseTask()
+        val relativeLayout = view!!.findViewById<RelativeLayout>(R.id.relativeLayout)
+        val disposable = dataBaseTask
+            .retrieveDataFolders()
+            .subscribe { folders ->
+                var taskList: ArrayList<Task>? = null
+                val swipeToDeleteCallback: SwipeToDeleteCallback =
+                    object : SwipeToDeleteCallback(context!!) {
+                        override fun onSwiped(
+                            @NonNull viewHolder: RecyclerView.ViewHolder,
+                            direction: Int
+                        ) {
+                            val position = viewHolder.adapterPosition
+                            val item: String = mAdapter!!.mData[position]
+                            for (folder in folders) {
+                                if (folder.name == item) {
+                                    taskList = folder.tasks
+                                    dataBaseTask.deletedDataFolder(folder.id)
+                                    mAdapter!!.mData.removeAt(position)
+                                    mAdapter!!.notifyDataSetChanged()
 
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        return when (item.itemId){
-            R.id.edit->{
-                if(item.title == "Удалить"){
-                    item.title = "Изменить"
-                    cancel?.isVisible = false
-                }else {
-                    item.title = "Удалить"
-                    cancel?.isVisible = true
-                }
-                true
+                                    val snackbar = Snackbar.make(
+                                        relativeLayout,
+                                        "Папка была удалена из списка",
+                                        Snackbar.LENGTH_LONG
+                                    )
+                                    snackbar.setAction("Отменить") { _ ->
+                                        val folderItem =
+                                            Folder(id = "", name = item, tasks = taskList)
+                                        dataBaseTask.createFolder(folderItem)
+                                        mAdapter!!.notifyDataSetChanged()
+                                        listFolder.scrollToPosition(position)
+                                    }
+                                    snackbar.setActionTextColor(Color.YELLOW)
+                                    snackbar.show()
+                                }
+                            }
+                        }
+                    }
+                val itemTouchhelper = ItemTouchHelper(swipeToDeleteCallback)
+                itemTouchhelper.attachToRecyclerView(listFolder)
             }
-            R.id.cancel_edit->{
-                edit?.title = "Изменить"
-                cancel?.isVisible = false
-                true
-            }
-            else-> return super.onOptionsItemSelected(item)
-        }
     }
 
     @OnClick(R.id.addFolder)
@@ -174,7 +201,6 @@ class GroupTask : Fragment(), NavigationView.OnNavigationItemSelectedListener,
 
                 Toast.makeText(context, "Папка $nameNewFolder успешно создана", Toast.LENGTH_SHORT)
                     .show()
-
             }
             .setNegativeButton("Отменить", null)
             .show()
@@ -274,7 +300,7 @@ class GroupTask : Fragment(), NavigationView.OnNavigationItemSelectedListener,
         super.onDestroy()
         mDrawerLayout!!.removeAllViews()
         pageViewModel = null
-        if(!disposable.isDisposed)
+        if (!disposable.isDisposed)
             disposable.dispose()
     }
 }
