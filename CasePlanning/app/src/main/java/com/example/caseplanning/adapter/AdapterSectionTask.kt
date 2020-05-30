@@ -202,7 +202,6 @@ class AdapterSectionTask(val context: Context, data: ArrayList<SectionHeader>, d
             val disposable = dataBaseTask
                 .retrieveData()
                 .subscribe({ tasks ->
-
                     for (taskData in tasks) {
                         if (taskData.name == task.name && taskData.day == task.day) {
 
@@ -210,7 +209,6 @@ class AdapterSectionTask(val context: Context, data: ArrayList<SectionHeader>, d
                                 (context as AppCompatActivity).supportFragmentManager,
                                 "Dialog"
                             )
-
                         }
                     }
                 },

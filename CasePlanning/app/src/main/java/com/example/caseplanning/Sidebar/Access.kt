@@ -18,6 +18,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import butterknife.ButterKnife
 import com.example.caseplanning.DataBase.DataBaseTask
+import com.example.caseplanning.GroupTask.GroupTask
 import com.example.caseplanning.MainActivity
 import com.example.caseplanning.R
 import com.example.caseplanning.mainWindow.WindowTask
@@ -118,7 +119,8 @@ class Access: Fragment(), NavigationView.OnNavigationItemSelectedListener {
             /*группа задач*/
             R.id.groupTask -> {
 
-                val groupTask: Fragment = GroupTask()
+                val groupTask: Fragment =
+                    GroupTask()
                 val transaction: FragmentTransaction = fragmentManager!!.beginTransaction()
 
                 transaction.replace(R.id.linerLayout, groupTask)

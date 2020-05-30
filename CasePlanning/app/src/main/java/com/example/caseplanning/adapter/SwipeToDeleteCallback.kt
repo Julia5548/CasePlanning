@@ -28,8 +28,6 @@ open class SwipeToDeleteCallback(context: Context) :
     private var deleteDrawable: Drawable? = null
     private var intrinsicHeight: Int = 0
     private var intrinsicWidth: Int = 0
-   /* private var mAdapter: AdapterRecyclerView? = null
-    private val mRelativeLayout : RelativeLayout = relativeLayout*/
 
     init {
         mClearPaint = Paint()

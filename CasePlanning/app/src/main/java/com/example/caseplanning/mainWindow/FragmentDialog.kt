@@ -19,7 +19,7 @@ import androidx.recyclerview.widget.RecyclerView
 import butterknife.ButterKnife
 import com.example.caseplanning.DataBase.Task
 import com.example.caseplanning.R
-import com.example.caseplanning.adapter.AdapterRecyclerView
+import com.example.caseplanning.adapter.AdapterRecyclerViewFolder
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import java.lang.Exception
 
@@ -102,7 +102,7 @@ class FragmentDialog(val dataTask: Task?) : DialogFragment(), DialogInterface.On
                     subTasks.add(subTask)
                 }
 
-                listSubTask.adapter = AdapterRecyclerView(context!!, subTasks)
+                listSubTask.adapter = AdapterRecyclerViewFolder(context!!, subTasks)
                 subTasks = arrayListOf()
                 if (view.parent != null) {
                     (view.parent as ViewGroup).removeView(view)

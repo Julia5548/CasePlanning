@@ -34,7 +34,7 @@
             <item
                     android:id="@+id/techSupport"
                     android:icon="@drawable/ic_trending_up_black_24dp"
-                    android:title="@string/setting" />
+                    android:title="@string/techSupport" />
         </menu>
     </item>
 

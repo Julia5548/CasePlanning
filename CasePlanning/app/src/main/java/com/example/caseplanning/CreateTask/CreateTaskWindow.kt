@@ -201,7 +201,6 @@ class CreateTaskWindow : Fragment() {
                 onClickAddSubTask()
             }
         }
-
     }
 
     @SuppressLint("SetTextI18n")
@@ -229,7 +228,6 @@ class CreateTaskWindow : Fragment() {
     fun onClickColor() {
 
         val color = view!!.findViewById<ImageButton>(R.id.color)
-
         val view = layoutInflater.inflate(R.layout.colors, null)
         val colorList = view.findViewById<ListView>(R.id.listColors)
         val colors = arrayListOf<String>(
@@ -663,6 +661,4 @@ class CreateTaskWindow : Fragment() {
         btnOkSubTasks = null
         pageViewModel = null
     }
-
-
 }

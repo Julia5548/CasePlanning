@@ -1,6 +1,5 @@
-package com.example.caseplanning.Sidebar
+package com.example.caseplanning.GroupTask
 
-import android.content.DialogInterface
 import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
@@ -32,7 +31,11 @@ import com.example.caseplanning.DataBase.Folder
 import com.example.caseplanning.DataBase.Task
 import com.example.caseplanning.MainActivity
 import com.example.caseplanning.R
-import com.example.caseplanning.adapter.AdapterRecyclerView
+import com.example.caseplanning.Sidebar.Access
+import com.example.caseplanning.Sidebar.Progress
+import com.example.caseplanning.Sidebar.Setting
+import com.example.caseplanning.Sidebar.TechSupport
+import com.example.caseplanning.adapter.AdapterRecyclerViewFolder
 import com.example.caseplanning.adapter.SwipeToDeleteCallback
 import com.example.caseplanning.mainWindow.WindowTask
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -49,14 +52,14 @@ class GroupTask : Fragment(), NavigationView.OnNavigationItemSelectedListener,
     var pageViewModel: MyViewModel? = null
     var mDrawerLayout: DrawerLayout? = null
     lateinit var disposable: Disposable
-    var mAdapter: AdapterRecyclerView? = null
+    var mAdapterFolder: AdapterRecyclerViewFolder? = null
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        val viewFragment = inflater.inflate(R.layout.folder_tasks, container, false)
+        val viewFragment = inflater.inflate(R.layout.folders, container, false)
 
         val toolbar = viewFragment.findViewById<Toolbar>(R.id.toolbarGroup)
         val activity = activity as AppCompatActivity?
@@ -124,8 +127,8 @@ class GroupTask : Fragment(), NavigationView.OnNavigationItemSelectedListener,
                 val nameFolderList = arrayListOf<String>()
                 for (folder in folders)
                     nameFolderList.add(folder.name)
-                mAdapter = AdapterRecyclerView(context!!, nameFolderList)
-                listFolder.adapter = mAdapter
+                mAdapterFolder = AdapterRecyclerViewFolder(context!!, nameFolderList)
+                listFolder.adapter = mAdapterFolder
                 enableSwipeToDeleteAndUndo(listFolder)
             },
                 { throwable ->
@@ -147,13 +150,13 @@ class GroupTask : Fragment(), NavigationView.OnNavigationItemSelectedListener,
                             direction: Int
                         ) {
                             val position = viewHolder.adapterPosition
-                            val item: String = mAdapter!!.mData[position]
+                            val item: String = mAdapterFolder!!.mData[position]
                             for (folder in folders) {
                                 if (folder.name == item) {
                                     taskList = folder.tasks
                                     dataBaseTask.deletedDataFolder(folder.id)
-                                    mAdapter!!.mData.removeAt(position)
-                                    mAdapter!!.notifyDataSetChanged()
+                                    mAdapterFolder!!.mData.removeAt(position)
+                                    mAdapterFolder!!.notifyDataSetChanged()
 
                                     val snackbar = Snackbar.make(
                                         relativeLayout,
@@ -164,7 +167,7 @@ class GroupTask : Fragment(), NavigationView.OnNavigationItemSelectedListener,
                                         val folderItem =
                                             Folder(id = "", name = item, tasks = taskList)
                                         dataBaseTask.createFolder(folderItem)
-                                        mAdapter!!.notifyDataSetChanged()
+                                        mAdapterFolder!!.notifyDataSetChanged()
                                         listFolder.scrollToPosition(position)
                                     }
                                     snackbar.setActionTextColor(Color.YELLOW)
@@ -211,7 +214,8 @@ class GroupTask : Fragment(), NavigationView.OnNavigationItemSelectedListener,
             /*группа задач*/
             R.id.groupTask -> {
 
-                val groupTask: Fragment = GroupTask()
+                val groupTask: Fragment =
+                    GroupTask()
                 val transaction: FragmentTransaction = fragmentManager!!.beginTransaction()
 
                 transaction.replace(R.id.linerLayout, groupTask)
@@ -241,7 +245,8 @@ class GroupTask : Fragment(), NavigationView.OnNavigationItemSelectedListener,
             /*прогресс выполнения задач*/
             R.id.progress -> {
 
-                val progress: Fragment = Progress()
+                val progress: Fragment =
+                    Progress()
                 val transaction: FragmentTransaction = fragmentManager!!.beginTransaction()
 
                 transaction.replace(R.id.linerLayout, progress)
@@ -252,7 +257,8 @@ class GroupTask : Fragment(), NavigationView.OnNavigationItemSelectedListener,
             /*настройки*/
             R.id.setting -> {
 
-                val setting: Fragment = Setting()
+                val setting: Fragment =
+                    Setting()
                 val transaction: FragmentTransaction = fragmentManager!!.beginTransaction()
 
                 transaction.replace(R.id.linerLayout, setting)
@@ -263,7 +269,8 @@ class GroupTask : Fragment(), NavigationView.OnNavigationItemSelectedListener,
             /*техподдержка*/
             R.id.techSupport -> {
 
-                val techSupport: Fragment = TechSupport()
+                val techSupport: Fragment =
+                    TechSupport()
                 val transaction: FragmentTransaction = fragmentManager!!.beginTransaction()
 
                 transaction.replace(R.id.linerLayout, techSupport)
@@ -293,7 +300,7 @@ class GroupTask : Fragment(), NavigationView.OnNavigationItemSelectedListener,
     ) {
 
         val idItem = id
-
+        Log.d("nomer", "${idItem}")
     }
 
     override fun onDestroy() {

@@ -21,6 +21,7 @@ import com.example.caseplanning.CreateTask.CreateTaskWindow
 import com.example.caseplanning.CreateTask.MyViewModel
 import com.example.caseplanning.DataBase.DataBaseTask
 import com.example.caseplanning.DataBase.Task
+import com.example.caseplanning.GroupTask.GroupTask
 import com.example.caseplanning.MainActivity
 import com.example.caseplanning.R
 import com.example.caseplanning.Sidebar.*
@@ -165,7 +166,7 @@ class WindowTask : Fragment(), NavigationView.OnNavigationItemSelectedListener{
         val dataBaseTask : DataBaseTask?= DataBaseTask()
 
 
-        /*подписываемся и выводим данные из бд, при выходе надо удалить подписчиков*/
+        /*подписываемся и выводим данные из бд*/
         disposable = dataBaseTask!!
             .retrieveData()
             .subscribe ({ task ->
@@ -268,7 +269,8 @@ class WindowTask : Fragment(), NavigationView.OnNavigationItemSelectedListener{
             /*группа задач*/
             R.id.groupTask -> {
 
-                val groupTask: Fragment = GroupTask()
+                val groupTask: Fragment =
+                    GroupTask()
                 val transaction: FragmentTransaction = fragmentManager!!.beginTransaction()
 
                 transaction.replace(R.id.linerLayout, groupTask)

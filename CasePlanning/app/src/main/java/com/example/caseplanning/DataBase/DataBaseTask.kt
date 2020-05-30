@@ -153,75 +153,59 @@ class DataBaseTask {
             .setValue(users)
     }
 
-    fun createTask(task: Task) {
-
-        FirebaseDatabase
+    fun createTask(task: Task) = FirebaseDatabase
             .getInstance()
             .reference
             .child(FirebaseAuth.getInstance().currentUser!!.uid)
             .child("Tasks")
             .push()
             .setValue(task)
-    }
 
-    fun createFolder(folder: Folder) {
-        FirebaseDatabase
+    fun createFolder(folder: Folder) = FirebaseDatabase
             .getInstance()
             .reference
             .child(FirebaseAuth.getInstance().currentUser!!.uid)
             .child("Folders")
             .push()
             .setValue(folder)
-    }
 
-    fun updateDataTask(task: Task, key: String) {
-        val databaseReference = FirebaseDatabase
+    fun updateDataTask(task: Task, key: String) = FirebaseDatabase
             .getInstance()
             .reference
             .child(FirebaseAuth.getInstance().currentUser!!.uid)
             .child("Tasks")
             .child(key)
             .setValue(task)
-    }
 
-    fun deletedDataTask(key: String){
-        val databaseReference = FirebaseDatabase
+    fun updateDataFolder(folder : Folder, key : String) = FirebaseDatabase
+        .getInstance()
+        .reference
+        .child(FirebaseAuth.getInstance().currentUser!!.uid)
+        .child("Folders")
+        .child(key)
+        .setValue(folder)
+
+    fun deletedDataTask(key: String) = FirebaseDatabase
             .getInstance()
             .reference
             .child(FirebaseAuth.getInstance().currentUser!!.uid)
             .child("Tasks")
             .child(key)
             .removeValue()
-    }
 
-    fun deletedDataFolder(key:String){
-        FirebaseDatabase
+    fun deletedDataFolder(key:String) = FirebaseDatabase
             .getInstance()
             .reference
             .child(FirebaseAuth.getInstance().currentUser!!.uid)
             .child("Folders")
             .child(key)
             .removeValue()
-    }
 
-    fun retrieveData(): Observable<List<Task>> {
+    fun retrieveData(): Observable<List<Task>> = readData()
 
-        return readData()
-    }
+    fun retrieveDataUser(): Observable<Users> = readUser()
 
-    fun retrieveDataUser(): Observable<Users> {
+    fun retrieveDataUid(): Observable<List<UID>> = readUid()
 
-        return readUser()
-    }
-
-    fun retrieveDataUid(): Observable<List<UID>> {
-
-        return readUid()
-    }
-
-    fun retrieveDataFolders(): Observable<List<Folder>> {
-
-        return readFolder()
-    }
-
+    fun retrieveDataFolders(): Observable<List<Folder>> = readFolder()
 }

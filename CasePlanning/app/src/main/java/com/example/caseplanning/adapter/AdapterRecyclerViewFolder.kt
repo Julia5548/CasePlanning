@@ -13,18 +13,19 @@ import com.example.caseplanning.GroupTask.ListTaskGroup
 import com.example.caseplanning.R
 import com.google.android.material.card.MaterialCardView
 
-class AdapterRecyclerView(val context: Context, data:ArrayList<String>): RecyclerView.Adapter<AdapterRecyclerView.ViewHolder>() {
+class AdapterRecyclerViewFolder(val context: Context, data:ArrayList<String>):RecyclerView.Adapter<AdapterRecyclerViewFolder.ViewHolder>() {
 
     val mData : ArrayList<String> = data
 
     inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView){
 
         val nameItem = itemView.findViewById<TextView>(R.id.nameItemList)
+        val cardView = itemView.findViewById<MaterialCardView>(R.id.card_view)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
 
-        val view = LayoutInflater.from(context).inflate(R.layout.card_list_task, parent, false)
+        val view = LayoutInflater.from(context).inflate(R.layout.card_folder, parent, false)
 
         return ViewHolder(view)
     }
@@ -32,6 +33,23 @@ class AdapterRecyclerView(val context: Context, data:ArrayList<String>): Recycle
     override fun getItemCount(): Int = mData.size
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+
         holder.nameItem.text = mData[position]
+        holder.cardView.setOnClickListener {
+
+            val database = DataBaseTask()
+            val disposal = database
+                .retrieveDataFolders()
+                .subscribe {folders->
+                    for(folder in folders){
+                        if(folder.name == mData[position])
+                        {
+                            val listTaskGroup : Fragment = ListTaskGroup(folder.name, folder.tasks)
+                            (context as AppCompatActivity).supportFragmentManager.beginTransaction()
+                                .replace(R.id.linerLayout, listTaskGroup).addToBackStack(null).commit()
+                        }
+                    }
+                }
+        }
     }
 }

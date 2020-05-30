@@ -55,4 +55,5 @@
     <string name="tomorrow">Завтра</string>
     <string name="subTask"><u>Подзадачи</u></string>
     <string name="start">Запустить</string>
+    <string name="techSupport">Тех.поддержка</string>
 </resources>

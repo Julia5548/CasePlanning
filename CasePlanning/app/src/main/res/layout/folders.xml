@@ -14,7 +14,7 @@
             android:orientation="vertical">
 
         <androidx.appcompat.widget.Toolbar
-                android:id="@+id/toolbarTask"
+                android:id="@+id/toolbarGroup"
                 style="@style/Toolbar"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
@@ -29,32 +29,13 @@
         </com.miguelcatalan.materialsearchview.MaterialSearchView>
 
 
-
-        <com.shrikanthravi.collapsiblecalendarview.widget.CollapsibleCalendar
-                android:layout_width="match_parent"
-                style="@style/Widget.CalendarView.Custom"
-                android:id="@+id/linearLayoutCalendar"
-                android:layout_below="@+id/toolbarTask"
-                android:layout_height="wrap_content"
-                app:primaryColor="@color/textWhite"
-                app:textColor="@android:color/widget_edittext_dark"
-                app:selectedItem_textColor="@color/textWhite"
-                app:todayItem_textColor="@android:color/widget_edittext_dark"
-                app:todayItem_background="@drawable/circle_primary_color_stroke_background"
-                app:selectedItem_background="@drawable/circle_primary_color_solid_backround"
-                app:buttonLeft_drawableTintColor="@android:color/primary_text_light"
-                app:buttonRight_drawableTintColor="@android:color/widget_edittext_dark"
-                app:expandIconColor="@android:color/widget_edittext_dark" />
-
-
         <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_below="@+id/linearLayoutCalendar">
-
+                android:layout_below="@+id/toolbarGroup">
 
             <androidx.recyclerview.widget.RecyclerView
-                    android:id="@+id/listViewTask"
+                    android:id="@+id/listViewFolder"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     tools:ignore="NestedScrolling" />
@@ -62,15 +43,18 @@
         </LinearLayout>
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
-                android:id="@+id/addTask"
+                android:id="@+id/addFolder"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentEnd="true"
+                android:layout_alignParentRight="true"
                 android:layout_alignParentBottom="true"
                 android:layout_gravity="end|bottom"
                 android:layout_margin="16dp"
                 android:src="@drawable/ic_add"
-                app:backgroundTint="@color/azure" />
+                app:backgroundTint="@color/azure"
+                tools:ignore="RtlHardcoded" />
+
     </RelativeLayout>
 
     <com.google.android.material.navigation.NavigationView
