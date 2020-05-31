@@ -5,13 +5,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
-import androidx.appcompat.app.AppCompatActivity
-import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.RecyclerView
-import com.example.caseplanning.DataBase.DataBaseTask
-import com.example.caseplanning.GroupTask.ListTaskGroup
 import com.example.caseplanning.R
-import com.google.android.material.card.MaterialCardView
 
 class AdapterRecyclerView(val context: Context, data:ArrayList<String>): RecyclerView.Adapter<AdapterRecyclerView.ViewHolder>() {
 

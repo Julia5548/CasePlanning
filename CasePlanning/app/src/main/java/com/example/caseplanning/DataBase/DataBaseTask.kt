@@ -201,11 +201,19 @@ class DataBaseTask {
             .child(key)
             .removeValue()
 
-    fun retrieveData(): Observable<List<Task>> = readData()
+    fun retrieveData(): Observable<List<Task>> {
+        return readData()
+    }
 
-    fun retrieveDataUser(): Observable<Users> = readUser()
+    fun retrieveDataUser(): Observable<Users> {
+        return readUser()
+    }
 
-    fun retrieveDataUid(): Observable<List<UID>> = readUid()
+    fun retrieveDataUid(): Observable<List<UID>> {
+        return readUid()
+    }
 
-    fun retrieveDataFolders(): Observable<List<Folder>> = readFolder()
+    fun retrieveDataFolders(): Observable<List<Folder>> {
+        return readFolder()
+    }
 }

@@ -44,7 +44,7 @@ class AdapterRecyclerViewFolder(val context: Context, data:ArrayList<String>):Re
                     for(folder in folders){
                         if(folder.name == mData[position])
                         {
-                            val listTaskGroup : Fragment = ListTaskGroup(folder.name, folder.tasks)
+                            val listTaskGroup : Fragment = ListTaskGroup(folder.name, folder.tasks, folder.id)
                             (context as AppCompatActivity).supportFragmentManager.beginTransaction()
                                 .replace(R.id.linerLayout, listTaskGroup).addToBackStack(null).commit()
                         }
