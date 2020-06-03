@@ -11,7 +11,6 @@ import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.cardview.widget.CardView
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.caseplanning.DataBase.DataBaseTask
 import com.example.caseplanning.DataBase.Task
@@ -205,7 +204,7 @@ class AdapterSectionTask(val context: Context, data: ArrayList<SectionHeader>, d
                     for (taskData in tasks) {
                         if (taskData.name == task.name && taskData.day == task.day) {
 
-                            FragmentDialog(taskData).show(
+                            FragmentDialog(taskData, disposable).show(
                                 (context as AppCompatActivity).supportFragmentManager,
                                 "Dialog"
                             )

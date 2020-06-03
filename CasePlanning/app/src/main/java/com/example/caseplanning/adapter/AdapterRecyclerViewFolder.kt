@@ -25,7 +25,7 @@ class AdapterRecyclerViewFolder(val context: Context, data:ArrayList<String>):Re
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
 
-        val view = LayoutInflater.from(context).inflate(R.layout.card_folder, parent, false)
+        val view = LayoutInflater.from(context).inflate(R.layout.card, parent, false)
 
         return ViewHolder(view)
     }

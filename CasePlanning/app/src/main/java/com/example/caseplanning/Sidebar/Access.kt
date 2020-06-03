@@ -18,6 +18,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import butterknife.ButterKnife
 import com.example.caseplanning.DataBase.DataBaseTask
+import com.example.caseplanning.DataBase.Users
 import com.example.caseplanning.GroupTask.GroupTask
 import com.example.caseplanning.MainActivity
 import com.example.caseplanning.R
@@ -28,12 +29,11 @@ import com.google.firebase.auth.FirebaseAuth
 import com.miguelcatalan.materialsearchview.MaterialSearchView
 import io.reactivex.disposables.Disposable
 
-class Access: Fragment(), NavigationView.OnNavigationItemSelectedListener {
-
+class Access : Fragment(), NavigationView.OnNavigationItemSelectedListener {
 
     lateinit var disposable: Disposable
     private lateinit var mDrawerLayout: DrawerLayout
-
+    private var list_uid: ArrayList<String>? = arrayListOf()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -50,10 +50,8 @@ class Access: Fragment(), NavigationView.OnNavigationItemSelectedListener {
 
         ButterKnife.bind(this, viewFragment)
 
-
-
         /*кнопка поиска*/
-       val search = viewFragment.findViewById<MaterialSearchView>(R.id.search)
+        val search = viewFragment.findViewById<MaterialSearchView>(R.id.search)
         search.closeSearch()
 
         /*боковое меню*/
@@ -79,7 +77,7 @@ class Access: Fragment(), NavigationView.OnNavigationItemSelectedListener {
         val dataBaseTask = DataBaseTask()
 
         disposable = dataBaseTask
-            .retrieveDataUser()
+            .retrieveDataUser(FirebaseAuth.getInstance().currentUser!!.uid)
             .subscribe({ user ->
                 nameUser.text = user.name
                 emailUser.text = user.email
@@ -88,105 +86,112 @@ class Access: Fragment(), NavigationView.OnNavigationItemSelectedListener {
                     throwable.printStackTrace()
                 })
 
-
-        listUsers(viewFragment)
+        createListUid(viewFragment)
         return viewFragment
     }
 
+    private fun getListUid(): ArrayList<String>? = list_uid
 
-    private fun listUsers(viewFragment: View) {
+    private fun createListUid(view: View) {
+        val dataBaseTask = DataBaseTask()
+        disposable = dataBaseTask
+            .retrieveDataUid()
+            .subscribe { uids ->
+                if (list_uid != null) {
+                    if (list_uid!!.size > 0) {
+                        list_uid = arrayListOf()
+                    }
+                    for (uid_user in uids)
+                        list_uid!!.add(uid_user.id!!)
+                    listUsers(view)
+                }
+            }
+    }
 
-        val listUsers = viewFragment.findViewById<RecyclerView>(R.id.listViewUser)
+    private fun listUsers(view: View) {
 
-        val stringList = arrayListOf<String>()
-
-
-
-        stringList.add("Алексей")
-        stringList.add("Юлия")
-        stringList.add("Ольга")
-        stringList.add("Сергей")
-        stringList.add("Евгений")
-
+        val listUsers = view.findViewById<RecyclerView>(R.id.listViewUser)
         val layoutManager = LinearLayoutManager(context)
-        listUsers.layoutManager = layoutManager
 
-        listUsers.adapter = AdapterRecyclerViewAccess(context!!, stringList)
+        val stringList = mutableMapOf<String, Users>()
+        val dataBaseTask = DataBaseTask()
+
+        val uids = getListUid()
+        if (uids != null) {
+            for (uid in uids) {
+                disposable = dataBaseTask
+                    .retrieveDataUser(uid)
+                    .subscribe { user_data ->
+                        if (uid != FirebaseAuth.getInstance().currentUser!!.uid) {
+                            val user =
+                                Users(user_data.name!!, user_data.email!!)
+                            stringList[uid] = user
+                            listUsers.layoutManager = layoutManager
+                            listUsers.adapter =
+                                AdapterRecyclerViewAccess(context!!, stringList)
+                        }
+                    }
+            }
+        }
     }
 
     override fun onNavigationItemSelected(menuItem: MenuItem): Boolean {
         when (menuItem.itemId) {
             /*группа задач*/
             R.id.groupTask -> {
-
                 val groupTask: Fragment =
                     GroupTask()
-                val transaction: FragmentTransaction = fragmentManager!!.beginTransaction()
-
-                transaction.replace(R.id.linerLayout, groupTask)
-                transaction.addToBackStack(null)
-                transaction.commit()
+                fragmentManager!!.beginTransaction()
+                    .replace(R.id.linerLayout, groupTask)
+                    .addToBackStack(null)
+                    .commit()
             }
 
             R.id.tasks -> {
                 val windowTask: Fragment =
                     WindowTask()
-                val transaction: FragmentTransaction = fragmentManager!!.beginTransaction()
-
-                transaction.replace(R.id.linerLayout, windowTask)
-                transaction.addToBackStack(null)
-                transaction.commit()
+                fragmentManager!!.beginTransaction()
+                    .replace(R.id.linerLayout, windowTask)
+                    .addToBackStack(null)
+                    .commit()
             }
             /*доступ к задачам другим людям*/
             R.id.access -> {
-
                 val access: Fragment = Access()
-                val transaction: FragmentTransaction = fragmentManager!!.beginTransaction()
-
-                transaction.replace(R.id.linerLayout, access)
-                transaction.addToBackStack(null)
-                transaction.commit()
-
+                fragmentManager!!.beginTransaction()
+                    .replace(R.id.linerLayout, access)
+                    .addToBackStack(null)
+                    .commit()
             }
             /*прогресс выполнения задач*/
             R.id.progress -> {
-
                 val progress: Fragment = Progress()
-                val transaction: FragmentTransaction = fragmentManager!!.beginTransaction()
-
-                transaction.replace(R.id.linerLayout, progress)
-                transaction.addToBackStack(null)
-                transaction.commit()
-
+                fragmentManager!!.beginTransaction()
+                    .replace(R.id.linerLayout, progress)
+                    .addToBackStack(null)
+                    .commit()
             }
             /*настройки*/
             R.id.setting -> {
-
                 val setting: Fragment = Setting()
-                val transaction: FragmentTransaction = fragmentManager!!.beginTransaction()
-
-                transaction.replace(R.id.linerLayout, setting)
-                transaction.addToBackStack(null)
-                transaction.commit()
-
+                fragmentManager!!.beginTransaction()
+                    .replace(R.id.linerLayout, setting)
+                    .addToBackStack(null)
+                    .commit()
             }
             /*техподдержка*/
             R.id.techSupport -> {
-
                 val techSupport: Fragment = TechSupport()
-                val transaction: FragmentTransaction = fragmentManager!!.beginTransaction()
-
-                transaction.replace(R.id.linerLayout, techSupport)
-                transaction.addToBackStack(null)
-                transaction.commit()
-
+                fragmentManager!!.beginTransaction()
+                    .replace(R.id.linerLayout, techSupport)
+                    .addToBackStack(null)
+                    .commit()
             }
             /*выход пользователя из системы*/
             R.id.signOut -> {
                 val mAuth = FirebaseAuth.getInstance()
                 mAuth.signOut()
                 val intent = Intent(activity!!.applicationContext, MainActivity::class.java)
-                //intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
                 startActivity(intent)
             }
 
@@ -194,9 +199,15 @@ class Access: Fragment(), NavigationView.OnNavigationItemSelectedListener {
         return true
     }
 
+    override fun onPause() {
+        super.onPause()
+        list_uid = null
+    }
+
     override fun onDestroy() {
         super.onDestroy()
-        if(!disposable.isDisposed)
+        list_uid = null
+        if (!disposable.isDisposed)
             disposable.dispose()
     }
 }

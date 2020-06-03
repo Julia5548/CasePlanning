@@ -21,12 +21,17 @@ import com.example.caseplanning.DataBase.Task
 import com.example.caseplanning.R
 import com.example.caseplanning.adapter.AdapterRecyclerViewFolder
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import io.reactivex.disposables.Disposable
 import java.lang.Exception
 
-class FragmentDialog(val dataTask: Task?) : DialogFragment(), DialogInterface.OnClickListener {
+class FragmentDialog(
+    val dataTask: Task?,
+    disposable: Disposable?
+) : DialogFragment(), DialogInterface.OnClickListener {
 
     private var mediaPlayer: MediaPlayer? = null
     private var time: String = ""
+    private val mDisposable = disposable
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -63,7 +68,12 @@ class FragmentDialog(val dataTask: Task?) : DialogFragment(), DialogInterface.On
                 fragmentManager!!.beginTransaction().replace(R.id.linerLayout, Timer(time)).addToBackStack(null).commit()
                 dialog!!.dismiss()
             }
-            Dialog.BUTTON_POSITIVE -> dialog!!.dismiss()
+            Dialog.BUTTON_POSITIVE -> {
+                dialog!!.dismiss()
+
+                if(mDisposable != null && !mDisposable.isDisposed)
+                    mDisposable.dispose()
+            }
         }
     }
     private fun createdView(

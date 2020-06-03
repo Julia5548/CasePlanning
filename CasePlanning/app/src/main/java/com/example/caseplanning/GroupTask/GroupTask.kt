@@ -95,7 +95,7 @@ class GroupTask : Fragment(), NavigationView.OnNavigationItemSelectedListener,
 
         val dataBaseTask = DataBaseTask()
         disposable = dataBaseTask
-            .retrieveDataUser()
+            .retrieveDataUser(FirebaseAuth.getInstance().currentUser!!.uid)
             .subscribe({ user ->
                 nameUser.text = user.name
                 emailUser.text = user.email

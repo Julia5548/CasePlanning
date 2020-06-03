@@ -85,9 +85,9 @@ class DataBaseTask {
         }
     }
 
-    fun readUser(): Observable<Users> {
+    fun readUser(uid: String): Observable<Users> {
         val databaseReference =
-            FirebaseDatabase.getInstance().reference.child(FirebaseAuth.getInstance().currentUser!!.uid)
+            FirebaseDatabase.getInstance().reference.child(uid)
                 .child("Users")
         /*подключаем класс подписки, оформляем подписчика */
         return object : Observable<Users>() {
@@ -169,6 +169,15 @@ class DataBaseTask {
             .push()
             .setValue(folder)
 
+    fun updateDataUser(access_user: Users, key:String){
+        FirebaseDatabase
+            .getInstance()
+            .reference
+            .child(key)
+            .child("Users")
+            .setValue(access_user)
+    }
+
     fun updateDataTask(task: Task, key: String) = FirebaseDatabase
             .getInstance()
             .reference
@@ -205,8 +214,8 @@ class DataBaseTask {
         return readData()
     }
 
-    fun retrieveDataUser(): Observable<Users> {
-        return readUser()
+    fun retrieveDataUser(uid: String): Observable<Users> {
+        return readUser(uid)
     }
 
     fun retrieveDataUid(): Observable<List<UID>> {

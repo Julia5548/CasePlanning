@@ -34,14 +34,14 @@ import com.shrikanthravi.collapsiblecalendarview.widget.CollapsibleCalendar
 import io.reactivex.disposables.Disposable
 
 
-class WindowTask : Fragment(), NavigationView.OnNavigationItemSelectedListener{
+class WindowTask : Fragment(), NavigationView.OnNavigationItemSelectedListener {
 
 
     private var search: MaterialSearchView? = null
-    private  var mDrawerLayout: DrawerLayout? = null
+    private var mDrawerLayout: DrawerLayout? = null
     private var mToggle: ActionBarDrawerToggle? = null
     private lateinit var pageViewModel: MyViewModel
-    private lateinit var disposable:Disposable
+    private lateinit var disposable: Disposable
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -80,25 +80,20 @@ class WindowTask : Fragment(), NavigationView.OnNavigationItemSelectedListener{
         /*подключение обработчика события кнопок бокового меню*/
         val navigationView = viewFragment.findViewById<NavigationView>(R.id.navigationView)
         navigationView.setNavigationItemSelectedListener(this)
-        /*  val intent: Intent = activity.intent
-          textTask = intent.getStringExtra("nameTask")*/
 
         val navHeader = navigationView.getHeaderView(0)
         val emailUser = navHeader.findViewById<TextView>(R.id.emailText)
         val nameUser = navHeader.findViewById<TextView>(R.id.nameUser)
-
-
-
-        val dataBaseTask : DataBaseTask?= DataBaseTask()
+        val dataBaseTask: DataBaseTask? = DataBaseTask()
 
         disposable = dataBaseTask!!
-            .retrieveDataUser()
-            .subscribe( { user ->
+            .retrieveDataUser(FirebaseAuth.getInstance().currentUser!!.uid)
+            .subscribe({ user ->
                 nameUser.text = user.name
                 emailUser.text = user.email
+                addAccessUsers(user.accessUsers, navigationView,dataBaseTask)
             },
-                {
-                        throwable->
+                { throwable ->
                     throwable.printStackTrace()
                 })
 
@@ -107,13 +102,31 @@ class WindowTask : Fragment(), NavigationView.OnNavigationItemSelectedListener{
         return viewFragment
     }
 
+    private fun addAccessUsers(accessUsers: ArrayList<String>, navigationView: NavigationView?, dataBaseTask: DataBaseTask) {
+
+        val menu = navigationView!!.menu
+        val subMenu = menu.addSubMenu("Пользователи")
+
+        if(!accessUsers.isEmpty()) {
+            for (user_uid in accessUsers) {
+                disposable = dataBaseTask
+                    .retrieveDataUser(user_uid)
+                    .subscribe {
+                        user->
+                        subMenu.add(user.name)
+                        navigationView.invalidate()
+                    }
+            }
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         setHasOptionsMenu(true)
         super.onCreate(savedInstanceState)
         pageViewModel = ViewModelProviders.of(requireActivity()).get(MyViewModel::class.java)
     }
 
-    fun calendar(view:View) {
+    fun calendar(view: View) {
 
         val calendarView: CollapsibleCalendar = view.findViewById(R.id.linearLayoutCalendar)
         var day = calendarView.selectedDay
@@ -128,15 +141,15 @@ class WindowTask : Fragment(), NavigationView.OnNavigationItemSelectedListener{
             }
 
             override fun onDataUpdate() {
-                }
+            }
 
             override fun onDayChanged() {
             }
 
             override fun onDaySelect() {
-                 day = calendarView.selectedDay
 
-                val date = "${day!!.day}.${day!!.month+1}.${day!!.year}"
+                day = calendarView.selectedDay
+                val date = "${day!!.day}.${day!!.month + 1}.${day!!.year}"
                 listTask(view, date)
                 pageViewModel.day.value = date
             }
@@ -156,20 +169,18 @@ class WindowTask : Fragment(), NavigationView.OnNavigationItemSelectedListener{
     private fun listTask(viewFragment: View, date: String) {
 
 
-       val listTasks = viewFragment.findViewById<RecyclerView>(R.id.listViewTask)
-
-        val sections : ArrayList<SectionHeader> = arrayListOf()
+        val listTasks = viewFragment.findViewById<RecyclerView>(R.id.listViewTask)
+        val sections: ArrayList<SectionHeader> = arrayListOf()
 
         val layoutManager = LinearLayoutManager(context)
         listTasks!!.layoutManager = layoutManager
 
-        val dataBaseTask : DataBaseTask?= DataBaseTask()
-
+        val dataBaseTask: DataBaseTask? = DataBaseTask()
 
         /*подписываемся и выводим данные из бд*/
         disposable = dataBaseTask!!
             .retrieveData()
-            .subscribe ({ task ->
+            .subscribe({ task ->
                 val stringListMorning = arrayListOf<Task>()
                 val stringListDay = arrayListOf<Task>()
                 val stringListEvening = arrayListOf<Task>()
@@ -178,36 +189,53 @@ class WindowTask : Fragment(), NavigationView.OnNavigationItemSelectedListener{
                 for (tasks in task) {
                     if (date == tasks.day) {
                         when (tasks.period) {
-                            "Утро" -> stringListMorning.add(Task(name = tasks.name!!, day = tasks.day))
-                            "День" -> stringListDay.add(Task(name = tasks.name!!, day = tasks.day))
-                            "Вечер" -> stringListEvening.add(Task(name = tasks.name!!, day = tasks.day))
-                            "Один раз в любое время" -> stringList.add(Task(name = tasks.name!!, day = tasks.day))
+                            "Утро" -> stringListMorning.add(
+                                Task(
+                                    name = tasks.name!!,
+                                    day = tasks.day
+                                )
+                            )
+                            "День" -> stringListDay.add(
+                                Task(
+                                    name = tasks.name!!,
+                                    day = tasks.day
+                                )
+                            )
+                            "Вечер" -> stringListEvening.add(
+                                Task(
+                                    name = tasks.name!!,
+                                    day = tasks.day
+                                )
+                            )
+                            "Один раз в любое время" -> stringList.add(
+                                Task(
+                                    name = tasks.name!!,
+                                    day = tasks.day
+                                )
+                            )
                             else -> stringList.add(Task(name = tasks.name!!, day = tasks.day))
                         }
                     }
                 }
 
-                if(stringList.isNotEmpty())
+                if (stringList.isNotEmpty())
                     sections.add(SectionHeader(stringList, "В любое время"))
 
-                if(stringListMorning.isNotEmpty())
+                if (stringListMorning.isNotEmpty())
                     sections.add(SectionHeader(stringListMorning, "Утро"))
 
-                if(stringListEvening.isNotEmpty())
+                if (stringListEvening.isNotEmpty())
                     sections.add(SectionHeader(stringListEvening, "Вечер"))
 
-                if(stringListDay.isNotEmpty())
+                if (stringListDay.isNotEmpty())
                     sections.add(SectionHeader(stringListDay, "День"))
 
                 listTasks.adapter = AdapterSectionTask(context!!, sections, date)
             },
-        {
-                throwable->
-            throwable.printStackTrace()
-        })
-
+                { throwable ->
+                    throwable.printStackTrace()
+                })
     }
-
 
     //inflate the menu
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
@@ -277,8 +305,8 @@ class WindowTask : Fragment(), NavigationView.OnNavigationItemSelectedListener{
                 transaction.addToBackStack(null)
                 transaction.commit()
             }
-            R.id.tasks ->{
-                val windowTask : Fragment =
+            R.id.tasks -> {
+                val windowTask: Fragment =
                     WindowTask()
                 val transaction: FragmentTransaction = fragmentManager!!.beginTransaction()
 
@@ -344,16 +372,16 @@ class WindowTask : Fragment(), NavigationView.OnNavigationItemSelectedListener{
         return true
     }
 
-     override fun onStop() {
+    override fun onStop() {
         super.onStop()
-         super.onPause()
-         if (!disposable.isDisposed)
-             disposable.dispose()
-         mToggle = null
-         search = null
-         mDrawerLayout?.closeDrawer(GravityCompat.START)
-         mDrawerLayout = null
-         Log.d("onStop", "onStop")
+        super.onPause()
+        if (!disposable.isDisposed)
+            disposable.dispose()
+        mToggle = null
+        search = null
+        mDrawerLayout?.closeDrawer(GravityCompat.START)
+        mDrawerLayout = null
+        Log.d("onStop", "onStop")
     }
 
 
