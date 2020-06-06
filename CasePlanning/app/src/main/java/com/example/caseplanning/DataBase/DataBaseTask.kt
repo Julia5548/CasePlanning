@@ -11,10 +11,10 @@ class DataBaseTask {
 
     /*чтение данных из бд*/
 
-    private fun readData(): Observable<List<Task>> {
+    private fun readData(uid: String): Observable<List<Task>> {
 
         val databaseReference =
-            FirebaseDatabase.getInstance().reference.child(FirebaseAuth.getInstance().currentUser!!.uid)
+            FirebaseDatabase.getInstance().reference.child(uid)
                 .child("Tasks")
         /*подключаем класс подписки, оформляем подписчика */
         return object : Observable<List<Task>>() {
@@ -210,8 +210,8 @@ class DataBaseTask {
             .child(key)
             .removeValue()
 
-    fun retrieveData(): Observable<List<Task>> {
-        return readData()
+    fun retrieveData(uid:String): Observable<List<Task>> {
+        return readData(uid)
     }
 
     fun retrieveDataUser(uid: String): Observable<Users> {

@@ -113,7 +113,7 @@ class Access : Fragment(), NavigationView.OnNavigationItemSelectedListener {
         val listUsers = view.findViewById<RecyclerView>(R.id.listViewUser)
         val layoutManager = LinearLayoutManager(context)
 
-        val stringList = mutableMapOf<String, Users>()
+        val stringList = mutableMapOf<String, String>()
         val dataBaseTask = DataBaseTask()
 
         val uids = getListUid()
@@ -123,9 +123,7 @@ class Access : Fragment(), NavigationView.OnNavigationItemSelectedListener {
                     .retrieveDataUser(uid)
                     .subscribe { user_data ->
                         if (uid != FirebaseAuth.getInstance().currentUser!!.uid) {
-                            val user =
-                                Users(user_data.name!!, user_data.email!!)
-                            stringList[uid] = user
+                            stringList[uid] = user_data.name!!
                             listUsers.layoutManager = layoutManager
                             listUsers.adapter =
                                 AdapterRecyclerViewAccess(context!!, stringList)

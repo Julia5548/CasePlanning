@@ -16,17 +16,16 @@ import io.reactivex.disposables.Disposable
 
 class AdapterRecyclerViewAccess(
     val context: Context,
-    data: MutableMap<String, Users>
+    data: MutableMap<String, String>
 ) :
     RecyclerView.Adapter<AdapterRecyclerViewAccess.ViewHolder>() {
 
-    val mData: MutableMap<String, Users> = data
+    val mData: MutableMap<String, String> = data
     private var mAccessUsers: ArrayList<String>? = arrayListOf()
 
     inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
         val nameUser: TextView = itemView.findViewById(R.id.nameUser)
-        val emailUser: TextView = itemView.findViewById(R.id.emailUser)
         val access: TextView = itemView.findViewById(R.id.access)
     }
 
@@ -41,32 +40,26 @@ class AdapterRecyclerViewAccess(
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
 
-        val data_user: MutableMap<String, String> = mutableMapOf()
-        for (user in mData.values) {
-            data_user[user.email!!] = user.name!!
-        }
-        holder.nameUser.text = data_user.values.elementAt(position)
-        holder.emailUser.text = data_user.keys.elementAt(position)
+        holder.nameUser.text = mData.values.elementAt(position)
 
         holder.access.setOnClickListener {
             getDataUser(
                 holder.nameUser.text.toString(),
-                holder.emailUser.text.toString(),
                 mData.keys.elementAt(position)
             )
         }
     }
 
     private fun getListAccess() = mAccessUsers
-    private fun getDataUser(nameUser: String, emailUser: String, uid: String) {
+    private fun getDataUser(nameUser: String, uid: String) {
         var disposable : Disposable? = null
         val dataBaseTask = DataBaseTask()
         disposable = dataBaseTask
             .retrieveDataUser(uid)
             .subscribe { user ->
-                if (user.name!! == nameUser && user.email!! == emailUser) {
+                if (user.name!! == nameUser) {
                     mAccessUsers = user.accessUsers
-                    dataUser(nameUser, emailUser, dataBaseTask, uid, disposable)
+                    dataUser(nameUser, user.email!!, dataBaseTask, uid, disposable)
                 }
             }
     }
@@ -80,7 +73,7 @@ class AdapterRecyclerViewAccess(
 
         MaterialAlertDialogBuilder(context)
             .setTitle("Разрешить?")
-            .setMessage("Действительно ли разрешить доступ пользователю\n$nameUser\n$emailUser")
+            .setMessage("Действительно ли разрешить доступ пользователю $nameUser")
             .setPositiveButton("Разрешить") { dialog, which ->
                 dialog.dismiss()
                 //другим пользователям

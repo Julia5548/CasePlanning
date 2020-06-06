@@ -33,7 +33,7 @@
                     android:title="@string/setting" />
             <item
                     android:id="@+id/techSupport"
-                    android:icon="@drawable/ic_trending_up_black_24dp"
+                    android:icon="@drawable/ic_baseline_headset_mic_24"
                     android:title="@string/techSupport" />
         </menu>
     </item>

@@ -176,8 +176,8 @@ class GroupTask : Fragment(), NavigationView.OnNavigationItemSelectedListener,
                             }
                         }
                     }
-                val itemTouchhelper = ItemTouchHelper(swipeToDeleteCallback)
-                itemTouchhelper.attachToRecyclerView(listFolder)
+                val itemTouchHelper = ItemTouchHelper(swipeToDeleteCallback)
+                itemTouchHelper.attachToRecyclerView(listFolder)
             }
     }
 

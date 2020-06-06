@@ -2,6 +2,7 @@ package com.example.caseplanning.adapter
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.graphics.*
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -19,21 +20,22 @@ import com.example.caseplanning.R
 import com.example.caseplanning.mainWindow.FragmentDialog
 import com.intrusoft.sectionedrecyclerview.SectionRecyclerViewAdapter
 import io.reactivex.disposables.Disposable
-import java.lang.Exception
+import kotlinx.android.synthetic.main.color_date.view.*
 import java.util.*
 import kotlin.collections.ArrayList
 
 
-class AdapterSectionTask(val context: Context, data: ArrayList<SectionHeader>, day: String?) :
+class AdapterSectionTask(val context: Context, data: ArrayList<SectionHeader>, day: String?, uid:String) :
     SectionRecyclerViewAdapter<SectionHeader, Task, AdapterSectionTask.SectionViewHolder, AdapterSectionTask.ChildViewHolder>(
         context,
         data
-    ) {
+    ), Filterable {
 
     private val mData: ArrayList<SectionHeader> = data
     var disposable: Disposable? = null
     val dataBaseTask = DataBaseTask()
     val mDay: String? = day
+    val mUid : String = uid
 
 
     inner class ChildViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -41,6 +43,7 @@ class AdapterSectionTask(val context: Context, data: ArrayList<SectionHeader>, d
         val dataChild: TextView = itemView.findViewById(R.id.nameItemList)
         var cardItem = itemView.findViewById<CardView>(R.id.card_view)
         val txtOptionDigit = itemView.findViewById<TextView>(R.id.txtOptionDigit)
+        val color_task = itemView.findViewById<ImageView>(R.id.color_task)
     }
 
     inner class SectionViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -80,6 +83,8 @@ class AdapterSectionTask(val context: Context, data: ArrayList<SectionHeader>, d
     ) {
 
         childViewHolder!!.dataChild.text = task!!.name
+        if(task.color != "")
+            drawColorTask(task.color!!, childViewHolder)
 
         childViewHolder.txtOptionDigit.setOnClickListener { view ->
             val popupMenu = PopupMenu(context, childViewHolder.txtOptionDigit)
@@ -112,7 +117,7 @@ class AdapterSectionTask(val context: Context, data: ArrayList<SectionHeader>, d
                                 nextDate = "${tomorrowDay}.${month}.${year}"
                             }
                             disposable = dataBaseTask
-                                .retrieveData()
+                                .retrieveData(mUid)
                                 .subscribe { tasks ->
                                     for (taskData in tasks) {
                                         if (taskData.name == task.name && taskData.day == task.day) {
@@ -163,7 +168,7 @@ class AdapterSectionTask(val context: Context, data: ArrayList<SectionHeader>, d
                     R.id.delete -> {
 
                         val disposable = dataBaseTask
-                            .retrieveData()
+                            .retrieveData(mUid)
                             .subscribe { tasks ->
                                 for (taskData in tasks) {
                                     if (taskData.name == task.name && taskData.day == task.day) {
@@ -199,7 +204,7 @@ class AdapterSectionTask(val context: Context, data: ArrayList<SectionHeader>, d
         childViewHolder.cardItem.setOnClickListener { viewHolder ->
 
             val disposable = dataBaseTask
-                .retrieveData()
+                .retrieveData(mUid)
                 .subscribe({ tasks ->
                     for (taskData in tasks) {
                         if (taskData.name == task.name && taskData.day == task.day) {
@@ -220,4 +225,61 @@ class AdapterSectionTask(val context: Context, data: ArrayList<SectionHeader>, d
             disposable!!.dispose()
 
     }
+
+    private fun drawColorTask(
+        color: String,
+        childViewHolder: ChildViewHolder
+    ) {
+        when (color) {
+            "yellow" -> childViewHolder.color_task.setImageResource(R.color.yellow)
+            "green" -> childViewHolder.color_task.setImageResource(R.color.green)
+            "azure" -> childViewHolder.color_task.setImageResource(R.color.azure)
+            "indigo" ->childViewHolder.color_task.setImageResource(R.color.indigo)
+            "orchid" -> childViewHolder.color_task.setImageResource(R.color.orchid)
+            "textBlack" -> childViewHolder.color_task.setImageResource(R.color.textBlack)
+            else -> childViewHolder.color_task.visibility = ImageView.INVISIBLE
+        }
+    }
+
+    //лист с задачами, которые нужно найти
+    var filterTaskList : ArrayList<SectionHeader> = arrayListOf()
+
+    fun setTaskList(mDataTask : ArrayList<Task>){
+        mData.clear()
+        //this.mData.addAll(mDataTask)
+        notifyDataSetChanged()
+    }
+    override fun getFilter(): Filter = filter()
+
+    fun filter() : Filter = object : Filter(){
+        override fun performFiltering(charSequence: CharSequence?): FilterResults {
+            val filteredList : ArrayList<SectionHeader> = arrayListOf()
+            filterTaskList = mData
+
+            if(charSequence == null || charSequence.isEmpty()){
+                filteredList.addAll(filterTaskList)
+            }else{
+                val charString = charSequence.toString().toLowerCase(Locale.ROOT).trim()
+                for(task in filterTaskList)
+                {
+                    for(task_name in task.mDataChildList)
+                    {
+                        if(task_name.name!!.toLowerCase(Locale.ROOT).contains(charString))
+                            filteredList.add(task)
+                    }
+                }
+            }
+            val filerResult = FilterResults()
+            filerResult.values = filteredList
+            return filerResult
+        }
+
+        override fun publishResults(constraint: CharSequence?, results: FilterResults?) {
+            mData.clear()
+            mData.addAll(results!!.values as ArrayList<SectionHeader>)
+            notifyDataSetChanged()
+        }
+
+    }
+
 }

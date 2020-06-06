@@ -26,6 +26,7 @@ import com.example.caseplanning.DataBase.UriTypeTask
 import com.example.caseplanning.mainWindow.MainWindowCasePlanning
 import com.example.caseplanning.R
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.firebase.auth.FirebaseAuth
 
 class EditTask : Fragment() {
 
@@ -93,7 +94,7 @@ class EditTask : Fragment() {
             taskList = arguments!!.getStringArrayList("dataTask")!!
         }
         val disposable = dataBase
-            .retrieveData()
+            .retrieveData(FirebaseAuth.getInstance().currentUser!!.uid)
             .subscribe { tasks ->
                 for (task in tasks) {
                     if (task.name == taskList[0] && task.day == taskList[1]) {

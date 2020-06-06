@@ -36,7 +36,6 @@ open class SwipeToDeleteCallback(context: Context) :
         deleteDrawable = ContextCompat.getDrawable(mContext!!, android.R.drawable.ic_menu_delete)
         intrinsicWidth = deleteDrawable!!.intrinsicWidth
         intrinsicHeight = deleteDrawable!!.intrinsicHeight
-      //  mAdapter = adapter
     }
 
     override fun getMovementFlags(
