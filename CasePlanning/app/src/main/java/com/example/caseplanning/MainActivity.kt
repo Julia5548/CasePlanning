@@ -14,6 +14,7 @@ import androidx.appcompat.widget.Toolbar
 import butterknife.ButterKnife
 import butterknife.OnClick
 import com.example.caseplanning.mainWindow.MainWindowCasePlanning
+import com.example.caseplanning.sign_up.SignUp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 

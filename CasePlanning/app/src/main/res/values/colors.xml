@@ -4,6 +4,7 @@
     <color name="colorPrimaryDark">#32a893</color>
     <color name="colorBtnSignIn">#22baad</color>
     <color name="textWhite">#fafafa</color>
+    <color name="green">#C629C659</color>
     <color name = "red">#FF1100</color>
     <color name="textBlack">#000000</color>
     <color name="lilac_disabled">#F0A0FF</color>
@@ -11,7 +12,6 @@
     <color name="sand_disabled">#6AF493DF</color>
     <color name="sand_checked">#FFD0A0</color>
     <color name="yellow">#FFEB00</color>
-    <color name="green">#9FEE00</color>
     <color name="azure">#87CEEB</color>
     <color name="indigo">#4B0082</color>
     <color name="orchid">#DA70D6</color>

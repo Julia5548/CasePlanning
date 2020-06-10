@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:orientation="horizontal">
+
+    <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardViewProgress"
+            android:layout_width="wrap_content"
+            android:layout_marginTop="5dp"
+            android:layout_height="wrap_content"
+            app:cardBackgroundColor="@color/colorPrimary">
+
+        <RelativeLayout
+                android:id="@+id/relativeLayout_progress"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                tools:ignore="UselessParent">
+
+            <TextView
+                    android:id="@+id/btn_sign_up"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="5dp"
+                    android:text="@string/sign_up"
+                    android:textColor="@color/textWhite"
+                    android:textSize="20sp" />
+
+            <ImageView
+                    android:id="@+id/image_done_error"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:layout_toEndOf="@+id/btn_sign_up"
+                    android:contentDescription="done_error"
+                    android:visibility="gone" />
+
+            <ProgressBar
+                    android:id="@+id/progress_bar"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:layout_toEndOf="@+id/btn_sign_up"
+                    android:indeterminateTint="@color/textWhite"
+                    android:indeterminateTintMode="src_atop"
+                    android:theme="?android:attr/progressBarStyle"
+                    android:visibility="gone" />
+        </RelativeLayout>
+
+    </com.google.android.material.card.MaterialCardView>
+</RelativeLayout>

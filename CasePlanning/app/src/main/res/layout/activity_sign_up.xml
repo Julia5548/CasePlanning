@@ -1,19 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-        xmlns:android="http://schemas.android.com/apk/res/android"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:app="http://schemas.android.com/apk/res-auto"
         android:id="@+id/signUpMainLinerLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         android:orientation="vertical">
 
     <androidx.appcompat.widget.Toolbar
             android:id="@+id/toolbarSignUp"
-            style="@style/Toolbar"/>
+            style="@style/Toolbar" />
 
     <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:orientation="vertical">
 
@@ -34,7 +33,6 @@
                     android:layout_marginEnd="20dp"
                     android:layout_marginBottom="2dp"
                     android:ems="10"
-
                     android:hint="@string/username" />
         </com.google.android.material.textfield.TextInputLayout>
 
@@ -74,20 +72,13 @@
                     android:layout_marginStart="20dp"
                     android:layout_marginEnd="20dp"
                     android:layout_marginBottom="2dp"
-
                     android:ems="50"
                     android:hint="@string/password"
                     android:inputType="textPassword" />
         </com.google.android.material.textfield.TextInputLayout>
-
-        <Button
-                android:id="@+id/btn_link_signUp"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:background="@drawable/shape_button"
-                android:text="@string/sign_up"
-                android:textColor="@color/textWhite" />
-
     </LinearLayout>
+
+    <include
+        layout="@layout/progress_button"
+        android:id = "@+id/view"/>
 </LinearLayout>

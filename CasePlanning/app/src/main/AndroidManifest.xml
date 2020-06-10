@@ -33,7 +33,7 @@
         <activity
                 android:name=".mainWindow.MainWindowCasePlanning"
                 android:largeHeap="true"></activity>
-        <activity android:name=".SignUp" />
+        <activity android:name=".sign_up.SignUp" />
         <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

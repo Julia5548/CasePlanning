@@ -77,16 +77,22 @@ class ListTaskGroup(nameFolder: String, listTasks: ArrayList<Task>?, key: String
                 val disposable = database
                     .retrieveData(FirebaseAuth.getInstance().currentUser!!.uid)
                     .subscribe { tasks ->
-                        task_item = arrayOfNulls(tasks.size)
+                        task_item = if(mListTasks != null) {
+                            arrayOfNulls(tasks.size - mListTasks.size + 1)//ОШИБКА
+                        }else{
+                            arrayOfNulls(tasks.size)
+                        }
                         for (task in tasks) {
-                            task_item[position] = task.name!!
-                            tasks_list.add(task)
-                            position++
+                            if (mListTasks != null && mListTasks.isNotEmpty() && !mListTasks.contains(task)) {
+                                task_item[position] = task.name!!
+                                tasks_list.add(task)
+                                position++
+                            }
                         }
                         val checkedItems = BooleanArray(task_item.size)
-                        for (positionChecked in task_item.indices) {
+                        for (positionChecked in task_item.indices)
                             checkedItems[positionChecked] = false
-                        }
+
                         MaterialAlertDialogBuilder(context)
                             .setTitle("Список задач")
                             .setMultiChoiceItems(
