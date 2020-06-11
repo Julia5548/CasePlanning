@@ -27,7 +27,10 @@ class Timer(var time: String) : Fragment() {
     ): View? {
         val view = inflater.inflate(R.layout.start_timer, null, false)
 
-        chronometer = view.findViewById<Chronometer>(R.id.chronometer)
+        chronometer = view.findViewById(R.id.chronometer)
+
+        if(time.length == 8)
+            chronometer!!.format = "00:00:00"
 
         ButterKnife.bind(this, view)
         return view
@@ -41,7 +44,9 @@ class Timer(var time: String) : Fragment() {
         startTimer.visibility = TextView.INVISIBLE
         stopTimer.visibility = TextView.VISIBLE
 
-        chronometer!!.base = SystemClock.elapsedRealtime()
+
+      //  chronometer!!.base = SystemClock.elapsedRealtimeNanos()
+       // chronometer!!.base = SystemClock.elapsedRealtime()
         chronometer!!.start()
 
         chronometer!!.setOnChronometerTickListener { chronometer ->

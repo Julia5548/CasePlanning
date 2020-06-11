@@ -53,10 +53,7 @@ class WindowTask : Fragment(), NavigationView.OnNavigationItemSelectedListener {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-
-
         val viewFragment = inflater.inflate(R.layout.window_main_task, container, false)
-
         val toolbar = viewFragment.findViewById<Toolbar>(R.id.toolbarTask)
         val activity = activity as AppCompatActivity?
         activity!!.setSupportActionBar(toolbar)
@@ -242,7 +239,6 @@ class WindowTask : Fragment(), NavigationView.OnNavigationItemSelectedListener {
                 })
     }
 
-    private fun getListTask() : ArrayList<Task> = task_list!!
     //inflate the menu
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         inflater.inflate(R.menu.search, menu)

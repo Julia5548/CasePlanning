@@ -26,6 +26,9 @@ import com.example.caseplanning.mainWindow.MainWindowCasePlanning
 import com.example.caseplanning.R
 import com.example.caseplanning.TypeTask.*
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import java.util.*
+import kotlin.collections.ArrayList
+import kotlin.math.min
 
 class CreateTaskWindow : Fragment() {
 
@@ -33,7 +36,7 @@ class CreateTaskWindow : Fragment() {
     var listSubTasksView: ArrayList<View>? = null
     private var pageViewModel: MyViewModel? = null
     var textPeriod = ""
-    var colorName = "textBlack"
+    var colorName = ""
     private var btnDeleted: ImageButton? = null
     private var btnOkSubTasks: ImageButton? = null
 
@@ -175,6 +178,9 @@ class CreateTaskWindow : Fragment() {
                     )
                     colorName = "textBlack"
                 }
+                else -> {
+                    colorName = ""
+                }
             }
 
             when (task!!.period) {
@@ -293,6 +299,9 @@ class CreateTaskWindow : Fragment() {
                         PorterDuff.Mode.SRC_ATOP
                     )
                     colorName = "textBlack"
+                }
+                else -> {
+                    colorName = ""
                 }
             }
             materialAlertDialogBuilder.dismiss()
@@ -555,7 +564,11 @@ class CreateTaskWindow : Fragment() {
             .setView(view)
             .setPositiveButton("Установить") { dialogInterface, id ->
 
-                timer.text = "${hours.value}:${minutes.value}:${seconds.value}"
+                timer.text = if (hours.value.toString() == "0") {
+                    String.format("%02d:%02d", minutes.value, seconds.value)
+                } else {
+                    String.format("%02d:%02d:%02d", hours.value, minutes.value, seconds.value)
+                }
                 dialogInterface.dismiss()
             }
             .setNegativeButton("Отмена") { dialogInterface, id ->
@@ -576,6 +589,10 @@ class CreateTaskWindow : Fragment() {
     fun onclickAdd() {
 
         val task = saveDataTask()
+        if (task.audio != null && task.audio != "") {
+            val storageFile = StorageFile("newAudio.mp3", task.audio!!, context!!)
+            storageFile.loadAudio()
+        }
         val dataBaseTask = DataBaseTask()
         dataBaseTask.createTask(task)
 
@@ -601,20 +618,15 @@ class CreateTaskWindow : Fragment() {
                 videoUri = uri.videoUri
                 audioUri = uri.audioUri
                 timeAudio = uri.timeAudio
-
             }
         })
 
         val editTextTask = view!!.findViewById<EditText>(R.id.editTextTask)
         val textReplay = view!!.findViewById<TextView>(R.id.textChoose)
         val replay = textReplay.text.toString()
-
         val date = view!!.findViewById<TextView>(R.id.setupData)
-
         val timer = view!!.findViewById<TextView>(R.id.timer)
-
         val notification = view!!.findViewById<TextView>(R.id.reminder)
-
         val comment = view!!.findViewById<EditText>(R.id.comment)
 
 
@@ -627,6 +639,7 @@ class CreateTaskWindow : Fragment() {
             )
             Log.d("Element", listSubTask!![position])
         }
+
         return Task(
             name = editTextTask.text.toString(),
             color = colorName,

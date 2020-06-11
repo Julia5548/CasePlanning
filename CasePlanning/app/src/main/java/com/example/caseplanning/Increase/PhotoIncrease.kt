@@ -19,6 +19,7 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import butterknife.ButterKnife
 import com.example.caseplanning.CreateTask.MyViewModel
+import com.example.caseplanning.CreateTask.StorageFile
 import com.example.caseplanning.R
 import com.github.chrisbanes.photoview.PhotoView
 import java.io.ByteArrayOutputStream

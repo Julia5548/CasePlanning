@@ -17,6 +17,7 @@ import androidx.fragment.app.DialogFragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import butterknife.ButterKnife
+import com.example.caseplanning.CreateTask.StorageFile
 import com.example.caseplanning.DataBase.Task
 import com.example.caseplanning.R
 import com.example.caseplanning.adapter.AdapterRecyclerViewFolder
@@ -120,7 +121,7 @@ class FragmentDialog(
             }
             if (dataTask.timer != "Указать >") {
                 timer.text = dataTask.timer
-                time = "01:00"
+                time = dataTask.timer
             } else {
                 dialog.setOnShowListener { dialogInterface ->
                     (dialogInterface as AlertDialog).getButton(AlertDialog.BUTTON_NEUTRAL).isEnabled = false
@@ -133,15 +134,12 @@ class FragmentDialog(
                 if (photo != null) {
                     (photo.drawable as? BitmapDrawable)!!.bitmap.recycle()
                 }
-                photo = view.findViewById<ImageButton>(R.id.imageViewPhoto)
-                photo!!.visibility = ImageButton.VISIBLE
+                photo = view.findViewById<ImageView>(R.id.imageViewPhoto)
+                photo!!.visibility = ImageView.VISIBLE
                 photoText.visibility = TextView.VISIBLE
 
-                val options = BitmapFactory.Options()
-                options.inJustDecodeBounds = false
-                options.inSampleSize = 32
-                val bitmap = BitmapFactory.decodeFile(dataTask.photo, options)
-                photo.setImageBitmap(bitmap)
+                val storageFile = StorageFile("newPhoto.jpg",dataTask.photo!!, context!!)
+                storageFile.loadFilesMemory(photo)
             }
 
             if (dataTask.video != "") {
