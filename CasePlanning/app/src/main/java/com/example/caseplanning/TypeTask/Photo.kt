@@ -3,10 +3,8 @@ package com.example.caseplanning.TypeTask
 import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity
-import android.content.ContentValues
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.content.res.Resources
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.drawable.BitmapDrawable
@@ -14,7 +12,6 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.Environment
-import android.provider.ContactsContract
 import android.provider.MediaStore
 import android.util.Log
 import android.view.LayoutInflater
@@ -24,24 +21,18 @@ import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.Toast
 import androidx.core.content.FileProvider
-import androidx.core.net.toFile
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentTransaction
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import butterknife.ButterKnife
 import butterknife.OnClick
-import com.example.caseplanning.CreateTask.CreateTaskWindow
 import com.example.caseplanning.CreateTask.MyViewModel
-import com.example.caseplanning.DataBase.DataBaseTask
 import com.example.caseplanning.DataBase.UriTypeTask
 import com.example.caseplanning.Increase.PhotoIncrease
 import com.example.caseplanning.R
 import java.io.File
-import java.io.FileNotFoundException
 import java.io.IOException
-import java.io.InputStream
-import java.lang.Exception
 import java.text.SimpleDateFormat
 import java.util.*
 

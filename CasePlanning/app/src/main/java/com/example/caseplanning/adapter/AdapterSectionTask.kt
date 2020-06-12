@@ -2,7 +2,6 @@ package com.example.caseplanning.adapter
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.graphics.*
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -13,19 +12,23 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.cardview.widget.CardView
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.RecyclerView
-import com.example.caseplanning.DataBase.DataBaseTask
+import com.example.caseplanning.DataBase.DataBase
 import com.example.caseplanning.DataBase.Task
 import com.example.caseplanning.EditElements.EditTask
 import com.example.caseplanning.R
+import com.example.caseplanning.mainWindow.CheckedTask
 import com.example.caseplanning.mainWindow.FragmentDialog
 import com.intrusoft.sectionedrecyclerview.SectionRecyclerViewAdapter
 import io.reactivex.disposables.Disposable
-import kotlinx.android.synthetic.main.color_date.view.*
 import java.util.*
-import kotlin.collections.ArrayList
 
 
-class AdapterSectionTask(val context: Context, data: ArrayList<SectionHeader>, day: String?, uid:String) :
+class AdapterSectionTask(
+    val context: Context,
+    data: ArrayList<SectionHeader>,
+    day: String?,
+    uid: String
+) :
     SectionRecyclerViewAdapter<SectionHeader, Task, AdapterSectionTask.SectionViewHolder, AdapterSectionTask.ChildViewHolder>(
         context,
         data
@@ -33,9 +36,9 @@ class AdapterSectionTask(val context: Context, data: ArrayList<SectionHeader>, d
 
     private val mData: ArrayList<SectionHeader> = data
     var disposable: Disposable? = null
-    val dataBaseTask = DataBaseTask()
+    val dataBaseTask = DataBase()
     val mDay: String? = day
-    val mUid : String = uid
+    val mUid: String = uid
 
 
     inner class ChildViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -44,6 +47,7 @@ class AdapterSectionTask(val context: Context, data: ArrayList<SectionHeader>, d
         var cardItem = itemView.findViewById<CardView>(R.id.card_view)
         val txtOptionDigit = itemView.findViewById<TextView>(R.id.txtOptionDigit)
         val color_task = itemView.findViewById<ImageView>(R.id.color_task)
+        val checkedTask = itemView.findViewById<CheckBox>(R.id.checkbox)
     }
 
     inner class SectionViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -81,11 +85,13 @@ class AdapterSectionTask(val context: Context, data: ArrayList<SectionHeader>, d
         childPosition: Int,
         task: Task?
     ) {
-
         childViewHolder!!.dataChild.text = task!!.name
-        if(task.color != "")
+        if (task.color != "")
             drawColorTask(task.color!!, childViewHolder)
-
+        if(task.checked!!) {
+            val checkedTask = CheckedTask(childViewHolder.cardItem, childViewHolder.dataChild, childViewHolder.checkedTask)
+            checkedTask.checkedTask()
+        }
         childViewHolder.txtOptionDigit.setOnClickListener { view ->
             val popupMenu = PopupMenu(context, childViewHolder.txtOptionDigit)
             popupMenu.inflate(R.menu.menu_list_task)
@@ -143,7 +149,6 @@ class AdapterSectionTask(val context: Context, data: ArrayList<SectionHeader>, d
                                     mData.removeAll(mData)
                                     notifyDataChanged(mData)
                                 }
-
                         }
                         Toast.makeText(
                             context,
@@ -159,7 +164,7 @@ class AdapterSectionTask(val context: Context, data: ArrayList<SectionHeader>, d
                         arg.putStringArrayList("dataTask", arrayListTask)
                         editTask.arguments = arg
 
-                        val manager = (context as AppCompatActivity).supportFragmentManager
+                         (context as AppCompatActivity).supportFragmentManager
                             .beginTransaction()
                             .replace(R.id.linerLayout, editTask)
                             .commit()
@@ -167,7 +172,7 @@ class AdapterSectionTask(val context: Context, data: ArrayList<SectionHeader>, d
                     }
                     R.id.delete -> {
 
-                        val disposable = dataBaseTask
+                         disposable = dataBaseTask
                             .retrieveData(mUid)
                             .subscribe { tasks ->
                                 for (taskData in tasks) {
@@ -200,15 +205,12 @@ class AdapterSectionTask(val context: Context, data: ArrayList<SectionHeader>, d
             popupMenu.show()
         }
 
-
         childViewHolder.cardItem.setOnClickListener { viewHolder ->
-
             val disposable = dataBaseTask
                 .retrieveData(mUid)
                 .subscribe({ tasks ->
                     for (taskData in tasks) {
                         if (taskData.name == task.name && taskData.day == task.day) {
-
                             FragmentDialog(taskData, disposable).show(
                                 (context as AppCompatActivity).supportFragmentManager,
                                 "Dialog"
@@ -224,6 +226,12 @@ class AdapterSectionTask(val context: Context, data: ArrayList<SectionHeader>, d
         if (disposable != null && !disposable!!.isDisposed)
             disposable!!.dispose()
 
+        childViewHolder.checkedTask.setOnCheckedChangeListener { buttonView, isChecked ->
+            val checkedTask = CheckedTask(childViewHolder.cardItem, childViewHolder.dataChild, childViewHolder.checkedTask)
+            checkedTask.updateTask(mUid, task, isChecked)
+            mData.removeAll(mData)
+            notifyDataChanged(mData)
+        }
     }
 
     private fun drawColorTask(
@@ -234,37 +242,35 @@ class AdapterSectionTask(val context: Context, data: ArrayList<SectionHeader>, d
             "yellow" -> childViewHolder.color_task.setImageResource(R.color.yellow)
             "green" -> childViewHolder.color_task.setImageResource(R.color.green)
             "azure" -> childViewHolder.color_task.setImageResource(R.color.azure)
-            "indigo" ->childViewHolder.color_task.setImageResource(R.color.indigo)
+            "indigo" -> childViewHolder.color_task.setImageResource(R.color.indigo)
             "orchid" -> childViewHolder.color_task.setImageResource(R.color.orchid)
             "textBlack" -> childViewHolder.color_task.setImageResource(R.color.textBlack)
             else -> childViewHolder.color_task.visibility = ImageView.INVISIBLE
         }
     }
-
     //лист с задачами, которые нужно найти
-    var filterTaskList : ArrayList<SectionHeader> = arrayListOf()
+    var filterTaskList: ArrayList<SectionHeader> = arrayListOf()
 
-    fun setTaskList(mDataTask : ArrayList<Task>){
+    fun setTaskList(mDataTask: ArrayList<Task>) {
         mData.clear()
         //this.mData.addAll(mDataTask)
         notifyDataSetChanged()
     }
+
     override fun getFilter(): Filter = filter()
 
-    fun filter() : Filter = object : Filter(){
+    fun filter(): Filter = object : Filter() {
         override fun performFiltering(charSequence: CharSequence?): FilterResults {
-            val filteredList : ArrayList<SectionHeader> = arrayListOf()
+            val filteredList: ArrayList<SectionHeader> = arrayListOf()
             filterTaskList = mData
 
-            if(charSequence == null || charSequence.isEmpty()){
+            if (charSequence == null || charSequence.isEmpty()) {
                 filteredList.addAll(filterTaskList)
-            }else{
+            } else {
                 val charString = charSequence.toString().toLowerCase(Locale.ROOT).trim()
-                for(task in filterTaskList)
-                {
-                    for(task_name in task.mDataChildList)
-                    {
-                        if(task_name.name!!.toLowerCase(Locale.ROOT).contains(charString))
+                for (task in filterTaskList) {
+                    for (task_name in task.mDataChildList) {
+                        if (task_name.name!!.toLowerCase(Locale.ROOT).contains(charString))
                             filteredList.add(task)
                     }
                 }

@@ -13,12 +13,10 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentTransaction
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import butterknife.ButterKnife
-import com.example.caseplanning.DataBase.DataBaseTask
-import com.example.caseplanning.DataBase.Users
+import com.example.caseplanning.DataBase.DataBase
 import com.example.caseplanning.GroupTask.GroupTask
 import com.example.caseplanning.MainActivity
 import com.example.caseplanning.R
@@ -74,7 +72,7 @@ class Access : Fragment(), NavigationView.OnNavigationItemSelectedListener {
         /*проверяем состояние*/
         mToggle.syncState()
 
-        val dataBaseTask = DataBaseTask()
+        val dataBaseTask = DataBase()
 
         disposable = dataBaseTask
             .retrieveDataUser(FirebaseAuth.getInstance().currentUser!!.uid)
@@ -93,7 +91,7 @@ class Access : Fragment(), NavigationView.OnNavigationItemSelectedListener {
     private fun getListUid(): ArrayList<String>? = list_uid
 
     private fun createListUid(view: View) {
-        val dataBaseTask = DataBaseTask()
+        val dataBaseTask = DataBase()
         disposable = dataBaseTask
             .retrieveDataUid()
             .subscribe { uids ->
@@ -114,7 +112,7 @@ class Access : Fragment(), NavigationView.OnNavigationItemSelectedListener {
         val layoutManager = LinearLayoutManager(context)
 
         val stringList = mutableMapOf<String, String>()
-        val dataBaseTask = DataBaseTask()
+        val dataBaseTask = DataBase()
 
         val uids = getListUid()
         if (uids != null) {

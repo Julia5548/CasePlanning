@@ -5,7 +5,6 @@ import android.os.Bundle
 import android.util.Log
 import android.view.*
 import android.widget.TextView
-import android.widget.Toast
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
@@ -20,7 +19,7 @@ import butterknife.ButterKnife
 import butterknife.OnClick
 import com.example.caseplanning.CreateTask.CreateTaskWindow
 import com.example.caseplanning.CreateTask.MyViewModel
-import com.example.caseplanning.DataBase.DataBaseTask
+import com.example.caseplanning.DataBase.DataBase
 import com.example.caseplanning.DataBase.Task
 import com.example.caseplanning.GroupTask.GroupTask
 import com.example.caseplanning.MainActivity
@@ -86,15 +85,15 @@ class WindowTask : Fragment(), NavigationView.OnNavigationItemSelectedListener {
         val navHeader = navigationView.getHeaderView(0)
         val emailUser = navHeader.findViewById<TextView>(R.id.emailText)
         val nameUser = navHeader.findViewById<TextView>(R.id.nameUser)
-        val dataBaseTask: DataBaseTask? = DataBaseTask()
+        val dataBase: DataBase? = DataBase()
 
-        disposable = dataBaseTask!!
+        disposable = dataBase!!
             .retrieveDataUser(FirebaseAuth.getInstance().currentUser!!.uid)
             .subscribe({ user ->
                 nameUser.text = user.name
                 emailUser.text = user.email
                 access_users = user.accessUsers
-                addAccessUsers(user.accessUsers, navigationView, dataBaseTask)
+                addAccessUsers(user.accessUsers, navigationView, dataBase)
             },
                 { throwable ->
                     throwable.printStackTrace()
@@ -109,14 +108,14 @@ class WindowTask : Fragment(), NavigationView.OnNavigationItemSelectedListener {
     private fun addAccessUsers(
         accessUsers: ArrayList<String>,
         navigationView: NavigationView?,
-        dataBaseTask: DataBaseTask
+        dataBase: DataBase
     ) {
         val menu = navigationView!!.menu
         val subMenu = menu.addSubMenu("Пользователи")
 
         if (accessUsers.isNotEmpty()) {
             for (user_uid in accessUsers) {
-                disposable = dataBaseTask
+                disposable = dataBase
                     .retrieveDataUser(user_uid)
                     .subscribe { user ->
                         subMenu.add(user.name)
@@ -166,55 +165,71 @@ class WindowTask : Fragment(), NavigationView.OnNavigationItemSelectedListener {
 
         val layoutManager = LinearLayoutManager(context)
         listTasks!!.layoutManager = layoutManager
-        val dataBaseTask: DataBaseTask? = DataBaseTask()
+        val dataBase: DataBase? = DataBase()
         /*подписываемся и выводим данные из бд*/
-        disposable = dataBaseTask!!
+        disposable = dataBase!!
             .retrieveData(uid)
             .subscribe({ task ->
                 val stringListMorning = arrayListOf<Task>()
                 val stringListDay = arrayListOf<Task>()
                 val stringListEvening = arrayListOf<Task>()
                 val stringList = arrayListOf<Task>()
-
+                val checkedList = arrayListOf<Task>()
                 for (tasks in task) {
                     task_list!!.add(tasks)
                     if (date == tasks.day) {
-                        when (tasks.period) {
-                            "Утро" -> stringListMorning.add(
+                        if(tasks.checked!!){
+                            checkedList.add(
                                 Task(
                                     name = tasks.name!!,
                                     day = tasks.day,
-                                    color = tasks.color
+                                    color = tasks.color,
+                                    checked = tasks.checked
                                 )
                             )
-                            "День" -> stringListDay.add(
-                                Task(
-                                    name = tasks.name!!,
-                                    day = tasks.day,
-                                    color = tasks.color
+                        }else {
+                            when (tasks.period) {
+                                "Утро" -> stringListMorning.add(
+                                    Task(
+                                        name = tasks.name!!,
+                                        day = tasks.day,
+                                        color = tasks.color,
+                                        checked = tasks.checked
+                                    )
                                 )
-                            )
-                            "Вечер" -> stringListEvening.add(
-                                Task(
-                                    name = tasks.name!!,
-                                    day = tasks.day,
-                                    color = tasks.color
+                                "День" -> stringListDay.add(
+                                    Task(
+                                        name = tasks.name!!,
+                                        day = tasks.day,
+                                        color = tasks.color,
+                                        checked = tasks.checked
+                                    )
                                 )
-                            )
-                            "Один раз в любое время" -> stringList.add(
-                                Task(
-                                    name = tasks.name!!,
-                                    day = tasks.day,
-                                    color = tasks.color
+                                "Вечер" -> stringListEvening.add(
+                                    Task(
+                                        name = tasks.name!!,
+                                        day = tasks.day,
+                                        color = tasks.color,
+                                        checked = tasks.checked
+                                    )
                                 )
-                            )
-                            else -> stringList.add(
-                                Task(
-                                    name = tasks.name!!,
-                                    day = tasks.day,
-                                    color = tasks.color
+                                "Один раз в любое время" -> stringList.add(
+                                    Task(
+                                        name = tasks.name!!,
+                                        day = tasks.day,
+                                        color = tasks.color,
+                                        checked = tasks.checked
+                                    )
                                 )
-                            )
+                                else -> stringList.add(
+                                    Task(
+                                        name = tasks.name!!,
+                                        day = tasks.day,
+                                        color = tasks.color,
+                                        checked = tasks.checked
+                                    )
+                                )
+                            }
                         }
                     }
                 }
@@ -230,6 +245,9 @@ class WindowTask : Fragment(), NavigationView.OnNavigationItemSelectedListener {
 
                 if (stringListDay.isNotEmpty())
                     sections.add(SectionHeader(stringListDay, "День"))
+
+                if (checkedList.isNotEmpty())
+                    sections.add(SectionHeader(checkedList, "\r"))
 
                 adapterSectionTask = AdapterSectionTask(context!!, sections, date, uid)
                 listTasks.adapter = adapterSectionTask
@@ -377,7 +395,7 @@ class WindowTask : Fragment(), NavigationView.OnNavigationItemSelectedListener {
                 startActivity(intent)
             }
             else -> {
-                val dataBaseTask = DataBaseTask()
+                val dataBaseTask = DataBase()
                 val list_users = getListAccessUsers()
                 if (!list_users.isEmpty()) {
                     for (user_uid in list_users) {

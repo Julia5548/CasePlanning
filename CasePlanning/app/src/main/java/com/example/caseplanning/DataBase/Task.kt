@@ -19,6 +19,7 @@ data class Task (
     var video: String ? = "",
     var comment: String ? = "",
     var timer:String ="",
+    var checked :Boolean? = false,
     var notification:String = ""
 
 )

@@ -7,7 +7,7 @@ import io.reactivex.Observable
 import io.reactivex.Observer
 import kotlin.collections.HashMap
 
-class DataBaseTask {
+class DataBase {
 
     /*чтение данных из бд*/
 
@@ -40,6 +40,7 @@ class DataBaseTask {
                                             timeAudio = task.value.timeAudio,
                                             video = task.value.video,
                                             comment = task.value.comment,
+                                            checked = task.value.checked,
                                             timer = task.value.timer,
                                             notification = task.value.notification,
                                             color = task.value.color,

@@ -8,7 +8,7 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.RecyclerView
-import com.example.caseplanning.DataBase.DataBaseTask
+import com.example.caseplanning.DataBase.DataBase
 import com.example.caseplanning.GroupTask.ListTaskGroup
 import com.example.caseplanning.R
 import com.google.android.material.card.MaterialCardView
@@ -37,7 +37,7 @@ class AdapterRecyclerViewFolder(val context: Context, data:ArrayList<String>):Re
         holder.nameItem.text = mData[position]
         holder.cardView.setOnClickListener {
 
-            val database = DataBaseTask()
+            val database = DataBase()
             val disposal = database
                 .retrieveDataFolders()
                 .subscribe {folders->

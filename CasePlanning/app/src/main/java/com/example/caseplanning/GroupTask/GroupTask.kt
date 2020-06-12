@@ -26,7 +26,7 @@ import androidx.recyclerview.widget.RecyclerView
 import butterknife.ButterKnife
 import butterknife.OnClick
 import com.example.caseplanning.CreateTask.MyViewModel
-import com.example.caseplanning.DataBase.DataBaseTask
+import com.example.caseplanning.DataBase.DataBase
 import com.example.caseplanning.DataBase.Folder
 import com.example.caseplanning.DataBase.Task
 import com.example.caseplanning.MainActivity
@@ -93,7 +93,7 @@ class GroupTask : Fragment(), NavigationView.OnNavigationItemSelectedListener,
         /*проверяем состояние*/
         mToggle.syncState()
 
-        val dataBaseTask = DataBaseTask()
+        val dataBaseTask = DataBase()
         disposable = dataBaseTask
             .retrieveDataUser(FirebaseAuth.getInstance().currentUser!!.uid)
             .subscribe({ user ->
@@ -116,7 +116,7 @@ class GroupTask : Fragment(), NavigationView.OnNavigationItemSelectedListener,
 
     private fun listFolder(viewFragment: View) {
 
-        val dataBaseTask = DataBaseTask()
+        val dataBaseTask = DataBase()
         val listFolder = viewFragment.findViewById<RecyclerView>(R.id.listViewFolder)
         listFolder.layoutManager = LinearLayoutManager(context)
 
@@ -137,7 +137,7 @@ class GroupTask : Fragment(), NavigationView.OnNavigationItemSelectedListener,
     }
 
     private fun enableSwipeToDeleteAndUndo(listFolder: RecyclerView) {
-        val dataBaseTask = DataBaseTask()
+        val dataBaseTask = DataBase()
         val relativeLayout = view!!.findViewById<RelativeLayout>(R.id.relativeLayout)
         val disposable = dataBaseTask
             .retrieveDataFolders()
@@ -184,7 +184,7 @@ class GroupTask : Fragment(), NavigationView.OnNavigationItemSelectedListener,
     @OnClick(R.id.addFolder)
     fun onClickFolderCreate() {
 
-        val dataBaseTask = DataBaseTask()
+        val dataBaseTask = DataBase()
         val view = layoutInflater.inflate(R.layout.create_folder, null)
         MaterialAlertDialogBuilder(context)
             .setTitle("Добавить папку")

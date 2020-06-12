@@ -4,7 +4,6 @@ import android.graphics.Color
 import android.os.Bundle
 import android.view.*
 import android.widget.LinearLayout
-import android.widget.RelativeLayout
 import androidx.annotation.NonNull
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
@@ -13,7 +12,7 @@ import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import butterknife.ButterKnife
-import com.example.caseplanning.DataBase.DataBaseTask
+import com.example.caseplanning.DataBase.DataBase
 import com.example.caseplanning.DataBase.Folder
 import com.example.caseplanning.DataBase.Task
 import com.example.caseplanning.R
@@ -69,7 +68,7 @@ class ListTaskGroup(nameFolder: String, listTasks: ArrayList<Task>?, key: String
                 fragmentManager!!.beginTransaction().replace(R.id.linerLayout, groupTask).commit()
             }
             R.id.add_task_group -> {
-                val database = DataBaseTask()
+                val database = DataBase()
                 var task_item: Array<String?>
                 val tasks_list = arrayListOf<Task>()
                 val checkedTask = arrayListOf<Task>()
@@ -143,7 +142,7 @@ class ListTaskGroup(nameFolder: String, listTasks: ArrayList<Task>?, key: String
 
     private fun enableSwipeToDeleteAndUndo(listFolder: RecyclerView, view: View) {
         val linearLayout = view.findViewById<LinearLayout>(R.id.linerLayout_listTaskFolder)
-        val dataBaseTask = DataBaseTask()
+        val dataBaseTask = DataBase()
         val swipeToDeleteCallback: SwipeToDeleteCallback =
             object : SwipeToDeleteCallback(context!!) {
                 override fun onSwiped(

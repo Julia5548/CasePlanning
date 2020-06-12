@@ -6,17 +6,9 @@ import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.Drawable
-import android.util.Log
-import android.view.View
-import android.widget.RelativeLayout
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
-import com.example.caseplanning.DataBase.DataBaseTask
-import com.example.caseplanning.DataBase.Folder
-import com.example.caseplanning.DataBase.Task
-import com.google.android.material.snackbar.Snackbar
-import java.util.ArrayList
 
 open class SwipeToDeleteCallback(context: Context) :
     ItemTouchHelper.Callback() {

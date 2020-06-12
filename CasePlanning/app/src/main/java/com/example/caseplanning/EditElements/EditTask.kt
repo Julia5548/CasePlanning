@@ -20,7 +20,7 @@ import androidx.lifecycle.ViewModelProviders
 import butterknife.*
 import com.example.caseplanning.CreateTask.MyViewModel
 import com.example.caseplanning.CreateTask.TimePicker
-import com.example.caseplanning.DataBase.DataBaseTask
+import com.example.caseplanning.DataBase.DataBase
 import com.example.caseplanning.DataBase.Task
 import com.example.caseplanning.DataBase.UriTypeTask
 import com.example.caseplanning.mainWindow.MainWindowCasePlanning
@@ -88,7 +88,7 @@ class EditTask : Fragment() {
         val comment = view.findViewById<EditText>(R.id.comment)
         val day = view.findViewById<TextView>(R.id.setupData)
 
-        val dataBase = DataBaseTask()
+        val dataBase = DataBase()
         var taskList = arrayListOf<String>()
         if (arguments != null) {
             taskList = arguments!!.getStringArrayList("dataTask")!!
@@ -533,7 +533,7 @@ class EditTask : Fragment() {
     fun onclickAdd() {
 
         val task = saveDataTask()
-        val dataBaseTask = DataBaseTask()
+        val dataBaseTask = DataBase()
         dataBaseTask.updateDataTask(task, tasksData!!.idTasks!!)
 
         val intent = Intent(activity!!.applicationContext, MainWindowCasePlanning()::class.java)

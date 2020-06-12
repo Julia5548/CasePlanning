@@ -15,7 +15,7 @@ import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentTransaction
 import butterknife.ButterKnife
-import com.example.caseplanning.DataBase.DataBaseTask
+import com.example.caseplanning.DataBase.DataBase
 import com.example.caseplanning.GroupTask.GroupTask
 import com.example.caseplanning.MainActivity
 import com.example.caseplanning.R
@@ -65,7 +65,7 @@ class TechSupport: Fragment(), NavigationView.OnNavigationItemSelectedListener {
         /*проверяем состояние*/
         mToggle.syncState()
 
-        val dataBaseTask = DataBaseTask()
+        val dataBaseTask = DataBase()
         disposable = dataBaseTask
             .retrieveDataUser(FirebaseAuth.getInstance().currentUser!!.uid)
             .subscribe({ user ->

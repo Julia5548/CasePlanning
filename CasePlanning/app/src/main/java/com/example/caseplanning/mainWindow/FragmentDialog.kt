@@ -22,6 +22,7 @@ import com.example.caseplanning.adapter.AdapterRecyclerViewFolder
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import io.reactivex.disposables.Disposable
 import java.lang.Exception
+import kotlin.random.Random
 
 class FragmentDialog(
     val dataTask: Task?,
@@ -132,11 +133,11 @@ class FragmentDialog(
                 if (photo != null) {
                     (photo.drawable as? BitmapDrawable)!!.bitmap.recycle()
                 }
-                photo = view.findViewById<ImageView>(R.id.imageViewPhoto)
+                photo = view.findViewById(R.id.imageViewPhoto)
                 photo!!.visibility = ImageView.VISIBLE
                 photoText.visibility = TextView.VISIBLE
 
-                val storageFile = StorageFile("newPhoto.jpg",dataTask.photo!!, context!!)
+                val storageFile = StorageFile(".jpg",dataTask.photo!!, context!!)
                 storageFile.loadImagesFilesMemory(photo)
             }
 

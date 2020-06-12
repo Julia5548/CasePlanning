@@ -7,7 +7,7 @@ import android.view.ViewGroup
 import android.widget.TextView
 import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
-import com.example.caseplanning.DataBase.DataBaseTask
+import com.example.caseplanning.DataBase.DataBase
 import com.example.caseplanning.DataBase.Users
 import com.example.caseplanning.R
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -53,7 +53,7 @@ class AdapterRecyclerViewAccess(
     private fun getListAccess() = mAccessUsers
     private fun getDataUser(nameUser: String, uid: String) {
         var disposable : Disposable? = null
-        val dataBaseTask = DataBaseTask()
+        val dataBaseTask = DataBase()
         disposable = dataBaseTask
             .retrieveDataUser(uid)
             .subscribe { user ->
@@ -66,7 +66,7 @@ class AdapterRecyclerViewAccess(
     private fun dataUser(
         nameUser: String,
         emailUser: String,
-        dataBaseTask: DataBaseTask,
+        dataBase: DataBase,
         uid: String,
         disposable: Disposable?
     ) {
@@ -82,7 +82,7 @@ class AdapterRecyclerViewAccess(
                 if (!access_users!!.contains(mCurrentUid)) {
                     access_users.add(mCurrentUid)
                     val user = Users(nameUser, emailUser, access_users)
-                    dataBaseTask.updateDataUser(user, uid)
+                    dataBase.updateDataUser(user, uid)
                     Toast.makeText(context, "Доступ разрешен", Toast.LENGTH_SHORT)
                         .show()
                 }else{

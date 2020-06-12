@@ -12,7 +12,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import butterknife.ButterKnife
-import com.example.caseplanning.DataBase.DataBaseTask
+import com.example.caseplanning.DataBase.DataBase
 import com.example.caseplanning.MainActivity
 import com.example.caseplanning.R
 import com.google.firebase.auth.FirebaseAuth
@@ -124,7 +124,7 @@ class SignUp : AppCompatActivity() {
         password: String,
         progressButton: ProgressButton
     ) {
-        val dataBaseTask = DataBaseTask()
+        val dataBaseTask = DataBase()
         var disposable : Disposable? = null
         disposable = dataBaseTask
             .retrieveDataUid()
@@ -150,7 +150,7 @@ class SignUp : AppCompatActivity() {
         if (disposable != null && !disposable.isDisposed)
             disposable.dispose()
 
-        val dataBaseTask = DataBaseTask()
+        val dataBaseTask = DataBase()
         var mDisposable : Disposable? = null
         val uids = getListUid()
         if (uids != null) {
@@ -200,7 +200,7 @@ class SignUp : AppCompatActivity() {
                                         "Регистрация прошла успешно. Потдвердите свою почту!",
                                         Toast.LENGTH_SHORT
                                     ).show()
-                                    val dataBase = DataBaseTask()
+                                    val dataBase = DataBase()
                                     dataBase.createUser(mName_user, email)
                                     successfulProgress(progressButton, 2500)
                                 } else {
