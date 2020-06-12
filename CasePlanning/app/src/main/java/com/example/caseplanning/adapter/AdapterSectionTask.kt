@@ -85,6 +85,7 @@ class AdapterSectionTask(
         childPosition: Int,
         task: Task?
     ) {
+
         childViewHolder!!.dataChild.text = task!!.name
         if (task.color != "")
             drawColorTask(task.color!!, childViewHolder)
@@ -206,7 +207,7 @@ class AdapterSectionTask(
         }
 
         childViewHolder.cardItem.setOnClickListener { viewHolder ->
-            val disposable = dataBaseTask
+            disposable = dataBaseTask
                 .retrieveData(mUid)
                 .subscribe({ tasks ->
                     for (taskData in tasks) {
