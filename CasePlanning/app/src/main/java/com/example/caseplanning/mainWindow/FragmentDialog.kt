@@ -2,7 +2,6 @@ package com.example.caseplanning.mainWindow
 
 import android.app.Dialog
 import android.content.DialogInterface
-import android.graphics.BitmapFactory
 import android.graphics.drawable.BitmapDrawable
 import android.media.MediaPlayer
 import android.os.Bundle
@@ -12,7 +11,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.*
 import androidx.appcompat.app.AlertDialog
-import androidx.core.net.toUri
 import androidx.fragment.app.DialogFragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -139,32 +137,40 @@ class FragmentDialog(
                 photoText.visibility = TextView.VISIBLE
 
                 val storageFile = StorageFile("newPhoto.jpg",dataTask.photo!!, context!!)
-                storageFile.loadFilesMemory(photo)
+                storageFile.loadImagesFilesMemory(photo)
             }
 
             if (dataTask.video != "") {
                 video.visibility = VideoView.VISIBLE
                 videoText.visibility = TextView.VISIBLE
-                video.setVideoURI(dataTask.video!!.toUri())
+                val storageFile = StorageFile("newVideo.mp4", dataTask.video!!, context!!)
+                storageFile.loadVideoFilesMemory(video)
             }
-            if (dataTask.audio != "" && dataTask.timeAudio == "") {
+            if (dataTask.audio != "" && dataTask.timeAudio != "") {
 
                 playAudio.visibility = ImageButton.VISIBLE
                 chronometer.visibility = Chronometer.VISIBLE
                 audioText.visibility = TextView.VISIBLE
 
+                val storageFile = StorageFile("newAudio.mp3", dataTask.audio!!, context!!)
+                val file = storageFile.loadAudioFilesMemory()
                 playAudio.setOnClickListener {
 
-                    playAudio(chronometer, dataTask.timeAudio!!, dataTask.audio!!)
+                    playAudio(chronometer, view, dataTask.timeAudio!!, file)
                 }
             }
         }
     }
 
     /*воспроизведение и остновка аудио*/
-    fun playAudio(mChronometer: Chronometer, timeAudio: String, fileName: String) {
+    fun playAudio(
+        mChronometer: Chronometer,
+        view: View,
+        timeAudio: String,
+        fileName: String
+    ) {
 
-        val playAndStopAudio = view!!.findViewById<ImageButton>(R.id.startAndStopPlay)
+        val playAndStopAudio = view.findViewById<ImageButton>(R.id.startAndStopPlay)
         try {
 
             var time = timeAudio

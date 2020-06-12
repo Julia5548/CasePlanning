@@ -4,8 +4,8 @@ import android.content.Context
 import android.graphics.BitmapFactory
 import android.widget.ImageView
 import android.widget.Toast
+import android.widget.VideoView
 import androidx.core.net.toUri
-import com.bumptech.glide.Glide
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
 import java.io.*
@@ -54,9 +54,9 @@ class StorageFile() {
         }
     }
 
-    fun loadFilesMemory(imageView: ImageView) {
+    fun loadImagesFilesMemory(imageView: ImageView) {
 
-        val downloadFile = mStorageReference.child("images/newPhoto.jpg")
+        val downloadFile = mStorageReference.child("images/${mNameFiles}")
         val localFile = File.createTempFile("images", "jpg")
 
         downloadFile.getFile(localFile).addOnSuccessListener {
@@ -68,6 +68,32 @@ class StorageFile() {
         }.addOnFailureListener { exception ->
             exception.stackTrace
         }
+    }
+
+    fun loadVideoFilesMemory(video: VideoView){
+        val downloadFile = mStorageReference.child("videos/${mNameFiles}")
+        val localFile = downloadFile.downloadUrl
+            .addOnSuccessListener {uri->
+                video.setVideoURI(uri)
+                video.seekTo(1)
+            }.addOnFailureListener {
+                Toast.makeText(mContext, "Видео не удалось загрузить", Toast.LENGTH_SHORT)
+                    .show()
+
+            }
+    }
+    fun loadAudioFilesMemory(): String{
+        val downloadFile = mStorageReference.child("audios/${mNameFiles}")
+        val localFile = File.createTempFile("newAudio", "mp3")
+
+        downloadFile.getFile(localFile).addOnSuccessListener {
+            Toast.makeText(mContext, "Аудио удалось загрузить", Toast.LENGTH_SHORT)
+                .show()
+
+        }.addOnFailureListener { exception ->
+            exception.stackTrace
+        }
+        return localFile.path
     }
 
      fun loadVideo() {
