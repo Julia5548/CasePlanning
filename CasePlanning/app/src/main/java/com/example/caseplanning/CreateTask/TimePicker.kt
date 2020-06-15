@@ -29,6 +29,14 @@ class TimePicker(var time : TextView):DialogFragment(), TimePickerDialog.OnTimeS
     @SuppressLint("SetTextI18n")
 
     override fun onTimeSet(timePicker: TimePicker?, hour: Int, minute: Int) {
-        time.text = "$hour:$minute"
+        if(minute.toString().length == 1){
+            time.text = "$hour:0$minute"
+        }else if(minute.toString().length == 1 && hour.toString().length == 1){
+            time.text = "0$hour:0$minute"
+        }else if(hour.toString().length == 1){
+            time.text = "0$hour:$minute"
+        }else{
+            time.text = "$hour:$minute"
+        }
     }
 }

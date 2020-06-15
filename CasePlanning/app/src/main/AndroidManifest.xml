@@ -26,13 +26,13 @@
                 android:grantUriPermissions="true">
             <meta-data
                     android:name="android.support.FILE_PROVIDER_PATHS"
-                    android:resource="@xml/provider_paths"></meta-data>
+                    android:resource="@xml/provider_paths" />
         </provider>
 
         <activity android:name=".ResetPassword" />
         <activity
                 android:name=".mainWindow.MainWindowCasePlanning"
-                android:largeHeap="true"></activity>
+                android:largeHeap="true" />
         <activity android:name=".sign_up.SignUp" />
         <activity android:name=".MainActivity">
             <intent-filter>
@@ -42,7 +42,15 @@
             </intent-filter>
         </activity>
 
+        <receiver
+                android:name=".CreateTask.NotificationsBroadcast"
+                android:enabled="true">
+            <intent-filter>
+                <action android:name="android.media.action.DISPLAY_NOTIFICATION" />
 
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </receiver>
     </application>
 
 </manifest>
