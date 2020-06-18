@@ -77,12 +77,12 @@ class ListTaskGroup(nameFolder: String, listTasks: ArrayList<Task>?, key: String
                     .retrieveData(FirebaseAuth.getInstance().currentUser!!.uid)
                     .subscribe { tasks ->
                         task_item = if(mListTasks != null) {
-                            arrayOfNulls(tasks.size - mListTasks.size + 1)//ОШИБКА
+                            arrayOfNulls(tasks.size - mListTasks.size)//ОШИБКА
                         }else{
                             arrayOfNulls(tasks.size)
                         }
                         for (task in tasks) {
-                            if (mListTasks != null && mListTasks.isNotEmpty() && !mListTasks.contains(task)) {
+                            if (mListTasks != null && !mListTasks.contains(task)) {
                                 task_item[position] = task.name!!
                                 tasks_list.add(task)
                                 position++

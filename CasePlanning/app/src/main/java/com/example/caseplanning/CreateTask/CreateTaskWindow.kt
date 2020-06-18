@@ -32,7 +32,6 @@ import com.example.caseplanning.TypeTask.Photo
 import com.example.caseplanning.TypeTask.Video
 import com.example.caseplanning.mainWindow.MainWindowCasePlanning
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import java.sql.DatabaseMetaData
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -614,12 +613,12 @@ class CreateTaskWindow : Fragment() {
     @SuppressLint("SimpleDateFormat")
     private fun scheduleNotification(day : String, timeNotification: String, name_task : String) {
         var mDate = day
-        val intentNotification = Intent(context!!, NotificationsBroadcast::class.java)
+     /*   val intentNotification = Intent(context!!, NotificationService::class.java)
         intentNotification.putExtra("name_task", name_task)
         intentNotification.putExtra("time_notification", timeNotification)
         val pendingIntent = PendingIntent.getBroadcast(context!!, 42, intentNotification, PendingIntent.FLAG_UPDATE_CURRENT)
-        val alarmManager : AlarmManager = context!!.getSystemService(ALARM_SERVICE) as AlarmManager
-        val arrayDate : List<String> = mDate.split(".")
+        val alarmManager : AlarmManager = context!!.getSystemService(ALARM_SERVICE) as AlarmManager*/
+     /*   val arrayDate : List<String> = mDate.split(".")
         var month = ""
         if(arrayDate[1].length == 1){
             month = "0${arrayDate[1]}"
@@ -627,9 +626,9 @@ class CreateTaskWindow : Fragment() {
         }
         val date_notification = "$mDate $timeNotification"
         val date = SimpleDateFormat("dd.MM.yyyy hh:mm").parse(date_notification)
-        val milliseconds = date!!.time
+        val milliseconds = date!!.time*/
 
-        alarmManager.set(AlarmManager.RTC_WAKEUP, milliseconds, pendingIntent)
+       // alarmManager.set(AlarmManager.RTC_WAKEUP, milliseconds, pendingIntent)
     }
 
     private fun createNotificationChannel() {
@@ -710,6 +709,7 @@ class CreateTaskWindow : Fragment() {
 
     override fun onDestroy() {
         super.onDestroy()
+
         listSubTask = null
         listSubTasksView = null
         btnDeleted = null

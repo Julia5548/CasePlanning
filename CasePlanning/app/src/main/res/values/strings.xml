@@ -56,4 +56,5 @@
     <string name="subTask"><u>Подзадачи</u></string>
     <string name="start">Запустить</string>
     <string name="techSupport">Тех.поддержка</string>
+    <string name="msg_token_fmt">error</string>
 </resources>

@@ -319,76 +319,72 @@ class WindowTask : Fragment(), NavigationView.OnNavigationItemSelectedListener {
 
     /*обработчик кнопок меню*/
     override fun onNavigationItemSelected(menuItem: MenuItem): Boolean {
-
         when (menuItem.itemId) {
             /*группа задач*/
             R.id.groupTask -> {
 
                 val groupTask: Fragment =
                     GroupTask()
-                val transaction: FragmentTransaction = fragmentManager!!.beginTransaction()
-
-                transaction.replace(R.id.linerLayout, groupTask)
-                transaction.addToBackStack(null)
-                transaction.commit()
+                fragmentManager!!.beginTransaction()
+                    .replace(R.id.linerLayout, groupTask)
+                    .addToBackStack(null)
+                    .commit()
             }
             R.id.tasks -> {
                 val windowTask: Fragment =
                     WindowTask()
-                val transaction: FragmentTransaction = fragmentManager!!.beginTransaction()
-
-                transaction.replace(R.id.linerLayout, windowTask)
-                transaction.addToBackStack(null)
-                transaction.commit()
+                fragmentManager!!.beginTransaction()
+                    .replace(R.id.linerLayout, windowTask)
+                    .addToBackStack(null)
+                    .commit()
             }
             /*доступ к задачам другим людям*/
             R.id.access -> {
 
                 val access: Fragment = Access()
-                val transaction: FragmentTransaction = fragmentManager!!.beginTransaction()
-
-                transaction.replace(R.id.linerLayout, access)
-                transaction.addToBackStack(null)
-                transaction.commit()
+                fragmentManager!!.beginTransaction()
+                    .replace(R.id.linerLayout, access)
+                    .addToBackStack(null)
+                    .commit()
 
             }
             /*прогресс выполнения задач*/
             R.id.progress -> {
 
-                val progress: Fragment = Progress()
-                val transaction: FragmentTransaction = fragmentManager!!.beginTransaction()
-
-                transaction.replace(R.id.linerLayout, progress)
-                transaction.addToBackStack(null)
-                transaction.commit()
+                val progress: Fragment =
+                    Progress()
+                fragmentManager!!.beginTransaction()
+                    .replace(R.id.linerLayout, progress)
+                    .addToBackStack(null)
+                    .commit()
 
             }
             /*настройки*/
             R.id.setting -> {
 
-                val setting: Fragment = Setting()
-                val transaction: FragmentTransaction = fragmentManager!!.beginTransaction()
-
-                transaction.replace(R.id.linerLayout, setting)
-                transaction.addToBackStack(null)
-                transaction.commit()
+                val setting: Fragment =
+                    Setting()
+                fragmentManager!!.beginTransaction()
+                    .replace(R.id.linerLayout, setting)
+                    .addToBackStack(null)
+                    .commit()
 
             }
             /*техподдержка*/
             R.id.techSupport -> {
 
-                val techSupport: Fragment = TechSupport()
-                val transaction: FragmentTransaction = fragmentManager!!.beginTransaction()
-
-                transaction.replace(R.id.linerLayout, techSupport)
-                transaction.addToBackStack(null)
-                transaction.commit()
+                val techSupport: Fragment =
+                    TechSupport()
+                fragmentManager!!.beginTransaction()
+                    .replace(R.id.linerLayout, techSupport)
+                    .addToBackStack(null)
+                    .commit()
 
             }
             /*выход пользователя из системы*/
             R.id.signOut -> {
+                disposable.dispose()
                 val mAuth = FirebaseAuth.getInstance()
-
                 mAuth.signOut()
                 val intent = Intent(activity!!.applicationContext, MainActivity::class.java)
                 //intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
@@ -415,7 +411,6 @@ class WindowTask : Fragment(), NavigationView.OnNavigationItemSelectedListener {
 
     override fun onStop() {
         super.onStop()
-        super.onPause()
         if (!disposable.isDisposed)
             disposable.dispose()
         task_list = null

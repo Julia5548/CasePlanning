@@ -41,16 +41,18 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
-        <receiver
-                android:name=".CreateTask.NotificationsBroadcast"
-                android:enabled="true">
+        <service
+                android:name=".CreateTask.NotificationService"
+                android:label="@string/app_name"
+                android:exported="false"
+                tools:ignore="Instantiatable">
             <intent-filter>
-                <action android:name="android.media.action.DISPLAY_NOTIFICATION" />
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
 
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
-        </receiver>
+        </service>
+
     </application>
 
 </manifest>

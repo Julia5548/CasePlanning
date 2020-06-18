@@ -195,8 +195,6 @@ class GroupTask : Fragment(), NavigationView.OnNavigationItemSelectedListener,
                 val folder = Folder()
 
                 val listTask = arrayListOf<Task>()
-                val task = Task(name = "kzd")
-                listTask.add(task)
                 folder.name = nameNewFolder
                 folder.tasks = listTask
 
@@ -216,30 +214,27 @@ class GroupTask : Fragment(), NavigationView.OnNavigationItemSelectedListener,
 
                 val groupTask: Fragment =
                     GroupTask()
-                val transaction: FragmentTransaction = fragmentManager!!.beginTransaction()
-
-                transaction.replace(R.id.linerLayout, groupTask)
-                transaction.addToBackStack(null)
-                transaction.commit()
+                fragmentManager!!.beginTransaction()
+                    .replace(R.id.linerLayout, groupTask)
+                    .addToBackStack(null)
+                    .commit()
             }
             R.id.tasks -> {
                 val windowTask: Fragment =
                     WindowTask()
-                val transaction: FragmentTransaction = fragmentManager!!.beginTransaction()
-
-                transaction.replace(R.id.linerLayout, windowTask)
-                transaction.addToBackStack(null)
-                transaction.commit()
+                fragmentManager!!.beginTransaction()
+                    .replace(R.id.linerLayout, windowTask)
+                    .addToBackStack(null)
+                    .commit()
             }
             /*доступ к задачам другим людям*/
             R.id.access -> {
 
                 val access: Fragment = Access()
-                val transaction: FragmentTransaction = fragmentManager!!.beginTransaction()
-
-                transaction.replace(R.id.linerLayout, access)
-                transaction.addToBackStack(null)
-                transaction.commit()
+                fragmentManager!!.beginTransaction()
+                    .replace(R.id.linerLayout, access)
+                    .addToBackStack(null)
+                    .commit()
 
             }
             /*прогресс выполнения задач*/
@@ -247,11 +242,10 @@ class GroupTask : Fragment(), NavigationView.OnNavigationItemSelectedListener,
 
                 val progress: Fragment =
                     Progress()
-                val transaction: FragmentTransaction = fragmentManager!!.beginTransaction()
-
-                transaction.replace(R.id.linerLayout, progress)
-                transaction.addToBackStack(null)
-                transaction.commit()
+                fragmentManager!!.beginTransaction()
+                    .replace(R.id.linerLayout, progress)
+                    .addToBackStack(null)
+                    .commit()
 
             }
             /*настройки*/
@@ -259,11 +253,10 @@ class GroupTask : Fragment(), NavigationView.OnNavigationItemSelectedListener,
 
                 val setting: Fragment =
                     Setting()
-                val transaction: FragmentTransaction = fragmentManager!!.beginTransaction()
-
-                transaction.replace(R.id.linerLayout, setting)
-                transaction.addToBackStack(null)
-                transaction.commit()
+                fragmentManager!!.beginTransaction()
+                    .replace(R.id.linerLayout, setting)
+                    .addToBackStack(null)
+                    .commit()
 
             }
             /*техподдержка*/
@@ -271,11 +264,10 @@ class GroupTask : Fragment(), NavigationView.OnNavigationItemSelectedListener,
 
                 val techSupport: Fragment =
                     TechSupport()
-                val transaction: FragmentTransaction = fragmentManager!!.beginTransaction()
-
-                transaction.replace(R.id.linerLayout, techSupport)
-                transaction.addToBackStack(null)
-                transaction.commit()
+                fragmentManager!!.beginTransaction()
+                    .replace(R.id.linerLayout, techSupport)
+                    .addToBackStack(null)
+                    .commit()
 
             }
             /*выход пользователя из системы*/

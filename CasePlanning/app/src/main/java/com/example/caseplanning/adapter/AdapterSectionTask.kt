@@ -13,6 +13,7 @@ import androidx.cardview.widget.CardView
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.RecyclerView
 import com.example.caseplanning.DataBase.DataBase
+import com.example.caseplanning.DataBase.Folder
 import com.example.caseplanning.DataBase.Task
 import com.example.caseplanning.EditElements.EditTask
 import com.example.caseplanning.R
@@ -21,6 +22,7 @@ import com.example.caseplanning.mainWindow.FragmentDialog
 import com.intrusoft.sectionedrecyclerview.SectionRecyclerViewAdapter
 import io.reactivex.disposables.Disposable
 import java.util.*
+import kotlin.collections.ArrayList
 
 
 class AdapterSectionTask(
@@ -37,6 +39,7 @@ class AdapterSectionTask(
     private val mData: ArrayList<SectionHeader> = data
     var disposable: Disposable? = null
     val dataBaseTask = DataBase()
+    var folder_list : ArrayList<Folder>? = null
     val mDay: String? = day
     val mUid: String = uid
 
@@ -123,33 +126,8 @@ class AdapterSectionTask(
                                 year += 1
                                 nextDate = "${tomorrowDay}.${month}.${year}"
                             }
-                            disposable = dataBaseTask
-                                .retrieveData(mUid)
-                                .subscribe { tasks ->
-                                    for (taskData in tasks) {
-                                        if (taskData.name == task.name && taskData.day == task.day) {
-                                            val mTask = Task(
-                                                name = taskData.name,
-                                                listSubTasks = taskData.listSubTasks,
-                                                photo = taskData.photo,
-                                                audio = taskData.audio,
-                                                timeAudio = taskData.timeAudio,
-                                                video = taskData.video,
-                                                comment = taskData.comment,
-                                                timer = taskData.timer,
-                                                notification = taskData.notification,
-                                                color = taskData.color,
-                                                replay = taskData.replay,
-                                                period = taskData.period,
-                                                day = nextDate
-                                            )
-                                            dataBaseTask.updateDataTask(mTask, taskData.idTasks!!)
-                                        }
-                                    }
+                            updateFolder(database = dataBaseTask, task = task, nextDate = nextDate)
 
-                                    mData.removeAll(mData)
-                                    notifyDataChanged(mData)
-                                }
                         }
                         Toast.makeText(
                             context,
@@ -248,6 +226,59 @@ class AdapterSectionTask(
             "textBlack" -> childViewHolder.color_task.setImageResource(R.color.textBlack)
             else -> childViewHolder.color_task.visibility = ImageView.INVISIBLE
         }
+    }
+
+    private fun getListFolder() : ArrayList<Folder>? = folder_list
+    private fun updateFolder(database : DataBase, task: Task, nextDate: String) {
+        folder_list = arrayListOf()
+        disposable = database
+            .retrieveDataFolders()
+            .subscribe { folders ->
+                for (folder in folders) {
+                    if (!folder.tasks.isNullOrEmpty()) {
+                        folder_list!!.add(folder)
+                    }
+                }
+                tomorrowTask(task, nextDate)
+            }
+    }
+    private fun tomorrowTask(task: Task, nextDate:String){
+        disposable = dataBaseTask
+            .retrieveData(mUid)
+            .subscribe { tasks ->
+                for (taskData in tasks) {
+                    if (taskData.name == task.name && taskData.day == task.day) {
+                        val list = getListFolder()
+                        val mTask = Task(
+                            name = taskData.name,
+                            listSubTasks = taskData.listSubTasks,
+                            photo = taskData.photo,
+                            audio = taskData.audio,
+                            timeAudio = taskData.timeAudio,
+                            video = taskData.video,
+                            comment = taskData.comment,
+                            timer = taskData.timer,
+                            notification = taskData.notification,
+                            color = taskData.color,
+                            replay = taskData.replay,
+                            period = taskData.period,
+                            day = nextDate
+                        )
+                        for(folder in list!!) {
+                            if (folder.tasks!!.contains(taskData)) {
+                                folder.tasks!!.remove(taskData)
+                                folder.tasks!!.add(mTask)
+                                val update_folder = Folder(name = folder.name, tasks = folder.tasks!!)
+                                dataBaseTask.updateDataFolder(update_folder, folder.id)
+                            }
+                        }
+                        dataBaseTask.updateDataTask(mTask, taskData.idTasks!!)
+                    }
+                }
+
+                mData.removeAll(mData)
+                notifyDataChanged(mData)
+            }
     }
     //лист с задачами, которые нужно найти
     var filterTaskList: ArrayList<SectionHeader> = arrayListOf()
