@@ -28,7 +28,7 @@
                 android:gravity="center"
                 android:textSize="18sp"
                 android:layout_gravity="center"
-                android:text="Возникли проблемы? Есть предложения или жалобы, пишите сюда: negodyaeva.yulya@mail.ru" />
+                android:text="Возникли проблемы? Есть предложения или жалобы, пишите сюда: magicunicornsup@gmail.com" />
     </LinearLayout>
 
     <com.google.android.material.navigation.NavigationView
