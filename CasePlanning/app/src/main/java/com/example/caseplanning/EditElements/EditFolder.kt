@@ -2,55 +2,36 @@ package com.example.caseplanning.EditElements
 
 import android.content.Context
 import android.view.LayoutInflater
-import android.widget.Adapter
-import android.widget.ArrayAdapter
-import android.widget.EditText
 import android.widget.Toast
-import androidx.appcompat.app.AlertDialog
-import androidx.fragment.app.FragmentActivity
-import androidx.lifecycle.ViewModelProviders
-import androidx.lifecycle.Observer
-import com.example.caseplanning.CreateTask.MyViewModel
+import com.example.caseplanning.DataBase.DataBase
+import com.example.caseplanning.DataBase.Folder
 import com.example.caseplanning.R
-import java.lang.Exception
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.textfield.TextInputLayout
 
-class EditFolder (val context : Context?,
-                  val activity: FragmentActivity?,
-                 val adapter:  ArrayAdapter<String>?,
-                 var list : ArrayList<String>,
-                 var id : Int){
+class EditFolder (val context : Context?, folder: Folder){
 
+    val mFolder = folder
 
-    fun createDialog(name : String?){
-         val layoutInflater : LayoutInflater = LayoutInflater.from(context)
+    fun createDialog(){
+        val layoutInflater : LayoutInflater = LayoutInflater.from(context)
+        val dataBaseTask = DataBase()
+        val view = layoutInflater.inflate(R.layout.create_folder, null)
+        val outlinedTextField = view.findViewById<TextInputLayout>(R.id.outlinedTextField)
+        outlinedTextField.editText!!.setText(mFolder.name)
 
-        val pageViewModel  = ViewModelProviders.of(activity!!).get(MyViewModel::class.java)
-        val view = layoutInflater.inflate(R.layout.edit_folder, null)
-        val mBuilder = AlertDialog.Builder(activity)
-        val nameFolder = view.findViewById<EditText>(R.id.editNameFolder)
-        nameFolder.setText(name)
-        val position = nameFolder.text.length
-        nameFolder.setSelection(position)
+        MaterialAlertDialogBuilder(context)
+            .setTitle("Изменить наименование папки")
+            .setView(view)
+            .setPositiveButton("Изменить") { dialogInterface, id ->
+                val nameNewFolder = outlinedTextField.editText!!.text.toString()
+                val folder = Folder(name = nameNewFolder, tasks = mFolder.tasks, progress = mFolder.progress)
 
-        mBuilder.setView(view)
-
-        mBuilder.setPositiveButton(
-            "Изменить"
-        ) { dialog, id ->
-
-            try {
-                val nameNewFolder = nameFolder.text.toString()
-                Toast.makeText(context, "Наименование папки успешно изменено", Toast.LENGTH_SHORT)
+                dataBaseTask.updateDataFolder(folder, mFolder.id)
+                Toast.makeText(context, "Папка $nameNewFolder успешно изменена", Toast.LENGTH_SHORT)
                     .show()
-                pageViewModel.mName.value = nameNewFolder
-                list[this.id] = nameNewFolder
-                adapter!!.notifyDataSetChanged()
-            } catch (e: Exception) {
-                Toast.makeText(context, e.message, Toast.LENGTH_SHORT).show()
-
             }
-        }
-        mBuilder.show()
-
+            .setNegativeButton("Отменить", null)
+            .show()
     }
 }

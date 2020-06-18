@@ -264,7 +264,7 @@ class AdapterSectionTask(
                             period = taskData.period,
                             day = nextDate
                         )
-                        //
+
                         for(folder in list!!) {
                             if (folder.tasks!!.contains(taskData)) {
                                 folder.tasks!!.remove(taskData)

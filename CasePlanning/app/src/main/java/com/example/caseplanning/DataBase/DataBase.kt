@@ -131,7 +131,8 @@ class DataBase {
                                 folders.add(Folder(
                                     id = key,
                                     name = value.name,
-                                    tasks = value.tasks
+                                    tasks = value.tasks,
+                                    progress = value.progress
                                 ))
                             }
                         }

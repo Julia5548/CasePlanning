@@ -33,7 +33,7 @@ open class SwipeToDeleteCallback(context: Context) :
     override fun getMovementFlags(
         recyclerView: RecyclerView,
         viewHolder: RecyclerView.ViewHolder
-    ): Int = makeMovementFlags(0, ItemTouchHelper.LEFT)
+    ): Int =  makeMovementFlags(0, ItemTouchHelper.LEFT )
 
     override fun onMove(
         recyclerView: RecyclerView,

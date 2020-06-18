@@ -94,7 +94,11 @@ dependencies {
 
     /*секции для списка*/
     implementation 'com.github.IntruderShanky:Sectioned-RecyclerView:2.1.1'
+    //фото
     implementation 'com.github.chrisbanes:PhotoView:2.3.0'
+
+    //прогресс выполнения задач
+    implementation 'com.mikhaellopez:circularprogressbar:3.0.3'
 
     /*убрать*/
     debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.2'

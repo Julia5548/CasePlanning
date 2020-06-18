@@ -19,10 +19,10 @@ import com.example.caseplanning.CreateTask.StorageFile
 import com.example.caseplanning.DataBase.Task
 import com.example.caseplanning.R
 import com.example.caseplanning.adapter.AdapterRecyclerViewFolder
+import com.example.caseplanning.adapter.AdapterRecyclerViewTaskFolder
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import io.reactivex.disposables.Disposable
 import java.lang.Exception
-import kotlin.random.Random
 
 class FragmentDialog(
     val dataTask: Task?,
@@ -112,7 +112,7 @@ class FragmentDialog(
                     subTasks.add(subTask)
                 }
 
-                listSubTask.adapter = AdapterRecyclerViewFolder(context!!, subTasks)
+                listSubTask.adapter = AdapterRecyclerViewTaskFolder(context!!, subTasks)
                 subTasks = arrayListOf()
                 if (view.parent != null) {
                     (view.parent as ViewGroup).removeView(view)

@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:custom="http://schemas.android.com/tools"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal">
@@ -19,8 +21,58 @@
                     android:id="@+id/nameItemList"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:padding="15dp"
-                    android:layout_marginEnd="35dp"/>
+                    android:layout_marginEnd="35dp"
+                    android:padding="15dp" />
+            <TextView
+                    android:id="@+id/menu"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text = "&#8942;"
+                    android:textColor="#DA780DA5"
+                    android:textSize="30sp"
+                    android:layout_alignParentEnd="true"
+                    android:padding="10dp" />
+
+            <RelativeLayout
+                    android:id="@+id/relativeLayout_progress_made"
+                    android:layout_width="40dp"
+                    android:layout_marginTop="3dp"
+                    android:layout_height="40dp"
+                    android:layout_toStartOf="@+id/menu">
+
+                <TextView
+                        android:id="@+id/percent_progress_made"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerInParent="true"
+                        android:text="0 %"
+                        android:textColor="#DA780DA5" />
+
+                <com.mikhaellopez.circularprogressbar.CircularProgressBar
+                        android:id="@+id/progress_made"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:layout_centerInParent="true"
+                        app:cpb_background_progressbar_color="#8A148BDA"
+                        app:cpb_background_progressbar_width="2dp"
+                        app:cpb_progress_direction="to_right"
+                        app:cpb_progressbar_color="#DA780DA5"
+                        app:cpb_progressbar_width="2dp" />
+            </RelativeLayout>
+
+            <RelativeLayout
+                    android:layout_width="40dp"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/relativeLayout_progress_made"
+                    android:layout_toStartOf="@+id/menu">
+
+                <TextView
+                        android:id="@+id/current_task"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerInParent="true"
+                        android:text="0" />
+            </RelativeLayout>
         </RelativeLayout>
 
     </com.google.android.material.card.MaterialCardView>

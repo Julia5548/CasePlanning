@@ -8,10 +8,7 @@ import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
-import android.widget.AdapterView
-import android.widget.RelativeLayout
-import android.widget.TextView
-import android.widget.Toast
+import android.widget.*
 import androidx.annotation.NonNull
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
@@ -19,7 +16,6 @@ import androidx.appcompat.widget.Toolbar
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentTransaction
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -125,9 +121,14 @@ class GroupTask : Fragment(), NavigationView.OnNavigationItemSelectedListener,
             .retrieveDataFolders()
             .subscribe({ folders ->
                 val nameFolderList = arrayListOf<String>()
-                for (folder in folders)
+                val current_task = arrayListOf<Int>()
+                val progress = arrayListOf<Float>()
+                for (folder in folders) {
                     nameFolderList.add(folder.name)
-                mAdapterFolder = AdapterRecyclerViewFolder(context!!, nameFolderList)
+                    current_task.add(folder.tasks!!.size)
+                    progress.add(folder.progress.toFloat())
+                }
+                mAdapterFolder = AdapterRecyclerViewFolder(context!!, nameFolderList, current_task, progress)
                 listFolder.adapter = mAdapterFolder
                 enableSwipeToDeleteAndUndo(listFolder)
             },
@@ -165,7 +166,7 @@ class GroupTask : Fragment(), NavigationView.OnNavigationItemSelectedListener,
                                     )
                                     snackbar.setAction("Отменить") { _ ->
                                         val folderItem =
-                                            Folder(id = "", name = item, tasks = taskList)
+                                            Folder(id = "", name = item, tasks = taskList, progress = folder.progress)
                                         dataBaseTask.createFolder(folderItem)
                                         mAdapterFolder!!.notifyDataSetChanged()
                                         listFolder.scrollToPosition(position)
@@ -179,6 +180,8 @@ class GroupTask : Fragment(), NavigationView.OnNavigationItemSelectedListener,
                 val itemTouchHelper = ItemTouchHelper(swipeToDeleteCallback)
                 itemTouchHelper.attachToRecyclerView(listFolder)
             }
+        if(disposable != null && disposable.isDisposed)
+            disposable.dispose()
     }
 
     @OnClick(R.id.addFolder)
@@ -192,11 +195,8 @@ class GroupTask : Fragment(), NavigationView.OnNavigationItemSelectedListener,
             .setPositiveButton("Добавить") { dialogInterface, id ->
                 val outlinedTextField = view.findViewById<TextInputLayout>(R.id.outlinedTextField)
                 val nameNewFolder = outlinedTextField.editText!!.text.toString()
-                val folder = Folder()
-
                 val listTask = arrayListOf<Task>()
-                folder.name = nameNewFolder
-                folder.tasks = listTask
+                val folder = Folder(name = nameNewFolder, tasks = listTask, progress = "0")
 
                 dataBaseTask.createFolder(folder)
 
@@ -206,8 +206,7 @@ class GroupTask : Fragment(), NavigationView.OnNavigationItemSelectedListener,
             .setNegativeButton("Отменить", null)
             .show()
     }
-
-    override fun onNavigationItemSelected(menuItem: MenuItem): Boolean {
+        override fun onNavigationItemSelected(menuItem: MenuItem): Boolean {
         when (menuItem.itemId) {
             /*группа задач*/
             R.id.groupTask -> {
