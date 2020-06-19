@@ -3,55 +3,47 @@
         xmlns:app="http://schemas.android.com/apk/res-auto"
         xmlns:tools="http://schemas.android.com/tools"
         android:id="@+id/drawerLayout"
+        xmlns:custom="http://schemas.android.com/apk/res-auto"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical">
+        android:layout_height="match_parent">
 
-    <RelativeLayout
+    <LinearLayout
             android:id="@+id/relativeLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
-        <androidx.appcompat.widget.Toolbar
-                android:id="@+id/toolbarTask"
-                style="@style/Toolbar"
-                android:layout_width="match_parent"
+        <RelativeLayout
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content">
 
-        </androidx.appcompat.widget.Toolbar>
+            <androidx.appcompat.widget.Toolbar
+                    android:id="@+id/toolbarTask"
+                    style="@style/Toolbar"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
 
-        <com.miguelcatalan.materialsearchview.MaterialSearchView
-                android:id="@+id/search"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content">
+            </androidx.appcompat.widget.Toolbar>
 
-        </com.miguelcatalan.materialsearchview.MaterialSearchView>
-
-
+            <com.miguelcatalan.materialsearchview.MaterialSearchView
+                    android:id="@+id/search_view"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
+        </RelativeLayout>
 
         <com.shrikanthravi.collapsiblecalendarview.widget.CollapsibleCalendar
-                android:layout_width="match_parent"
-                style="@style/Widget.CalendarView.Custom"
                 android:id="@+id/linearLayoutCalendar"
-                android:layout_below="@+id/toolbarTask"
+                style="@style/Widget.CalendarView.Custom"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:primaryColor="@color/textWhite"
-                app:textColor="@android:color/widget_edittext_dark"
-                app:selectedItem_textColor="@color/textWhite"
-                app:todayItem_textColor="@android:color/widget_edittext_dark"
-                app:todayItem_background="@drawable/circle_primary_color_stroke_background"
-                app:selectedItem_background="@drawable/circle_primary_color_solid_backround"
                 app:buttonLeft_drawableTintColor="@android:color/primary_text_light"
                 app:buttonRight_drawableTintColor="@android:color/widget_edittext_dark"
-                app:expandIconColor="@android:color/widget_edittext_dark" />
-
-
-        <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_below="@+id/linearLayoutCalendar">
-
+                app:expandIconColor="@android:color/widget_edittext_dark"
+                app:selectedItem_background="@drawable/circle_primary_color_solid_backround"
+                app:selectedItem_textColor="@color/textWhite"
+                app:textColor="@android:color/widget_edittext_dark"
+                app:todayItem_background="@drawable/circle_primary_color_stroke_background"
+                app:todayItem_textColor="@android:color/widget_edittext_dark" />
 
             <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/listViewTask"
@@ -59,7 +51,9 @@
                     android:layout_height="wrap_content"
                     tools:ignore="NestedScrolling" />
 
-        </LinearLayout>
+        <RelativeLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content">
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
                 android:id="@+id/addTask"
@@ -67,20 +61,21 @@
                 android:layout_height="wrap_content"
                 android:layout_alignParentEnd="true"
                 android:layout_alignParentBottom="true"
-                android:layout_gravity="end|bottom"
-                android:layout_margin="16dp"
+                android:padding="16dp"
                 android:src="@drawable/ic_add"
                 app:backgroundTint="@color/azure" />
-    </RelativeLayout>
+
+        </RelativeLayout>
+
+    </LinearLayout>
 
     <com.google.android.material.navigation.NavigationView
+            android:id="@+id/navigationView"
             android:layout_width="wrap_content"
-            app:headerLayout="@layout/header"
             android:layout_height="match_parent"
-            android:id = "@+id/navigationView"
-            android:layout_marginTop="?attr/actionBarSize"
             android:layout_gravity="start"
-            app:menu="@menu/drawer_menu">
-    </com.google.android.material.navigation.NavigationView>
+            android:layout_marginTop="?attr/actionBarSize"
+            app:headerLayout="@layout/header"
+            app:menu="@menu/drawer_menu" />
 
 </androidx.drawerlayout.widget.DrawerLayout>

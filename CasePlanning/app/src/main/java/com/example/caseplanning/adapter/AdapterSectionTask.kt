@@ -34,7 +34,7 @@ class AdapterSectionTask(
     SectionRecyclerViewAdapter<SectionHeader, Task, AdapterSectionTask.SectionViewHolder, AdapterSectionTask.ChildViewHolder>(
         context,
         data
-    ), Filterable {
+    ){
 
     private val mData: ArrayList<SectionHeader> = data
     var disposable: Disposable? = null
@@ -281,44 +281,4 @@ class AdapterSectionTask(
                 notifyDataChanged(mData)
             }
     }
-    //лист с задачами, которые нужно найти
-    var filterTaskList: ArrayList<SectionHeader> = arrayListOf()
-
-    fun setTaskList(mDataTask: ArrayList<Task>) {
-        mData.clear()
-        //this.mData.addAll(mDataTask)
-        notifyDataSetChanged()
-    }
-
-    override fun getFilter(): Filter = filter()
-
-    fun filter(): Filter = object : Filter() {
-        override fun performFiltering(charSequence: CharSequence?): FilterResults {
-            val filteredList: ArrayList<SectionHeader> = arrayListOf()
-            filterTaskList = mData
-
-            if (charSequence == null || charSequence.isEmpty()) {
-                filteredList.addAll(filterTaskList)
-            } else {
-                val charString = charSequence.toString().toLowerCase(Locale.ROOT).trim()
-                for (task in filterTaskList) {
-                    for (task_name in task.mDataChildList) {
-                        if (task_name.name!!.toLowerCase(Locale.ROOT).contains(charString))
-                            filteredList.add(task)
-                    }
-                }
-            }
-            val filerResult = FilterResults()
-            filerResult.values = filteredList
-            return filerResult
-        }
-
-        override fun publishResults(constraint: CharSequence?, results: FilterResults?) {
-            mData.clear()
-            mData.addAll(results!!.values as ArrayList<SectionHeader>)
-            notifyDataSetChanged()
-        }
-
-    }
-
 }

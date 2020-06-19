@@ -19,6 +19,7 @@ class EditFolder (val context : Context?, folder: Folder){
         val view = layoutInflater.inflate(R.layout.create_folder, null)
         val outlinedTextField = view.findViewById<TextInputLayout>(R.id.outlinedTextField)
         outlinedTextField.editText!!.setText(mFolder.name)
+        outlinedTextField.editText!!.requestFocus(mFolder.name.length)
 
         MaterialAlertDialogBuilder(context)
             .setTitle("Изменить наименование папки")

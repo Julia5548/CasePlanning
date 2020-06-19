@@ -79,7 +79,6 @@ class GroupTask : Fragment(), NavigationView.OnNavigationItemSelectedListener,
         val emailUser = navHeader.findViewById<TextView>(R.id.emailText)
         val nameUser = navHeader.findViewById<TextView>(R.id.nameUser)
 
-
         val mToggle = ActionBarDrawerToggle(
             activity, mDrawerLayout, toolbar,
             R.string.Open, R.string.Close
@@ -98,7 +97,8 @@ class GroupTask : Fragment(), NavigationView.OnNavigationItemSelectedListener,
             },
                 { throwable ->
                     throwable.printStackTrace()
-                })
+                }
+            )
 
         listFolder(viewFragment)
 

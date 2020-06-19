@@ -2,7 +2,6 @@ package com.example.caseplanning.CreateTask
 
 import android.annotation.SuppressLint
 import android.app.*
-import android.content.Context.ALARM_SERVICE
 import android.content.Intent
 import android.graphics.PorterDuff
 import android.os.Build
@@ -32,7 +31,6 @@ import com.example.caseplanning.TypeTask.Photo
 import com.example.caseplanning.TypeTask.Video
 import com.example.caseplanning.mainWindow.MainWindowCasePlanning
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import java.text.SimpleDateFormat
 import java.util.*
 
 class CreateTaskWindow : Fragment() {

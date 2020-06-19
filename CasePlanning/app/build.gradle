@@ -80,13 +80,12 @@ dependencies {
 
     /*material search*/
     implementation 'com.miguelcatalan:materialsearchview:1.4.0'
-
     /*recycler View*/
     //noinspection GradleCompatible
     implementation 'com.android.support:recyclerview-v7:27.0.0'
 
     implementation 'android.arch.navigation:navigation-ui:1.0.0'
-
+//календарь
     implementation 'com.github.shrikanth7698:Collapsible-Calendar-View-Android:v1.0.3'
 
     implementation 'androidx.lifecycle:lifecycle-extensions:2.0.0'
