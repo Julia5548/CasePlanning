@@ -18,6 +18,7 @@ import butterknife.ButterKnife
 import com.example.caseplanning.CreateTask.StorageFile
 import com.example.caseplanning.DataBase.Task
 import com.example.caseplanning.R
+import com.example.caseplanning.adapter.AdapterRecyclerView
 import com.example.caseplanning.adapter.AdapterRecyclerViewFolder
 import com.example.caseplanning.adapter.AdapterRecyclerViewTaskFolder
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -112,7 +113,7 @@ class FragmentDialog(
                     subTasks.add(subTask)
                 }
 
-                listSubTask.adapter = AdapterRecyclerViewTaskFolder(context!!, subTasks)
+                listSubTask.adapter = AdapterRecyclerView(context!!, subTasks)
                 subTasks = arrayListOf()
                 if (view.parent != null) {
                     (view.parent as ViewGroup).removeView(view)

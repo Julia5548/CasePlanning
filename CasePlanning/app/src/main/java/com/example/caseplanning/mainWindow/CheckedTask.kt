@@ -5,7 +5,9 @@ import android.widget.CheckBox
 import android.widget.TextView
 import androidx.cardview.widget.CardView
 import com.example.caseplanning.DataBase.DataBase
+import com.example.caseplanning.DataBase.Folder
 import com.example.caseplanning.DataBase.Task
+import com.google.firebase.auth.FirebaseAuth
 import io.reactivex.disposables.Disposable
 
 class CheckedTask() {
@@ -13,12 +15,33 @@ class CheckedTask() {
     private lateinit var mCardView: CardView
     private lateinit var mTextView: TextView
     private lateinit var mCheckbox : CheckBox
+    private var folder_list : ArrayList<Folder>? = null
 
     constructor(cardView: CardView, textView: TextView, checkbox:CheckBox) : this(){
         mCardView = cardView
         mTextView = textView
         mCheckbox = checkbox
     }
+
+    private fun getListFolder() : ArrayList<Folder>? = folder_list
+
+     fun updateFolder(task: Task, checked: Boolean) {
+        folder_list = arrayListOf()
+         val database = DataBase()
+        var disposable: Disposable? = null
+        disposable = database
+            .retrieveDataFolders()
+            .subscribe { folders ->
+                for (folder in folders) {
+                    if (!folder.tasks.isNullOrEmpty()) {
+                        folder_list!!.add(folder)
+                    }
+                }
+                updateTask(mUid = FirebaseAuth.getInstance().currentUser!!.uid, task = task, checked = checked)
+                onDestroy(disposable)
+            }
+    }
+
     fun updateTask(
         mUid: String,
         task: Task,
@@ -31,6 +54,7 @@ class CheckedTask() {
             .subscribe { tasks ->
                 for (taskData in tasks) {
                     if (taskData.name == task.name && taskData.day == task.day) {
+                        val list = getListFolder()
                         var mTask : Task
                         if(checked) {
                             mTask = Task(
@@ -38,6 +62,7 @@ class CheckedTask() {
                                 listSubTasks = taskData.listSubTasks,
                                 photo = taskData.photo,
                                 audio = taskData.audio,
+                                idTasks = task.idTasks,
                                 timeAudio = taskData.timeAudio,
                                 video = taskData.video,
                                 comment = taskData.comment,
@@ -55,6 +80,7 @@ class CheckedTask() {
                                 listSubTasks = taskData.listSubTasks,
                                 photo = taskData.photo,
                                 audio = taskData.audio,
+                                idTasks = task.idTasks,
                                 timeAudio = taskData.timeAudio,
                                 video = taskData.video,
                                 comment = taskData.comment,
@@ -68,6 +94,24 @@ class CheckedTask() {
                             )
                         }
                         dataBase.updateDataTask(mTask, taskData.idTasks!!)
+
+                        for(folder in list!!) {
+                            if (folder.tasks!!.contains(taskData)) {
+                                folder.tasks!!.remove(taskData)
+                                folder.tasks!!.add(mTask)
+                                var checked_count = 0.0
+                                for(folder_task in folder.tasks!!){
+                                    if(folder_task.checked!!){
+                                        checked_count++
+                                    }
+                                }
+                                //Расчет для прогресса
+                                val mProgress = (checked_count/folder.tasks!!.size) * 100
+
+                                val update_folder = Folder(name = folder.name, tasks = folder.tasks!!, progress = mProgress.toString())
+                                dataBase.updateDataFolder(update_folder, folder.id)
+                            }
+                        }
                         onDestroy(disposable)
                     }
                 }

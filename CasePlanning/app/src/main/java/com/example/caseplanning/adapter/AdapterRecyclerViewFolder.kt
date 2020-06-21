@@ -14,6 +14,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.RecyclerView
 import com.example.caseplanning.DataBase.DataBase
+import com.example.caseplanning.DataBase.Folder
 import com.example.caseplanning.EditElements.EditFolder
 import com.example.caseplanning.GroupTask.ListTaskGroup
 import com.example.caseplanning.R
@@ -22,12 +23,12 @@ import com.mikhaellopez.circularprogressbar.CircularProgressBar
 
 class AdapterRecyclerViewFolder(
     val context: Context,
-    data: ArrayList<String>,
+    data: ArrayList<Folder>,
     currentTask: ArrayList<Int>,
     progress: ArrayList<Float>
 ) : RecyclerView.Adapter<AdapterRecyclerViewFolder.ViewHolder>() {
 
-    val mData: ArrayList<String> = data
+    val mData: ArrayList<Folder> = data
     val mCurrentTask: ArrayList<Int> = currentTask
     val mProgress = progress
 
@@ -53,7 +54,7 @@ class AdapterRecyclerViewFolder(
     @SuppressLint("SetTextI18n")
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
 
-        holder.nameItem.text = mData[position]
+        holder.nameItem.text = mData[position].name
         holder.currentTask.text = mCurrentTask[position].toString()
         holder.progress_made.apply {
             setProgressWithAnimation(mProgress[position], 1000)
@@ -68,19 +69,8 @@ class AdapterRecyclerViewFolder(
 
                 when (item.itemId) {
                     R.id.edit -> {
-                        val database = DataBase()
-                        val disposal = database
-                            .retrieveDataFolders()
-                            .subscribe { folders ->
-                                for (folder in folders) {
-                                    if (folder.name == mData[position]) {
-                                        val editFolder = EditFolder(context, folder)
-                                        editFolder.createDialog()
-                                    }
-                                }
-                            }
-                        if (disposal != null && disposal.isDisposed)
-                            disposal.dispose()
+                        val editFolder = EditFolder(context, mData[position])
+                        editFolder.createDialog()
                         true
                     }
                     else -> false
@@ -95,12 +85,9 @@ class AdapterRecyclerViewFolder(
                 .retrieveDataFolders()
                 .subscribe { folders ->
                     for (folder in folders) {
-                        if (folder.name == mData[position]) {
+                        if (folder.name == mData[position].name) {
                             val listTaskGroup: Fragment = ListTaskGroup(
-                                folder.name,
-                                folder.tasks,
-                                folder.id,
-                                mProgress[position]
+                                folder
                             )
                             (context as AppCompatActivity).supportFragmentManager.beginTransaction()
                                 .replace(R.id.linerLayout, listTaskGroup).addToBackStack(null)

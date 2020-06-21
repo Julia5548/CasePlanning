@@ -269,7 +269,7 @@ class AdapterSectionTask(
                             if (folder.tasks!!.contains(taskData)) {
                                 folder.tasks!!.remove(taskData)
                                 folder.tasks!!.add(mTask)
-                                val update_folder = Folder(name = folder.name, tasks = folder.tasks!!)
+                                val update_folder = Folder(name = folder.name, tasks = folder.tasks!!, progress = folder.progress)
                                 dataBaseTask.updateDataFolder(update_folder, folder.id)
                             }
                         }

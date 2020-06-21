@@ -2,31 +2,38 @@ package com.example.caseplanning.adapter
 
 
 import android.content.Context
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.CheckBox
 import android.widget.TextView
-import androidx.appcompat.app.AppCompatActivity
-import androidx.fragment.app.Fragment
+import androidx.cardview.widget.CardView
 import androidx.recyclerview.widget.RecyclerView
-import com.example.caseplanning.DataBase.DataBase
-import com.example.caseplanning.GroupTask.ListTaskGroup
+import com.example.caseplanning.DataBase.Folder
+import com.example.caseplanning.DataBase.Task
 import com.example.caseplanning.R
-import com.google.android.material.card.MaterialCardView
+import com.example.caseplanning.mainWindow.CheckedTask
 
-class AdapterRecyclerViewTaskFolder(val context: Context, data:ArrayList<String>):RecyclerView.Adapter<AdapterRecyclerViewTaskFolder.ViewHolder>() {
+class AdapterRecyclerViewTaskFolder(
+    val context: Context,
+    data: ArrayList<Task>,
+    folder: Folder?
+) : RecyclerView.Adapter<AdapterRecyclerViewTaskFolder.ViewHolder>() {
 
-    val mData : ArrayList<String> = data
+    val mData: ArrayList<Task> = data
+    val mFolder = folder
 
-    inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView){
+    inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
         val nameItem = itemView.findViewById<TextView>(R.id.nameItemList)
-        val cardView = itemView.findViewById<MaterialCardView>(R.id.card_view)
+        val checkBox = itemView.findViewById<CheckBox>(R.id.checkbox_folder_task_subTask)
+        val cardView = itemView.findViewById<CardView>(R.id.card_view)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
 
-        val view = LayoutInflater.from(context).inflate(R.layout.card, parent, false)
+        val view = LayoutInflater.from(context).inflate(R.layout.folder_tass_list, parent, false)
 
         return ViewHolder(view)
     }
@@ -35,22 +42,43 @@ class AdapterRecyclerViewTaskFolder(val context: Context, data:ArrayList<String>
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
 
-        holder.nameItem.text = mData[position]
-        holder.cardView.setOnClickListener {
+        holder.nameItem.text = mData[position].name
 
-           /* val database = DataBase()
-            val disposal = database
-                .retrieveDataFolders()
-                .subscribe {folders->
-                    for(folder in folders){
-                        if(folder.name == mData[position])
-                        {
-                            val listTaskGroup : Fragment = ListTaskGroup(folder.name, folder.tasks, folder.id)
-                            (context as AppCompatActivity).supportFragmentManager.beginTransaction()
-                                .replace(R.id.linerLayout, listTaskGroup).addToBackStack(null).commit()
-                        }
-                    }
-                }*/
+        if (mData[position].checked!!) {
+            val checkedTask = CheckedTask(holder.cardView, holder.nameItem, holder.checkBox)
+            checkedTask.checkedTask()
+        }
+
+        holder.checkBox.setOnCheckedChangeListener { card, isChecked ->
+            checkedFolderTask(
+                mData[position].name!!,
+                holder.cardView,
+                holder.nameItem,
+                holder.checkBox,
+                isChecked
+            )
+            try {
+                notifyItemChanged(position)
+            } catch (e: Exception) {
+                Log.d("TAG", e.toString())
+            }
+        }
+    }
+
+    private fun checkedFolderTask(
+        nameTask: String,
+        cardView: CardView,
+        textView: TextView,
+        checkBox: CheckBox,
+        checked: Boolean
+    ) {
+        if (mFolder != null) {
+            for (task_folder in mFolder.tasks!!) {
+                if (task_folder.name == nameTask) {
+                    val checkedTask = CheckedTask(cardView, textView, checkBox)
+                    checkedTask.updateFolder(task_folder, checked)
+                }
+            }
         }
     }
 }

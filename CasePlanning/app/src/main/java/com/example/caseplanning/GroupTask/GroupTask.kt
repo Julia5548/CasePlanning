@@ -120,15 +120,16 @@ class GroupTask : Fragment(), NavigationView.OnNavigationItemSelectedListener,
         disposable = dataBaseTask
             .retrieveDataFolders()
             .subscribe({ folders ->
-                val nameFolderList = arrayListOf<String>()
+                val folder_list = arrayListOf<Folder>()
                 val current_task = arrayListOf<Int>()
                 val progress = arrayListOf<Float>()
                 for (folder in folders) {
-                    nameFolderList.add(folder.name)
+                    folder_list.add(folder)
                     current_task.add(folder.tasks!!.size)
                     progress.add(folder.progress.toFloat())
                 }
-                mAdapterFolder = AdapterRecyclerViewFolder(context!!, nameFolderList, current_task, progress)
+                mAdapterFolder =
+                    AdapterRecyclerViewFolder(context!!, folder_list, current_task, progress)
                 listFolder.adapter = mAdapterFolder
                 enableSwipeToDeleteAndUndo(listFolder)
             },
@@ -140,48 +141,43 @@ class GroupTask : Fragment(), NavigationView.OnNavigationItemSelectedListener,
     private fun enableSwipeToDeleteAndUndo(listFolder: RecyclerView) {
         val dataBaseTask = DataBase()
         val relativeLayout = view!!.findViewById<RelativeLayout>(R.id.relativeLayout)
-        val disposable = dataBaseTask
-            .retrieveDataFolders()
-            .subscribe { folders ->
-                var taskList: ArrayList<Task>? = null
-                val swipeToDeleteCallback: SwipeToDeleteCallback =
-                    object : SwipeToDeleteCallback(context!!) {
-                        override fun onSwiped(
-                            @NonNull viewHolder: RecyclerView.ViewHolder,
-                            direction: Int
-                        ) {
-                            val position = viewHolder.adapterPosition
-                            val item: String = mAdapterFolder!!.mData[position]
-                            for (folder in folders) {
-                                if (folder.name == item) {
-                                    taskList = folder.tasks
-                                    dataBaseTask.deletedDataFolder(folder.id)
-                                    mAdapterFolder!!.mData.removeAt(position)
-                                    mAdapterFolder!!.notifyDataSetChanged()
+        var taskList: ArrayList<Task>? = null
+        val swipeToDeleteCallback: SwipeToDeleteCallback =
+            object : SwipeToDeleteCallback(context!!) {
+                override fun onSwiped(
+                    @NonNull viewHolder: RecyclerView.ViewHolder,
+                    direction: Int
+                ) {
+                    val position = viewHolder.adapterPosition
+                    val item: String = mAdapterFolder!!.mData[position].name
+                    taskList = mAdapterFolder!!.mData[position].tasks
+                    dataBaseTask.deletedDataFolder(mAdapterFolder!!.mData[position].id)
+                    mAdapterFolder!!.mData.removeAt(position)
+                    mAdapterFolder!!.notifyDataSetChanged()
 
-                                    val snackbar = Snackbar.make(
-                                        relativeLayout,
-                                        "Папка была удалена из списка",
-                                        Snackbar.LENGTH_LONG
-                                    )
-                                    snackbar.setAction("Отменить") { _ ->
-                                        val folderItem =
-                                            Folder(id = "", name = item, tasks = taskList, progress = folder.progress)
-                                        dataBaseTask.createFolder(folderItem)
-                                        mAdapterFolder!!.notifyDataSetChanged()
-                                        listFolder.scrollToPosition(position)
-                                    }
-                                    snackbar.setActionTextColor(Color.YELLOW)
-                                    snackbar.show()
-                                }
-                            }
-                        }
+                    val snackbar = Snackbar.make(
+                        relativeLayout,
+                        "Папка была удалена из списка",
+                        Snackbar.LENGTH_LONG
+                    )
+                    snackbar.setAction("Отменить") { _ ->
+                        val folderItem =
+                            Folder(
+                                id = "",
+                                name = item,
+                                tasks = taskList,
+                                progress = mAdapterFolder!!.mData[position].progress
+                            )
+                        dataBaseTask.createFolder(folderItem)
+                        mAdapterFolder!!.notifyDataSetChanged()
+                        listFolder.scrollToPosition(position)
                     }
-                val itemTouchHelper = ItemTouchHelper(swipeToDeleteCallback)
-                itemTouchHelper.attachToRecyclerView(listFolder)
+                    snackbar.setActionTextColor(Color.YELLOW)
+                    snackbar.show()
+                }
             }
-        if(disposable != null && disposable.isDisposed)
-            disposable.dispose()
+        val itemTouchHelper = ItemTouchHelper(swipeToDeleteCallback)
+        itemTouchHelper.attachToRecyclerView(listFolder)
     }
 
     @OnClick(R.id.addFolder)
@@ -206,7 +202,8 @@ class GroupTask : Fragment(), NavigationView.OnNavigationItemSelectedListener,
             .setNegativeButton("Отменить", null)
             .show()
     }
-        override fun onNavigationItemSelected(menuItem: MenuItem): Boolean {
+
+    override fun onNavigationItemSelected(menuItem: MenuItem): Boolean {
         when (menuItem.itemId) {
             /*группа задач*/
             R.id.groupTask -> {

@@ -4,9 +4,11 @@ import android.graphics.Color
 import android.os.Bundle
 import android.view.*
 import android.widget.LinearLayout
+import android.widget.TextView
 import androidx.annotation.NonNull
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
+import androidx.core.view.isNotEmpty
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -22,18 +24,13 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.FirebaseAuth
 import com.mikhaellopez.circularprogressbar.CircularProgressBar
+import org.w3c.dom.Text
 
 class ListTaskGroup(
-    nameFolder: String,
-    listTasks: ArrayList<Task>?,
-    key: String?,
-    progress : Float
+    folder: Folder
 ) : Fragment() {
 
-    var mNameFolder : String? = nameFolder
-    var mListTasks = listTasks
-    var mKey = key
-    var mProgress = progress
+    var mFolder: Folder? = folder
     var mAdapterFolderTask: AdapterRecyclerViewTaskFolder? = null
 
     override fun onCreateView(
@@ -48,7 +45,7 @@ class ListTaskGroup(
 
         activity!!.setSupportActionBar(toolbar)
         val actionBar = activity.supportActionBar
-        actionBar!!.title = mNameFolder
+        actionBar!!.title = mFolder!!.name
 
         actionBar.setHomeButtonEnabled(true)
         actionBar.setDisplayHomeAsUpEnabled(true)
@@ -83,13 +80,13 @@ class ListTaskGroup(
                 val disposable = database
                     .retrieveData(FirebaseAuth.getInstance().currentUser!!.uid)
                     .subscribe { tasks ->
-                        task_item = if(mListTasks != null) {
-                            arrayOfNulls(tasks.size - mListTasks!!.size)
-                        }else{
+                        task_item = if (mFolder!!.tasks != null) {
+                            arrayOfNulls(tasks.size - mFolder!!.tasks!!.size)
+                        } else {
                             arrayOfNulls(tasks.size)
                         }
                         for (task in tasks) {
-                            if (mListTasks != null && !mListTasks!!.contains(task)) {
+                            if (mFolder!!.tasks != null && !mFolder!!.tasks!!.contains(task)) {
                                 task_item[position] = task.name!!
                                 tasks_list.add(task)
                                 position++
@@ -108,9 +105,9 @@ class ListTaskGroup(
                                 checkedItems[which] = isChecked
                             }
                             .setPositiveButton("Ок") { dialog, which ->
-                                if (mListTasks?.size != 0) {
-                                    for (positionList in mListTasks!!.indices)
-                                        checkedTask.add(mListTasks!![positionList])
+                                if (mFolder!!.tasks?.size != 0) {
+                                    for (positionList in mFolder!!.tasks!!.indices)
+                                        checkedTask.add(mFolder!!.tasks!![positionList])
                                 }
                                 for (idItems in checkedItems.indices) {
                                     if (checkedItems[idItems]) {
@@ -118,10 +115,20 @@ class ListTaskGroup(
                                             checkedTask.add(tasks_list[idItems])
                                     }
                                 }
-                            //Расчет для прогресса
-                                /* mProgress = checked_count/mList_count * 100 */
-                                val folder = Folder(name = mNameFolder!!, tasks = checkedTask, progress = mProgress.toString())
-                                database.updateDataFolder(folder = folder, key = mKey!!)
+                                var checked_count = 0.0
+                                for (folder_task in checkedTask) {
+                                    if (folder_task.checked!!) {
+                                        checked_count++
+                                    }
+                                }
+                                //Расчет для прогресса
+                                val progress: Double = (checked_count / checkedTask.size) * 100
+                                val folder = Folder(
+                                    name = mFolder!!.name,
+                                    tasks = checkedTask,
+                                    progress = progress.toString()
+                                )
+                                database.updateDataFolder(folder = folder, key = mFolder!!.id)
                                 dialog.dismiss()
                             }
                             .setNegativeButton("Отмена") { dialogInterface, which ->
@@ -129,7 +136,7 @@ class ListTaskGroup(
                             }
                             .show()
                     }
-                if(disposable != null && disposable.isDisposed)
+                if (disposable != null && disposable.isDisposed)
                     disposable.dispose()
             }
         }
@@ -139,16 +146,25 @@ class ListTaskGroup(
     private fun listTaskGroup(view: View) {
 
         val listTask = view.findViewById<RecyclerView>(R.id.list_task_group)
-        val nameTask = arrayListOf<String>()
-        if (mListTasks != null) {
-            for (task in mListTasks!!)
-                nameTask.add(task.name!!)
-        }
-        listTask.layoutManager = LinearLayoutManager(context)
-        mAdapterFolderTask = AdapterRecyclerViewTaskFolder(context!!, nameTask)
-        listTask.adapter = mAdapterFolderTask
+        val taskList = arrayListOf<Task>()
 
-        enableSwipeToDeleteAndUndo(listTask, view)
+        if (mFolder!!.tasks != null) {
+            for (task in mFolder!!.tasks!!) {
+                if (task.checked == false)
+                    taskList.add(task)
+            }
+            for (task in mFolder!!.tasks!!) {
+                if (task.checked!!)
+                    taskList.add(task)
+            }
+
+            listTask.layoutManager = LinearLayoutManager(context)
+            mAdapterFolderTask =
+                AdapterRecyclerViewTaskFolder(context!!, taskList, mFolder)
+            listTask.adapter = mAdapterFolderTask
+
+            enableSwipeToDeleteAndUndo(listTask, view)
+        }
     }
 
     private fun enableSwipeToDeleteAndUndo(listFolder: RecyclerView, view: View) {
@@ -161,14 +177,30 @@ class ListTaskGroup(
                     direction: Int
                 ) {
                     val position = viewHolder.adapterPosition
-                    val deleted_item = mListTasks!![position]
-                    mListTasks!!.removeAt(position)
+                    val deleted_item = mAdapterFolderTask!!.mData[position]
+                    if (mFolder!!.tasks!!.contains(deleted_item)) {
+                        mFolder!!.tasks!!.remove(deleted_item)
+                    }
+                    mAdapterFolderTask!!.mData.removeAt(position)
 
+                    var checked_count = 0.0
+                    for (folder_task in mFolder!!.tasks!!) {
+                        if (folder_task.checked!!) {
+                            checked_count++
+                        }
+                    }
                     //Расчет для прогресса
-                    /* mProgress = checked_count/mList_count * 100 */
 
-                    val folder = Folder(name = mNameFolder!!, tasks = mListTasks, progress = mProgress.toString())
-                    dataBaseTask.updateDataFolder(folder, mKey!!)
+                    var progress = 0.0
+                    if (mFolder!!.tasks!!.size != 0)
+                        progress = (checked_count / mFolder!!.tasks!!.size) * 100
+
+                    val folder = Folder(
+                        name = mFolder!!.name,
+                        tasks = mFolder!!.tasks,
+                        progress = progress.toString()
+                    )
+                    dataBaseTask.updateDataFolder(folder, mFolder!!.id)
                     mAdapterFolderTask!!.notifyDataSetChanged()
                     val snackbar = Snackbar.make(
                         linearLayout,
@@ -176,13 +208,13 @@ class ListTaskGroup(
                         Snackbar.LENGTH_LONG
                     )
                     snackbar.setAction("Отменить") { _ ->
-                        mListTasks!!.add(deleted_item)
+                        mFolder!!.tasks!!.add(deleted_item)
 
                         //Расчет для прогресса
-                        /* mProgress = checked_count/mList_count * 100
-                        folder.progress = mProgress */
+                        progress = (checked_count / mFolder!!.tasks!!.size) * 100
+                        folder.progress = progress.toString()
 
-                        dataBaseTask.updateDataFolder(folder, mKey!!)
+                        dataBaseTask.updateDataFolder(folder, mFolder!!.id)
                         mAdapterFolderTask!!.notifyDataSetChanged()
                         listFolder.scrollToPosition(position)
                     }
@@ -196,9 +228,7 @@ class ListTaskGroup(
 
     override fun onDestroy() {
         super.onDestroy()
-        mNameFolder = null
-        mListTasks = null
-        mKey = null
         mAdapterFolderTask = null
+        mFolder = null
     }
 }
