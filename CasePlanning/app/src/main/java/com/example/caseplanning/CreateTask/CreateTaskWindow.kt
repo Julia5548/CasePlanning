@@ -594,8 +594,8 @@ class CreateTaskWindow : Fragment() {
             val storageFile = StorageFile("newAudio.mp3", task.audio!!, context!!)
             storageFile.loadAudio()
         }
-        createNotificationChannel()
-        scheduleNotification(task.day!!, task.notification, task.name!!)
+     /*   createNotificationChannel()
+        scheduleNotification(task.day!!, task.notification, task.name!!)*/
 
         val dataBaseTask = DataBase()
         dataBaseTask.createTask(task)
@@ -679,6 +679,7 @@ class CreateTaskWindow : Fragment() {
             Log.d("Element", listSubTask!![position])
         }
 
+        val checked_list = hashMapOf<String, Boolean>()
         return Task(
             name = editTextTask.text.toString(),
             color = colorName,
@@ -689,6 +690,7 @@ class CreateTaskWindow : Fragment() {
             notification = notification.text.toString(),
             comment = comment.text.toString(),
             listSubTasks = listSubTask!!,
+            checkedTasks = checked_list,
             audio = audioUri,
             timeAudio = timeAudio,
             video = videoUri,

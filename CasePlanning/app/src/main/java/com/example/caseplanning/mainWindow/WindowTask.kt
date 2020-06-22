@@ -1,14 +1,19 @@
 package com.example.caseplanning.mainWindow
 
+import android.annotation.SuppressLint
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.*
 import android.widget.TextView
+import android.widget.Toast
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.core.view.GravityCompat
+import androidx.core.view.get
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentTransaction
@@ -34,8 +39,11 @@ import com.shrikanthravi.collapsiblecalendarview.data.Day
 import com.shrikanthravi.collapsiblecalendarview.widget.CollapsibleCalendar
 import io.reactivex.disposables.Disposable
 import kotlinx.android.synthetic.main.window_main_task.*
+import java.text.DateFormatSymbols
+import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.collections.ArrayList
+import kotlin.math.absoluteValue
 
 
 class WindowTask : Fragment(), NavigationView.OnNavigationItemSelectedListener {
@@ -134,25 +142,16 @@ class WindowTask : Fragment(), NavigationView.OnNavigationItemSelectedListener {
         pageViewModel = ViewModelProviders.of(requireActivity()).get(MyViewModel::class.java)
     }
 
+    @SuppressLint("SimpleDateFormat")
     fun calendar(view: View, uid: String, mDate: String) {
 
         calendarView = view.findViewById(R.id.linearLayoutCalendar)
         var day = calendarView!!.selectedDay
 
-        var date_current = ""
-        if (mDate == "") {
-            date_current = "${day!!.day}.${day.month}.${day.year}"
+        val date_current = if (mDate == "") {
+            "${day!!.day}.${day.month}.${day.year}"
         } else {
-            date_current = mDate
-          /*  val date = mDate.split(".")
-            val selectedDay = Calendar.getInstance()
-            val day_selected = Day(selectedDay.get(Calendar.YEAR),
-                    selectedDay.get(Calendar.MONTH),
-                selectedDay.get(date[0].toInt()))
-            val mya = day_selected.day.toString()
-            val mysdfa = day_selected.year.toString()
-            val eur = day_selected.month.toString()
-            print(eur)*/
+            mDate
         }
         listTask(view, date_current, uid)
 
@@ -176,8 +175,22 @@ class WindowTask : Fragment(), NavigationView.OnNavigationItemSelectedListener {
         })
     }
 
+    @SuppressLint("SimpleDateFormat")
     private fun listTask(viewFragment: View, date: String, uid: String) {
 
+        var mDate = date
+        val arrayDate: List<String> = date.split(".")
+        val month : String
+
+        if (arrayDate[1].length == 1) {
+            month = "0${arrayDate[1]}"
+            mDate = "${arrayDate[0]}.$month.${arrayDate[2]}"
+        }
+        val format = SimpleDateFormat("dd.MM.yyyy")
+        val getDate = format.parse(mDate)
+
+        val week_format = SimpleDateFormat("EEEE")
+        val week = week_format.format(getDate!!)
 
         val listTasks = viewFragment.findViewById<RecyclerView>(R.id.listViewTask)
         val sections: ArrayList<SectionHeader> = arrayListOf()
@@ -195,58 +208,81 @@ class WindowTask : Fragment(), NavigationView.OnNavigationItemSelectedListener {
                 val stringList = arrayListOf<Task>()
                 val checkedList = arrayListOf<Task>()
                 for (task in tasks) {
-                    if (date == task.day) {
+                    if (date == task.day || week == task.replay.toLowerCase(Locale.ROOT)) {
                         if (task.checked!!) {
                             checkedList.add(
                                 Task(
                                     name = task.name!!,
                                     day = task.day,
                                     color = task.color,
-                                    checked = task.checked
+                                    checked = task.checked,
+                                    replay = task.replay
                                 )
                             )
                         } else {
-                            when (task.period) {
-                                "Утро" -> stringListMorning.add(
-                                    Task(
-                                        name = task.name!!,
-                                        day = task.day,
-                                        color = task.color,
-                                        checked = task.checked
+                            val checkedDate = date.replace('.', '-')
+                            if (task.checkedTasks!!.containsKey(checkedDate)) {
+                                val value = task.checkedTasks!![checkedDate]!!
+                                if (value) {
+                                    checkedList.add(
+                                        Task(
+                                            name = task.name!!,
+                                            day = task.day,
+                                            color = task.color,
+                                            checked = task.checked,
+                                            replay = task.replay,
+                                            checkedTasks = task.checkedTasks
+                                        )
                                     )
-                                )
-                                "День" -> stringListDay.add(
-                                    Task(
-                                        name = task.name!!,
-                                        day = task.day,
-                                        color = task.color,
-                                        checked = task.checked
+                                }
+                            } else {
+                                when (task.period) {
+                                    "Утро" -> stringListMorning.add(
+                                        Task(
+                                            name = task.name!!,
+                                            day = task.day,
+                                            color = task.color,
+                                            checked = task.checked,
+                                            replay = task.replay
+                                        )
                                     )
-                                )
-                                "Вечер" -> stringListEvening.add(
-                                    Task(
-                                        name = task.name!!,
-                                        day = task.day,
-                                        color = task.color,
-                                        checked = task.checked
+                                    "День" -> stringListDay.add(
+                                        Task(
+                                            name = task.name!!,
+                                            day = task.day,
+                                            color = task.color,
+                                            checked = task.checked,
+                                            replay = task.replay
+                                        )
                                     )
-                                )
-                                "Один раз в любое время" -> stringList.add(
-                                    Task(
-                                        name = task.name!!,
-                                        day = task.day,
-                                        color = task.color,
-                                        checked = task.checked
+                                    "Вечер" -> stringListEvening.add(
+                                        Task(
+                                            name = task.name!!,
+                                            day = task.day,
+                                            color = task.color,
+                                            checked = task.checked,
+                                            replay = task.replay
+                                        )
                                     )
-                                )
-                                else -> stringList.add(
-                                    Task(
-                                        name = task.name!!,
-                                        day = task.day,
-                                        color = task.color,
-                                        checked = task.checked
+                                    "Один раз в любое время" -> stringList.add(
+                                        Task(
+                                            name = task.name!!,
+                                            day = task.day,
+                                            color = task.color,
+                                            checked = task.checked,
+                                            replay = task.replay
+                                        )
                                     )
-                                )
+                                    else -> stringList.add(
+                                        Task(
+                                            name = task.name!!,
+                                            day = task.day,
+                                            color = task.color,
+                                            checked = task.checked,
+                                            replay = task.replay
+                                        )
+                                    )
+                                }
                             }
                         }
                     }
@@ -314,7 +350,7 @@ class WindowTask : Fragment(), NavigationView.OnNavigationItemSelectedListener {
             .subscribe { tasks ->
                 for (task in tasks) {
                     if (task_search != "" && task_search == task.name) {
-                        val mDate = task.day!!
+                        val mDate = task.day
                         calendar(
                             view = view!!,
                             uid = FirebaseAuth.getInstance().currentUser!!.uid,
@@ -429,7 +465,8 @@ class WindowTask : Fragment(), NavigationView.OnNavigationItemSelectedListener {
                     disposable!!.dispose()
                 val mAuth = FirebaseAuth.getInstance()
                 mAuth.signOut()
-                val intent = Intent(activity!!.applicationContext, MainActivity::class.java)
+                val intent =
+                    Intent(activity!!.applicationContext, MainActivity::class.java)
                 //intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
                 startActivity(intent)
             }

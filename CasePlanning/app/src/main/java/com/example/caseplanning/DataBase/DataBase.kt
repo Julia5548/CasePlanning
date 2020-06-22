@@ -1,5 +1,6 @@
 package com.example.caseplanning.DataBase
 
+import android.util.Log
 import com.androidhuman.rxfirebase2.database.RxFirebaseDatabase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
@@ -35,6 +36,7 @@ class DataBase {
                                         Task(
                                             name = task.value.name,
                                             listSubTasks = task.value.listSubTasks,
+                                            checkedTasks = task.value.checkedTasks,
                                             photo = task.value.photo,
                                             audio = task.value.audio,
                                             timeAudio = task.value.timeAudio,

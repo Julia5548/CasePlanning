@@ -34,12 +34,12 @@ class AdapterSectionTask(
     SectionRecyclerViewAdapter<SectionHeader, Task, AdapterSectionTask.SectionViewHolder, AdapterSectionTask.ChildViewHolder>(
         context,
         data
-    ){
+    ) {
 
     private val mData: ArrayList<SectionHeader> = data
     var disposable: Disposable? = null
     val dataBaseTask = DataBase()
-    var folder_list : ArrayList<Folder>? = null
+    var folder_list: ArrayList<Folder>? = null
     val mDay: String? = day
     val mUid: String = uid
 
@@ -90,12 +90,26 @@ class AdapterSectionTask(
     ) {
 
         childViewHolder!!.dataChild.text = task!!.name
+
         if (task.color != "")
             drawColorTask(task.color!!, childViewHolder)
-        if(task.checked!!) {
-            val checkedTask = CheckedTask(childViewHolder.cardItem, childViewHolder.dataChild, childViewHolder.checkedTask)
+        if (task.checked != null && task.checked!!) {
+            val checkedTask = CheckedTask(
+                childViewHolder.cardItem,
+                childViewHolder.dataChild,
+                childViewHolder.checkedTask
+            )
             checkedTask.checkedTask()
         }
+        if (task.checkedTasks!!.isNotEmpty()) {
+            val checkedTask = CheckedTask(
+                childViewHolder.cardItem,
+                childViewHolder.dataChild,
+                childViewHolder.checkedTask
+            )
+            checkedTask.checkedTask()
+        }
+
         childViewHolder.txtOptionDigit.setOnClickListener { view ->
             val popupMenu = PopupMenu(context, childViewHolder.txtOptionDigit)
             popupMenu.inflate(R.menu.menu_list_task)
@@ -143,7 +157,7 @@ class AdapterSectionTask(
                         arg.putStringArrayList("dataTask", arrayListTask)
                         editTask.arguments = arg
 
-                         (context as AppCompatActivity).supportFragmentManager
+                        (context as AppCompatActivity).supportFragmentManager
                             .beginTransaction()
                             .replace(R.id.linerLayout, editTask)
                             .commit()
@@ -151,7 +165,7 @@ class AdapterSectionTask(
                     }
                     R.id.delete -> {
 
-                         disposable = dataBaseTask
+                        disposable = dataBaseTask
                             .retrieveData(mUid)
                             .subscribe { tasks ->
                                 for (taskData in tasks) {
@@ -206,8 +220,13 @@ class AdapterSectionTask(
             disposable!!.dispose()
 
         childViewHolder.checkedTask.setOnCheckedChangeListener { buttonView, isChecked ->
-            val checkedTask = CheckedTask(childViewHolder.cardItem, childViewHolder.dataChild, childViewHolder.checkedTask)
-            checkedTask.updateTask(mUid, task, isChecked)
+            val checkedTask = CheckedTask(
+                childViewHolder.cardItem,
+                childViewHolder.dataChild,
+                childViewHolder.checkedTask
+            )
+
+            checkedTask.updateFolder(task, isChecked)
             mData.removeAll(mData)
             notifyDataChanged(mData)
         }
@@ -228,8 +247,8 @@ class AdapterSectionTask(
         }
     }
 
-    private fun getListFolder() : ArrayList<Folder>? = folder_list
-    private fun updateFolder(database : DataBase, task: Task, nextDate: String) {
+    private fun getListFolder(): ArrayList<Folder>? = folder_list
+    private fun updateFolder(database: DataBase, task: Task, nextDate: String) {
         folder_list = arrayListOf()
         disposable = database
             .retrieveDataFolders()
@@ -242,7 +261,8 @@ class AdapterSectionTask(
                 tomorrowTask(task, nextDate)
             }
     }
-    private fun tomorrowTask(task: Task, nextDate:String){
+
+    private fun tomorrowTask(task: Task, nextDate: String) {
         disposable = dataBaseTask
             .retrieveData(mUid)
             .subscribe { tasks ->
@@ -265,11 +285,15 @@ class AdapterSectionTask(
                             day = nextDate
                         )
 
-                        for(folder in list!!) {
+                        for (folder in list!!) {
                             if (folder.tasks!!.contains(taskData)) {
                                 folder.tasks!!.remove(taskData)
                                 folder.tasks!!.add(mTask)
-                                val update_folder = Folder(name = folder.name, tasks = folder.tasks!!, progress = folder.progress)
+                                val update_folder = Folder(
+                                    name = folder.name,
+                                    tasks = folder.tasks!!,
+                                    progress = folder.progress
+                                )
                                 dataBaseTask.updateDataFolder(update_folder, folder.id)
                             }
                         }

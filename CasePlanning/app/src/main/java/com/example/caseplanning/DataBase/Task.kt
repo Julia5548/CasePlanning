@@ -4,6 +4,7 @@ import com.google.firebase.database.IgnoreExtraProperties
 import com.shrikanthravi.collapsiblecalendarview.data.Day
 import java.util.*
 import kotlin.collections.ArrayList
+import kotlin.collections.HashMap
 
 @IgnoreExtraProperties
 data class Task(
@@ -13,6 +14,7 @@ data class Task(
     var day: String ="",
     var period : String = "",
     var listSubTasks:ArrayList<String>? = arrayListOf(),
+    var checkedTasks:MutableMap<String,Boolean>? = HashMap(),
     var replay : String = "",
     var photo: String ? = "",
     var audio: String ? = "",
