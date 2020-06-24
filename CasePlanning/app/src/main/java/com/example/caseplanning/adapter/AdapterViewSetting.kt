@@ -19,14 +19,12 @@ import io.reactivex.disposables.Disposable
 class AdapterViewSetting(
     val context: Context,
     data: HashMap<String, String>,
-    name: String?,
-    email: String?,
+    val name: String?,
+    val email: String?,
     shared_user: ArrayList<String>
 ) : RecyclerView.Adapter<AdapterViewSetting.ViewHolder>() {
 
     val mData: HashMap<String, String> = data
-    val mName: String = name!!
-    val mEmail: String = email!!
     var mSharedUsers: ArrayList<String> = shared_user
     var list_uid: ArrayList<String>? = null
 
@@ -56,11 +54,17 @@ class AdapterViewSetting(
                 createListUid()
             } else {
                 (context as AppCompatActivity).supportFragmentManager.beginTransaction()
-                    .replace(R.id.linerLayout, Account(mName, mEmail, mSharedUsers))
+                    .replace(R.id.linerLayout, Account(name!!, email!!, mSharedUsers))
                     .addToBackStack(null)
                     .commit()
             }
         }
+    }
+
+    fun update(shared_user: ArrayList<String>) {
+        mSharedUsers.clear()
+        this.mSharedUsers.addAll(shared_user)
+        notifyDataSetChanged()
     }
 
     private fun getListUid(): ArrayList<String>? = list_uid
@@ -85,7 +89,8 @@ class AdapterViewSetting(
 
     private fun listUsers(disposable: Disposable?) {
 
-        var mDisposable = disposable
+        if(disposable!= null && !disposable.isDisposed)
+            disposable.dispose()
         val users_shared = mutableMapOf<String, Users>()
         val users_acces = mutableMapOf<String, Users>()
         val dataBaseTask = DataBase()
@@ -93,7 +98,7 @@ class AdapterViewSetting(
         if (uids != null) {
             var position = 1
             for (uid in uids) {
-                mDisposable = dataBaseTask
+                val mDisposable = dataBaseTask
                     .retrieveDataUser(uid)
                     .subscribe { user_data ->
                         if (user_data.accessUsers.contains(FirebaseAuth.getInstance().currentUser!!.uid)) {
@@ -107,10 +112,6 @@ class AdapterViewSetting(
                                 .replace(R.id.linerLayout, AccessSetting(users_acces, users_shared))
                                 .addToBackStack(null)
                                 .commit()
-                            mSharedUsers = arrayListOf()
-
-                            if (mDisposable != null && !mDisposable!!.isDisposed)
-                                mDisposable!!.dispose()
                         }
                         position++
                     }

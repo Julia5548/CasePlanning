@@ -18,6 +18,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import butterknife.ButterKnife
 import com.example.caseplanning.DataBase.DataBase
+import com.example.caseplanning.DataBase.Users
 import com.example.caseplanning.GroupTask.GroupTask
 import com.example.caseplanning.MainActivity
 import com.example.caseplanning.R
@@ -106,7 +107,7 @@ class Access : Fragment(), NavigationView.OnNavigationItemSelectedListener {
         val listUsers = view.findViewById<RecyclerView>(R.id.listViewUser)
         val layoutManager = LinearLayoutManager(context)
 
-        val stringList = mutableMapOf<String, String>()
+        val stringList = mutableMapOf<String, Users>()
         val dataBaseTask = DataBase()
 
         val uids = getListUid()
@@ -117,7 +118,7 @@ class Access : Fragment(), NavigationView.OnNavigationItemSelectedListener {
                     .retrieveDataUser(uid)
                     .subscribe { user_data ->
                         if (uid != FirebaseAuth.getInstance().currentUser!!.uid) {
-                            stringList[uid] = user_data.name!!
+                            stringList[uid] = user_data
                         }
                         if (position == uids.size) {
                             listUsers.layoutManager = layoutManager

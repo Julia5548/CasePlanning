@@ -96,7 +96,10 @@ class Setting: Fragment(), NavigationView.OnNavigationItemSelectedListener {
         setting_list["Доступ"] = "Управление доступом"
         setting_list["Аккаунт"] = "Управление аккаунтом"
         val mAdapterFolder = AdapterViewSetting(context!!, setting_list, name, email, shared_user)
-      //  mAdapterFolder.notifyDataSetChanged()
+
+        if (shared_user.isNullOrEmpty())
+            mAdapterFolder.update(shared_user)
+
         listSetting.adapter = mAdapterFolder
 
 

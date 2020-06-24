@@ -16,11 +16,11 @@ import io.reactivex.disposables.Disposable
 
 class AdapterRecyclerViewAccess(
     val context: Context,
-    data: MutableMap<String, String>
+    data: MutableMap<String, Users>
 ) :
     RecyclerView.Adapter<AdapterRecyclerViewAccess.ViewHolder>() {
 
-    val mData: MutableMap<String, String> = data
+    val mData: MutableMap<String, Users> = data
     private var mAccessUsers: ArrayList<String>? = arrayListOf()
 
     inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -40,62 +40,32 @@ class AdapterRecyclerViewAccess(
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
 
-        holder.nameUser.text = mData.values.elementAt(position)
+        holder.nameUser.text = mData.values.elementAt(position).name
 
         holder.access.setOnClickListener {
-            getDataUser(
-                holder.nameUser.text.toString(),
-                mData.keys.elementAt(position)
-            )
+            MaterialAlertDialogBuilder(context)
+                .setTitle("Разрешить?")
+                .setMessage("Действительно ли разрешить доступ пользователю ${mData.values.elementAt(position).name}")
+                .setPositiveButton("Разрешить") { dialog, which ->
+                    dialog.dismiss()
+                    //другим пользователям
+                    val mCurrentUid = FirebaseAuth.getInstance().currentUser!!.uid
+                    if (!mData.values.elementAt(position).accessUsers.contains(mCurrentUid)) {
+                        mData.values.elementAt(position).accessUsers.add(mCurrentUid)
+                        val user = mData.values.elementAt(position)
+                        val dataBase = DataBase()
+                        dataBase.updateDataUser(user, mData.keys.elementAt(position))
+                        Toast.makeText(context, "Доступ разрешен", Toast.LENGTH_SHORT)
+                            .show()
+                    }else{
+                        Toast.makeText(context, "Данному пользователю уже был разрешен доступ", Toast.LENGTH_SHORT)
+                            .show()
+                    }
+                }
+                .setNegativeButton("Отмена") { dialog, which ->
+                    dialog.dismiss()
+                }
+                .show()
         }
     }
-
-    private fun getListAccess() = mAccessUsers
-    private fun getDataUser(nameUser: String, uid: String) {
-        var disposable : Disposable? = null
-        val dataBaseTask = DataBase()
-        disposable = dataBaseTask
-            .retrieveDataUser(uid)
-            .subscribe { user ->
-                if (user.name!! == nameUser) {
-                    mAccessUsers = user.accessUsers
-                    dataUser(nameUser, user.email!!, dataBaseTask, uid, disposable)
-                }
-            }
-    }
-    private fun dataUser(
-        nameUser: String,
-        emailUser: String,
-        dataBase: DataBase,
-        uid: String,
-        disposable: Disposable?
-    ) {
-        MaterialAlertDialogBuilder(context)
-            .setTitle("Разрешить?")
-            .setMessage("Действительно ли разрешить доступ пользователю $nameUser")
-            .setPositiveButton("Разрешить") { dialog, which ->
-                dialog.dismiss()
-                //другим пользователям
-                val mCurrentUid = FirebaseAuth.getInstance().currentUser!!.uid
-                val access_users = getListAccess()
-                if (!access_users!!.contains(mCurrentUid)) {
-                    access_users.add(mCurrentUid)
-                    val user = Users(nameUser, emailUser, access_users)
-                    dataBase.updateDataUser(user, uid)
-                    Toast.makeText(context, "Доступ разрешен", Toast.LENGTH_SHORT)
-                        .show()
-                }else{
-                    Toast.makeText(context, "Данному пользователю уже был разрешен доступ", Toast.LENGTH_SHORT)
-                        .show()
-                }
-                if(disposable != null && !disposable.isDisposed)
-                    disposable.dispose()
-
-            }
-            .setNegativeButton("Отмена") { dialog, which ->
-                dialog.dismiss()
-            }
-            .show()
-    }
-
 }

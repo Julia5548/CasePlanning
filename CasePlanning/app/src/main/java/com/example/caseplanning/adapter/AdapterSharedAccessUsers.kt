@@ -21,10 +21,12 @@ import com.google.firebase.auth.FirebaseAuth
 class AdapterSharedAccessUsers(
     val context: Context,
     data: MutableMap<String, Users>,
-    val tag : String
+    val tag: String,
+    val userTextAccess: TextView,
+    val refuseAccess: TextView
 ) : RecyclerView.Adapter<AdapterSharedAccessUsers.ViewHolder>() {
 
-    val mData: MutableMap<String, Users> = data
+    var mData: MutableMap<String, Users> = data
 
     inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
@@ -48,15 +50,22 @@ class AdapterSharedAccessUsers(
         holder.switch.setOnCheckedChangeListener { buttonView, isChecked ->
             if (!isChecked) {
                 var message = ""
-                if(tag == "user_shared"){
-                    message = "Вы действительно хотите отказаться от представленного доступа к задачам?"
-                }else{
+                if (tag == "user_shared") {
+                    message =
+                        "Вы действительно хотите отказаться от представленного доступа к задачам?"
+                } else {
                     message = "Вы действительно хотите отменить доступ к вашим задачам"
                 }
                 holder.switch.text = "Отказано"
                 holder.switch.setTextColor(context.resources.getColor(R.color.red))
-                holder.switch.thumbDrawable.setColorFilter(Color.argb(81,255,17,0), PorterDuff.Mode.MULTIPLY)
-                holder.switch.trackDrawable.setColorFilter(Color.argb(60,255,17,0), PorterDuff.Mode.MULTIPLY)
+                holder.switch.thumbDrawable.setColorFilter(
+                    Color.argb(81, 255, 17, 0),
+                    PorterDuff.Mode.MULTIPLY
+                )
+                holder.switch.trackDrawable.setColorFilter(
+                    Color.argb(60, 255, 17, 0),
+                    PorterDuff.Mode.MULTIPLY
+                )
                 MaterialAlertDialogBuilder(context)
                     .setTitle("Отказ в доступе")
                     .setMessage(message)
@@ -65,7 +74,7 @@ class AdapterSharedAccessUsers(
                         val dataBase = DataBase()
                         val update_user = Users()
                         val user = FirebaseAuth.getInstance().currentUser!!
-                        if(tag == "user_shared") {
+                        if (tag == "user_shared") {
                             mData.remove(mData.keys.elementAt(position))
                             user.let {
                                 update_user.name = user.displayName
@@ -74,15 +83,16 @@ class AdapterSharedAccessUsers(
                             for ((key, _) in mData)
                                 update_user.accessUsers.add(key)
                             dataBase.updateDataUser(update_user, user.uid)
-                        }else{
+                            updateDate(mData)
+                        } else {
                             update_user.name = mData.values.elementAt(position).name
                             update_user.email = mData.values.elementAt(position).email
                             mData.values.elementAt(position).accessUsers.remove(user.uid)
-
-                            for(values in mData.values.elementAt(position).accessUsers)
+                            for (values in mData.values.elementAt(position).accessUsers)
                                 update_user.accessUsers.add(values)
-
                             dataBase.updateDataUser(update_user, mData.keys.elementAt(position))
+                            mData.remove(mData.keys.elementAt(position))
+                            updateDate(mData)
                         }
                         try {
                             notifyItemChanged(position)
@@ -99,5 +109,15 @@ class AdapterSharedAccessUsers(
                     .show()
             }
         }
+    }
+
+    fun updateDate(mData: MutableMap<String, Users>) {
+        this.mData = hashMapOf()
+        this.mData.putAll(mData)
+        if (this.mData.isEmpty()) {
+            userTextAccess.visibility = View.VISIBLE
+            refuseAccess.visibility = View.GONE
+        }
+        notifyDataSetChanged()
     }
 }
