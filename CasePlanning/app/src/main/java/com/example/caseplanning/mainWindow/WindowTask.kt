@@ -191,7 +191,7 @@ class WindowTask : Fragment(), NavigationView.OnNavigationItemSelectedListener {
         val listTasks = viewFragment.findViewById<RecyclerView>(R.id.listViewTask)
         val sections: ArrayList<SectionHeader> = arrayListOf()
 
-        val layoutManager = LinearLayoutManager(context)
+        val layoutManager = LinearLayoutManager(activity)
         listTasks!!.layoutManager = layoutManager
         val dataBase: DataBase? = DataBase()
         /*подписываемся и выводим данные из бд*/

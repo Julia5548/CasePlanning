@@ -1,5 +1,6 @@
 package com.example.caseplanning.Sidebar
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -15,6 +16,7 @@ import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.Fragment
 import butterknife.ButterKnife
 import com.example.caseplanning.DataBase.DataBase
+import com.example.caseplanning.DataBase.Task
 import com.example.caseplanning.GroupTask.GroupTask
 import com.example.caseplanning.MainActivity
 import com.example.caseplanning.R
@@ -22,37 +24,41 @@ import com.example.caseplanning.Setting.Setting
 import com.example.caseplanning.mainWindow.WindowTask
 import com.google.android.material.navigation.NavigationView
 import com.google.firebase.auth.FirebaseAuth
-import com.miguelcatalan.materialsearchview.MaterialSearchView
+import com.mikhaellopez.circularprogressbar.CircularProgressBar
 import io.reactivex.disposables.Disposable
+import java.text.SimpleDateFormat
+import java.util.*
 
-class Progress: Fragment(), NavigationView.OnNavigationItemSelectedListener {
+class Progress : Fragment(), NavigationView.OnNavigationItemSelectedListener {
 
     var mDrawerLayout: DrawerLayout? = null
-    lateinit var disposable: Disposable
+    var disposable: Disposable? = null
+
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setHasOptionsMenu(true)
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        val viewFragment = inflater.inflate(R.layout.progress_made, container, false)
+        val view = inflater.inflate(R.layout.progress_made, container, false)
 
-        val toolbar = viewFragment.findViewById<Toolbar>(R.id.toolbarGroup)
+        val toolbar = view.findViewById<Toolbar>(R.id.toolbar)
         val activity = activity as AppCompatActivity?
         activity!!.setSupportActionBar(toolbar)
         val actionBar = activity.supportActionBar
-        actionBar!!.title = "Группы задач"
+        actionBar!!.title = "Прогресс выполнения задач"
 
-        ButterKnife.bind(this, viewFragment)
-
-        /*кнопка поиска*/
-        val search = viewFragment.findViewById<MaterialSearchView>(R.id.search)
-        search.closeSearch()
+        ButterKnife.bind(this, view)
 
         /*боковое меню*/
-        mDrawerLayout = viewFragment.findViewById<DrawerLayout>(R.id.drawerLayout)
+        mDrawerLayout = view.findViewById<DrawerLayout>(R.id.drawerLayout)
         /*подключение обработчика события кнопок бокового меню*/
-        val navigationView = viewFragment.findViewById<NavigationView>(R.id.navigationView)
+        val navigationView = view.findViewById<NavigationView>(R.id.navigationView)
         navigationView.setNavigationItemSelectedListener(this)
 
         val navHeader = navigationView.getHeaderView(0)
@@ -73,13 +79,206 @@ class Progress: Fragment(), NavigationView.OnNavigationItemSelectedListener {
             nameUser.text = user.displayName
             emailUser.text = user.email
         }
-        return viewFragment
+
+        dayWeek(view)
+
+        return view
     }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setHasOptionsMenu(true)
+    @SuppressLint("SimpleDateFormat")
+    private fun dayWeek(view : View) {
+        var calendar = Calendar.getInstance()
+        val current_week = calendar.get(Calendar.DAY_OF_WEEK)
+        val starting_week = 1
+        val last_week = 6
+
+        val week_format = SimpleDateFormat("EEEE")
+        val week = week_format.format(current_week)
+
+        val amount_startingDay: Int
+        val amount_lastDay: Int
+
+        val startingDay: String
+        val lastDay: String
+        val dateFormat = SimpleDateFormat("dd.MM.yyyy", Locale.getDefault())
+
+        if (current_week != 0) {
+            amount_startingDay = starting_week - current_week + 1
+            calendar.add(Calendar.DAY_OF_YEAR, amount_startingDay)
+            startingDay = dateFormat.format(calendar.time)
+
+            calendar = Calendar.getInstance()
+
+            amount_lastDay = last_week + 2 - current_week
+            calendar.add(Calendar.DAY_OF_YEAR, amount_lastDay)
+            lastDay = dateFormat.format(calendar.time)
+
+        } else {
+            val today = Date()
+            lastDay = dateFormat.format(today)
+
+            calendar.add(Calendar.DAY_OF_YEAR, -6)
+            startingDay = dateFormat.format(calendar.time)
+        }
+        calendar.set(Calendar.DAY_OF_MONTH, calendar.getActualMaximum(Calendar.DAY_OF_MONTH))
+        val last = calendar.time
+        val lastDayMonth = dateFormat.format(last)
+
+        calendar.set(Calendar.DAY_OF_MONTH, calendar.getActualMinimum(Calendar.DAY_OF_MONTH))
+        val start = calendar.time
+        val startDayMonth = dateFormat.format(start)
+
+        getTask(startingDay, lastDay, week, view, lastDayMonth, startDayMonth)
+
     }
+
+
+    @Suppress("UNUSED_CHANGED_VALUE")
+    @SuppressLint("SimpleDateFormat")
+    private fun getTask(
+        startingDay: String,
+        lastDay: String,
+        week: String,
+        view: View,
+        lastDayMonth: String,
+        startDayMonth: String
+    ) {
+        val dataBase = DataBase()
+        disposable = dataBase
+            .retrieveData(FirebaseAuth.getInstance().currentUser!!.uid)
+            .subscribe { listTask ->
+                checkedTask(view, listTask)
+                progressWeek(view, startingDay, lastDay, week, listTask)
+                var checkedCount = 0.0
+                var total_task = 0.0
+                for (task in listTask) {
+                    var date = task.day
+                    val arrayDate: List<String> = date.split(".")
+                    val month: String
+
+                    if (arrayDate[1].length == 1) {
+                        month = "0${arrayDate[1]}"
+                        date = "${arrayDate[0]}.$month.${arrayDate[2]}"
+                    }
+
+                    if (startDayMonth <= date ||
+                        date <= lastDayMonth
+                    ) {
+                        total_task++
+                        if (task.checked!!) {
+                            checkedCount++
+                        } else {
+                            val checkedDate = date.replace('.', '-')
+                            if (task.checkedTasks!!.containsKey(checkedDate)) {
+                                val value = task.checkedTasks!![checkedDate]!!
+                                if (value) {
+                                    checkedCount++
+                                }
+                            }
+                        }
+                    }
+                }
+
+                initializationMonth(view, checkedCount, total_task)
+            }
+    }
+
+    @SuppressLint("SimpleDateFormat", "SetTextI18n")
+    private fun progressWeek(
+        view: View,
+        startingDay: String,
+        lastDay: String,
+        week: String,
+        listTask: List<Task>?
+    ) {
+        val progress_week = view.findViewById<CircularProgressBar>(R.id.progress_made_week)
+        val percent_week = view.findViewById<TextView>(R.id.percent_progress_made)
+        var checkedCount = 0.0
+        var total_task = 0.0
+        for (task in listTask!!) {
+            var date = task.day
+            val arrayDate: List<String> = date.split(".")
+            val month: String
+            if (arrayDate[1].length == 1) {
+                month = "0${arrayDate[1]}"
+                date = "${arrayDate[0]}.$month.${arrayDate[2]}"
+            }
+            if (startingDay <= date ||
+                date <= lastDay ||
+                task.replay.toLowerCase(Locale.ROOT) == week
+            ) {
+                total_task++
+                if (task.checked!!) {
+                    checkedCount++
+                } else {
+                    val checkedDate = task.day.replace('.', '-')
+                    if (task.checkedTasks!!.containsKey(checkedDate)) {
+                        val value = task.checkedTasks!![checkedDate]!!
+                        if (value) {
+                            checkedCount++
+                        }
+                    }
+                }
+            }
+        }
+        if(checkedCount != 0.0 && total_task != 0.0) {
+            val progress_current = (checkedCount / total_task) * 100
+            percent_week.text = "$progress_current%"
+            progress_week.apply {
+                setProgressWithAnimation(progress_current.toFloat(), 1000)
+                progressMax = 100f
+            }
+        }else{
+            progress_week.apply {
+                setProgressWithAnimation(0F, 1000)
+                progressMax = 100f
+            }
+        }
+    }
+
+    private fun checkedTask(view: View, listTask: List<Task>?) {
+        val count_task = view.findViewById<TextView>(R.id.count_task)
+        var count_checkedTask = 0
+        for(task in listTask!!) {
+            if (task.checked!!) {
+                count_checkedTask++
+            } else {
+                if (task.checkedTasks!!.isNotEmpty()) {
+                    count_checkedTask += task.checkedTasks!!.size
+                }
+            }
+        }
+        count_task.text = count_checkedTask.toString()
+    }
+
+    @SuppressLint("SetTextI18n")
+    private fun initializationMonth(
+        view: View?,
+        checkedCount: Double,
+        totalTask: Double
+    ) {
+
+        if(disposable != null && !disposable!!.isDisposed)
+            disposable!!.dispose()
+
+        val progress_month = view!!.findViewById<CircularProgressBar>(R.id.progress_made_month)
+        val procent_month = view.findViewById<TextView>(R.id.percent_progressMade_month)
+        if(checkedCount != 0.0 && totalTask != 0.0) {
+            val progress_current = (checkedCount / totalTask) * 100
+            procent_month.text = "$progress_current%"
+            progress_month.apply {
+                setProgressWithAnimation(progress_current.toFloat(), 1000)
+                progressMax = 100f
+            }
+        }else{
+            progress_month.apply {
+                setProgressWithAnimation(0F, 1000)
+                progressMax = 100f
+            }
+        }
+
+    }
+
     override fun onNavigationItemSelected(menuItem: MenuItem): Boolean {
         when (menuItem.itemId) {
             /*группа задач*/
@@ -145,16 +344,26 @@ class Progress: Fragment(), NavigationView.OnNavigationItemSelectedListener {
             }
             /*выход пользователя из системы*/
             R.id.signOut -> {
-                disposable.dispose()
+                disposable?.dispose()
                 val mAuth = FirebaseAuth.getInstance()
                 mAuth.signOut()
-                val intent = Intent(activity!!.applicationContext, MainActivity::class.java)
+                val intent =
+                    Intent(activity!!.applicationContext, MainActivity::class.java)
                 //intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
                 startActivity(intent)
             }
         }
         mDrawerLayout!!.closeDrawer(GravityCompat.START)
+        onDestroy()
         return true
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        mDrawerLayout!!.removeAllViews()
+        if (disposable != null && !disposable!!.isDisposed) {
+            disposable!!.dispose()
+        }
     }
 
 }
