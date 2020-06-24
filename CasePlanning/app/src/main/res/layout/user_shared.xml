@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:background="#043351"
+        android:layout_width="match_parent" android:layout_height="match_parent">
+
+    <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_margin="15dp"
+            android:background="@drawable/fragment_view"
+            android:layout_height="match_parent">
+
+        <androidx.recyclerview.widget.RecyclerView
+                android:layout_width="wrap_content"
+                android:id="@+id/recycler_shared_user"
+                android:layout_marginTop="?attr/actionBarSize"
+                android:visibility="gone"
+                android:layout_centerHorizontal="true"
+                android:layout_height="wrap_content"/>
+
+        <TextView
+                android:layout_width="wrap_content"
+                android:textColor="#BA807A7A"
+                android:text="Пользователей нет"
+                android:textStyle="bold"
+                android:id = "@+id/user_text_shared"
+                android:layout_centerInParent="true"
+                android:textSize="30sp"
+                android:layout_height="wrap_content"/>
+
+        <TextView
+                android:id="@+id/refuse_access"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                android:visibility="gone"
+                android:layout_below="@+id/recycler_shared_user"
+                android:gravity="center"
+                android:text="Отказаться от доступа всех пользователей"
+                android:textColor="#8DEC2C1E"
+                android:typeface="monospace" />
+    </RelativeLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

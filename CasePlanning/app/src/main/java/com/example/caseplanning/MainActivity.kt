@@ -114,9 +114,6 @@ class MainActivity : AppCompatActivity() {
                     Toast.LENGTH_SHORT
                 ).show()
             }
-        } else {
-            Toast.makeText(applicationContext, "регистрация не прошла", Toast.LENGTH_SHORT)
-                .show()
         }
     }
 

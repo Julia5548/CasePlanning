@@ -19,6 +19,7 @@ import com.example.caseplanning.DataBase.DataBase
 import com.example.caseplanning.GroupTask.GroupTask
 import com.example.caseplanning.MainActivity
 import com.example.caseplanning.R
+import com.example.caseplanning.Setting.Setting
 import com.example.caseplanning.mainWindow.WindowTask
 import com.google.android.material.navigation.NavigationView
 import com.google.firebase.auth.FirebaseAuth
@@ -65,16 +66,12 @@ class TechSupport: Fragment(), NavigationView.OnNavigationItemSelectedListener {
         /*проверяем состояние*/
         mToggle.syncState()
 
-        val dataBaseTask = DataBase()
-        disposable = dataBaseTask
-            .retrieveDataUser(FirebaseAuth.getInstance().currentUser!!.uid)
-            .subscribe({ user ->
-                nameUser.text = user.name
-                emailUser.text = user.email
-            },
-                { throwable ->
-                    throwable.printStackTrace()
-                })
+
+        val user = FirebaseAuth.getInstance().currentUser!!
+        user.let {
+            nameUser.text = user.displayName
+            emailUser.text = user.email
+        }
 
         return viewFragment
     }

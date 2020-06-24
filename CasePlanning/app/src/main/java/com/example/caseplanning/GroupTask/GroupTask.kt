@@ -29,7 +29,7 @@ import com.example.caseplanning.MainActivity
 import com.example.caseplanning.R
 import com.example.caseplanning.Sidebar.Access
 import com.example.caseplanning.Sidebar.Progress
-import com.example.caseplanning.Sidebar.Setting
+import com.example.caseplanning.Setting.Setting
 import com.example.caseplanning.Sidebar.TechSupport
 import com.example.caseplanning.adapter.AdapterRecyclerViewFolder
 import com.example.caseplanning.adapter.SwipeToDeleteCallback
@@ -88,18 +88,11 @@ class GroupTask : Fragment(), NavigationView.OnNavigationItemSelectedListener,
         /*проверяем состояние*/
         mToggle.syncState()
 
-        val dataBaseTask = DataBase()
-        disposable = dataBaseTask
-            .retrieveDataUser(FirebaseAuth.getInstance().currentUser!!.uid)
-            .subscribe({ user ->
-                nameUser.text = user.name
-                emailUser.text = user.email
-            },
-                { throwable ->
-                    throwable.printStackTrace()
-                }
-            )
-
+        val user = FirebaseAuth.getInstance().currentUser!!
+        user.let {
+            nameUser.text = user.displayName
+            emailUser.text = user.email
+        }
         listFolder(viewFragment)
 
         return viewFragment
@@ -218,10 +211,13 @@ class GroupTask : Fragment(), NavigationView.OnNavigationItemSelectedListener,
             R.id.tasks -> {
                 val windowTask: Fragment =
                     WindowTask()
-                fragmentManager!!.beginTransaction()
-                    .replace(R.id.linerLayout, windowTask)
-                    .addToBackStack(null)
-                    .commit()
+                if(fragmentManager!!.findFragmentById(R.id.linerLayout) != null) {
+                    fragmentManager!!.beginTransaction().remove(GroupTask()).commit()
+                    fragmentManager!!.beginTransaction()
+                        .replace(R.id.linerLayout, windowTask)
+                        .addToBackStack(null)
+                        .commit()
+                }
             }
             /*доступ к задачам другим людям*/
             R.id.access -> {
@@ -231,7 +227,6 @@ class GroupTask : Fragment(), NavigationView.OnNavigationItemSelectedListener,
                     .replace(R.id.linerLayout, access)
                     .addToBackStack(null)
                     .commit()
-
             }
             /*прогресс выполнения задач*/
             R.id.progress -> {
@@ -242,7 +237,6 @@ class GroupTask : Fragment(), NavigationView.OnNavigationItemSelectedListener,
                     .replace(R.id.linerLayout, progress)
                     .addToBackStack(null)
                     .commit()
-
             }
             /*настройки*/
             R.id.setting -> {
@@ -253,7 +247,6 @@ class GroupTask : Fragment(), NavigationView.OnNavigationItemSelectedListener,
                     .replace(R.id.linerLayout, setting)
                     .addToBackStack(null)
                     .commit()
-
             }
             /*техподдержка*/
             R.id.techSupport -> {
@@ -264,7 +257,6 @@ class GroupTask : Fragment(), NavigationView.OnNavigationItemSelectedListener,
                     .replace(R.id.linerLayout, techSupport)
                     .addToBackStack(null)
                     .commit()
-
             }
             /*выход пользователя из системы*/
             R.id.signOut -> {
@@ -277,6 +269,7 @@ class GroupTask : Fragment(), NavigationView.OnNavigationItemSelectedListener,
             }
         }
         mDrawerLayout!!.closeDrawer(GravityCompat.START)
+        onDestroy()
         return true
     }
 

@@ -14,6 +14,8 @@ import com.example.caseplanning.DataBase.Folder
 import com.example.caseplanning.DataBase.Task
 import com.example.caseplanning.R
 import com.example.caseplanning.mainWindow.CheckedTask
+import com.google.android.material.card.MaterialCardView
+import com.google.android.material.checkbox.MaterialCheckBox
 
 class AdapterRecyclerViewTaskFolder(
     val context: Context,
@@ -27,8 +29,8 @@ class AdapterRecyclerViewTaskFolder(
     inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
         val nameItem = itemView.findViewById<TextView>(R.id.nameItemList)
-        val checkBox = itemView.findViewById<CheckBox>(R.id.checkbox_folder_task_subTask)
-        val cardView = itemView.findViewById<CardView>(R.id.card_view)
+        val checkBox = itemView.findViewById<MaterialCheckBox>(R.id.checkbox_folder_task_subTask)
+        val cardView = itemView.findViewById<MaterialCardView>(R.id.card_view)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {

@@ -3,9 +3,13 @@
     <color name="colorPrimary">#32a893</color>
     <color name="colorPrimaryDark">#32a893</color>
     <color name="colorBtnSignIn">#22baad</color>
+    <color name="colorElementPageView">#00B8D4</color>
+    <color name="colorElementTwoPageView">#00BFA5</color>
+    <color name="trackTint">#9AFF1100</color>
+    <color name="thumbTint">#CEFF1100</color>
     <color name="textWhite">#fafafa</color>
     <color name="green">#C629C659</color>
-    <color name = "red">#FF1100</color>
+    <color name = "red">#8DEC2C1E</color>
     <color name="textBlack">#000000</color>
     <color name="lilac_disabled">#F0A0FF</color>
     <color name="sand_default">#F0B000</color>

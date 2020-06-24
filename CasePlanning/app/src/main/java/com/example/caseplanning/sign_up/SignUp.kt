@@ -16,6 +16,7 @@ import com.example.caseplanning.DataBase.DataBase
 import com.example.caseplanning.MainActivity
 import com.example.caseplanning.R
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.UserProfileChangeRequest
 import io.reactivex.disposables.Disposable
 
 class SignUp : AppCompatActivity() {
@@ -192,6 +193,9 @@ class SignUp : AppCompatActivity() {
                     ) { created_user ->
                         if (created_user.isSuccessful) {
                             val user = mAuth!!.currentUser
+                            val displayName = UserProfileChangeRequest.Builder()
+                                .setDisplayName(mName_user).build()
+                            user?.updateProfile(displayName)
                             user?.sendEmailVerification()?.addOnCompleteListener(this)
                             { sented_email ->
                                 if (sented_email.isSuccessful) {

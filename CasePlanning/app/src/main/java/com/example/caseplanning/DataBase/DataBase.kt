@@ -229,4 +229,10 @@ class DataBase {
     fun retrieveDataFolders(): Observable<List<Folder>> {
         return readFolder()
     }
+
+    fun deletedUser(uid: String) = FirebaseDatabase
+    .getInstance()
+    .reference
+    .child(uid)
+    .removeValue()
 }

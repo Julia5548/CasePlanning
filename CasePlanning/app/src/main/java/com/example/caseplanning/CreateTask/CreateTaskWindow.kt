@@ -2,6 +2,7 @@ package com.example.caseplanning.CreateTask
 
 import android.annotation.SuppressLint
 import android.app.*
+import android.content.Context.ALARM_SERVICE
 import android.content.Intent
 import android.graphics.PorterDuff
 import android.os.Build
@@ -25,12 +26,15 @@ import butterknife.OnCheckedChanged
 import butterknife.OnClick
 import com.example.caseplanning.DataBase.DataBase
 import com.example.caseplanning.DataBase.Task
+import com.example.caseplanning.Notification.NotificationBroadcast
+import com.example.caseplanning.Notification.NotificationService
 import com.example.caseplanning.R
 import com.example.caseplanning.TypeTask.AudioTask
 import com.example.caseplanning.TypeTask.Photo
 import com.example.caseplanning.TypeTask.Video
 import com.example.caseplanning.mainWindow.MainWindowCasePlanning
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import java.text.SimpleDateFormat
 import java.util.*
 
 class CreateTaskWindow : Fragment() {
@@ -594,8 +598,8 @@ class CreateTaskWindow : Fragment() {
             val storageFile = StorageFile("newAudio.mp3", task.audio!!, context!!)
             storageFile.loadAudio()
         }
-     /*   createNotificationChannel()
-        scheduleNotification(task.day!!, task.notification, task.name!!)*/
+       // createNotificationChannel()
+      //  scheduleNotification(task.day, task.notification, task.name!!)
 
         val dataBaseTask = DataBase()
         dataBaseTask.createTask(task)
@@ -609,14 +613,14 @@ class CreateTaskWindow : Fragment() {
     }
 
     @SuppressLint("SimpleDateFormat")
-    private fun scheduleNotification(day : String, timeNotification: String, name_task : String) {
+    private fun scheduleNotification(day : String, timeNotification: String, name: String) {
         var mDate = day
-     /*   val intentNotification = Intent(context!!, NotificationService::class.java)
-        intentNotification.putExtra("name_task", name_task)
+        val intentNotification = Intent(context!!, NotificationBroadcast::class.java)
+        intentNotification.putExtra("name_task", name)
         intentNotification.putExtra("time_notification", timeNotification)
-        val pendingIntent = PendingIntent.getBroadcast(context!!, 42, intentNotification, PendingIntent.FLAG_UPDATE_CURRENT)
-        val alarmManager : AlarmManager = context!!.getSystemService(ALARM_SERVICE) as AlarmManager*/
-     /*   val arrayDate : List<String> = mDate.split(".")
+        val pendingIntent = PendingIntent.getBroadcast(context!!, 42, intentNotification, PendingIntent.FLAG_ONE_SHOT)
+        val alarmManager : AlarmManager = context!!.getSystemService(ALARM_SERVICE) as AlarmManager
+        val arrayDate : List<String> = mDate.split(".")
         var month = ""
         if(arrayDate[1].length == 1){
             month = "0${arrayDate[1]}"
@@ -624,12 +628,12 @@ class CreateTaskWindow : Fragment() {
         }
         val date_notification = "$mDate $timeNotification"
         val date = SimpleDateFormat("dd.MM.yyyy hh:mm").parse(date_notification)
-        val milliseconds = date!!.time*/
+        val milliseconds = date!!.time
 
-       // alarmManager.set(AlarmManager.RTC_WAKEUP, milliseconds, pendingIntent)
+        alarmManager.set(AlarmManager.RTC_WAKEUP, milliseconds, pendingIntent)
     }
 
-    private fun createNotificationChannel() {
+ /*   private fun createNotificationChannel() {
 
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
             val name : CharSequence = "LemubitReminderChannel"
@@ -642,7 +646,7 @@ class CreateTaskWindow : Fragment() {
             notificationManager.createNotificationChannel(channel)
         }
     }
-
+*/
     private fun saveDataTask(): Task {
 
         var photoUri: String? = ""
@@ -707,8 +711,14 @@ class CreateTaskWindow : Fragment() {
         Log.d("OnPAUSE", "onPause")
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
+    override fun onStop() {
+        super.onStop()
+        onDestroyView()
+
+    }
+    override fun onDestroyView() {
+        super.onDestroyView()
+        Log.d("onDESTROy", "onPause")
 
         listSubTask = null
         listSubTasksView = null

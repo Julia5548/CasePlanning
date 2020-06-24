@@ -19,6 +19,8 @@ import com.example.caseplanning.EditElements.EditTask
 import com.example.caseplanning.R
 import com.example.caseplanning.mainWindow.CheckedTask
 import com.example.caseplanning.mainWindow.FragmentDialog
+import com.google.android.material.card.MaterialCardView
+import com.google.android.material.checkbox.MaterialCheckBox
 import com.intrusoft.sectionedrecyclerview.SectionRecyclerViewAdapter
 import io.reactivex.disposables.Disposable
 import java.util.*
@@ -47,10 +49,10 @@ class AdapterSectionTask(
     inner class ChildViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
         val dataChild: TextView = itemView.findViewById(R.id.nameItemList)
-        var cardItem = itemView.findViewById<CardView>(R.id.card_view)
+        var cardItem = itemView.findViewById<MaterialCardView>(R.id.card_view)
         val txtOptionDigit = itemView.findViewById<TextView>(R.id.txtOptionDigit)
         val color_task = itemView.findViewById<ImageView>(R.id.color_task)
-        val checkedTask = itemView.findViewById<CheckBox>(R.id.checkbox)
+        val checkedTask = itemView.findViewById<MaterialCheckBox>(R.id.checkbox)
     }
 
     inner class SectionViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {

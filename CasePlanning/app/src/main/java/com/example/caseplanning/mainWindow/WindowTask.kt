@@ -2,18 +2,14 @@ package com.example.caseplanning.mainWindow
 
 import android.annotation.SuppressLint
 import android.content.Intent
-import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.*
 import android.widget.TextView
-import android.widget.Toast
-import androidx.annotation.RequiresApi
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.core.view.GravityCompat
-import androidx.core.view.get
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentTransaction
@@ -29,21 +25,18 @@ import com.example.caseplanning.DataBase.Task
 import com.example.caseplanning.GroupTask.GroupTask
 import com.example.caseplanning.MainActivity
 import com.example.caseplanning.R
+import com.example.caseplanning.Setting.Setting
 import com.example.caseplanning.Sidebar.*
 import com.example.caseplanning.adapter.AdapterSectionTask
 import com.example.caseplanning.adapter.SectionHeader
 import com.google.android.material.navigation.NavigationView
 import com.google.firebase.auth.FirebaseAuth
 import com.miguelcatalan.materialsearchview.MaterialSearchView
-import com.shrikanthravi.collapsiblecalendarview.data.Day
 import com.shrikanthravi.collapsiblecalendarview.widget.CollapsibleCalendar
 import io.reactivex.disposables.Disposable
-import kotlinx.android.synthetic.main.window_main_task.*
-import java.text.DateFormatSymbols
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.collections.ArrayList
-import kotlin.math.absoluteValue
 
 
 class WindowTask : Fragment(), NavigationView.OnNavigationItemSelectedListener {
@@ -98,11 +91,14 @@ class WindowTask : Fragment(), NavigationView.OnNavigationItemSelectedListener {
         val nameUser = navHeader.findViewById<TextView>(R.id.nameUser)
         val dataBase: DataBase? = DataBase()
 
+        val user = FirebaseAuth.getInstance().currentUser!!
+        user.let {
+            nameUser.text = user.displayName
+            emailUser.text = user.email
+        }
         disposable = dataBase!!
             .retrieveDataUser(FirebaseAuth.getInstance().currentUser!!.uid)
             .subscribe({ user ->
-                nameUser.text = user.name
-                emailUser.text = user.email
                 access_users = user.accessUsers
                 addAccessUsers(user.accessUsers, navigationView, dataBase)
             },
@@ -180,7 +176,7 @@ class WindowTask : Fragment(), NavigationView.OnNavigationItemSelectedListener {
 
         var mDate = date
         val arrayDate: List<String> = date.split(".")
-        val month : String
+        val month: String
 
         if (arrayDate[1].length == 1) {
             month = "0${arrayDate[1]}"
@@ -331,7 +327,6 @@ class WindowTask : Fragment(), NavigationView.OnNavigationItemSelectedListener {
 
         search!!.setOnQueryTextListener(object : MaterialSearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(query: String?): Boolean {
-
                 newDate(query!!)
                 search!!.closeSearch()
                 return true

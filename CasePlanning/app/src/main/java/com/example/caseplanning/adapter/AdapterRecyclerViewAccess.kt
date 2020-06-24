@@ -70,7 +70,6 @@ class AdapterRecyclerViewAccess(
         uid: String,
         disposable: Disposable?
     ) {
-
         MaterialAlertDialogBuilder(context)
             .setTitle("Разрешить?")
             .setMessage("Действительно ли разрешить доступ пользователю $nameUser")
