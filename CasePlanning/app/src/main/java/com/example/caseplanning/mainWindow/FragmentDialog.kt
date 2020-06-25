@@ -111,6 +111,7 @@ class FragmentDialog(
 
             if (dataTask.replay != "Нет >")
                 replayDay.text = dataTask.replay
+
             if (dataTask.listSubTasks!!.size != 0) {
                 listSubTask.layoutManager = LinearLayoutManager(context)
                 for (subTask in dataTask.listSubTasks!!) {
@@ -126,6 +127,7 @@ class FragmentDialog(
             if (dataTask.timer != "Указать >") {
                 timer.text = dataTask.timer
                 time = dataTask.timer
+
             } else {
                 dialog.setOnShowListener { dialogInterface ->
                     (dialogInterface as AlertDialog).getButton(AlertDialog.BUTTON_NEUTRAL).isEnabled =
@@ -134,23 +136,27 @@ class FragmentDialog(
             }
             if (dataTask.comment != "")
                 comment.text = dataTask.comment
-            if (dataTask.photo != "") {
 
+            if (dataTask.photo != "") {
                 if (photo != null) {
                     (photo.drawable as? BitmapDrawable)!!.bitmap.recycle()
                 }
                 photo = view.findViewById(R.id.imageViewPhoto)
                 photo!!.visibility = ImageView.VISIBLE
                 photoText.visibility = TextView.VISIBLE
+                val name = dataTask.photo!!.split("/")
 
-                val storageFile = StorageFile(".jpg", dataTask.photo!!, context!!)
+                val storageFile = StorageFile(name[9], dataTask.photo!!, context!!)
                 storageFile.loadImagesFilesMemory(photo)
             }
 
             if (dataTask.video != "") {
                 video.visibility = VideoView.VISIBLE
                 videoText.visibility = TextView.VISIBLE
-                val storageFile = StorageFile("newVideo.mp4", dataTask.video!!, context!!)
+
+                val name = dataTask.video!!.split("/")
+
+                val storageFile = StorageFile(name[6], dataTask.video!!, context!!)
                 storageFile.loadVideoFilesMemory(video)
             }
             if (dataTask.audio != "" && dataTask.timeAudio != "") {
@@ -159,7 +165,9 @@ class FragmentDialog(
                 chronometer.visibility = Chronometer.VISIBLE
                 audioText.visibility = TextView.VISIBLE
 
-                val storageFile = StorageFile("newAudio.mp3", dataTask.audio!!, context!!)
+                val name = dataTask.audio!!.split("/")
+
+                val storageFile = StorageFile(name[4], dataTask.audio!!, context!!)
                 val file = storageFile.loadAudioFilesMemory()
                 playAudio.setOnClickListener {
 

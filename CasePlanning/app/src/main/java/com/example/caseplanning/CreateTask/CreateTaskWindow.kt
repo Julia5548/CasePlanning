@@ -594,12 +594,24 @@ class CreateTaskWindow : Fragment() {
     fun onclickAdd() {
 
         val task = saveDataTask()
+        var name: List<String>
         if (task.audio != null && task.audio != "") {
-            val storageFile = StorageFile("newAudio.mp3", task.audio!!, context!!)
+            name = task.audio!!.split("/")
+            val storageFile = StorageFile(name[4], task.audio!!, context!!)
             storageFile.loadAudio()
         }
-       // createNotificationChannel()
-      //  scheduleNotification(task.day, task.notification, task.name!!)
+        if (task.photo != null && task.photo != ""){
+            name = task.photo!!.split("/")
+            val storageFile = StorageFile(name[9], task.photo!!, context!!)
+            storageFile.loadImages()
+        }
+        if(task.video != null && task.video != ""){
+            name = task.video!!.split("/")
+            val storageFile = StorageFile(name[6], task.video!!, context!!)
+            storageFile.loadVideo()
+        }
+        // createNotificationChannel()
+        //  scheduleNotification(task.day, task.notification, task.name!!)
 
         val dataBaseTask = DataBase()
         dataBaseTask.createTask(task)
@@ -608,23 +620,29 @@ class CreateTaskWindow : Fragment() {
         pageViewModel!!.uri.value = null
         pageViewModel!!.day.value = null
 
+        onDestroyView()
         val intent = Intent(activity!!.applicationContext, MainWindowCasePlanning()::class.java)
         startActivity(intent)
     }
 
     @SuppressLint("SimpleDateFormat")
-    private fun scheduleNotification(day : String, timeNotification: String, name: String) {
+    private fun scheduleNotification(day: String, timeNotification: String, name: String) {
         var mDate = day
         val intentNotification = Intent(context!!, NotificationBroadcast::class.java)
         intentNotification.putExtra("name_task", name)
         intentNotification.putExtra("time_notification", timeNotification)
-        val pendingIntent = PendingIntent.getBroadcast(context!!, 42, intentNotification, PendingIntent.FLAG_ONE_SHOT)
-        val alarmManager : AlarmManager = context!!.getSystemService(ALARM_SERVICE) as AlarmManager
-        val arrayDate : List<String> = mDate.split(".")
+        val pendingIntent = PendingIntent.getBroadcast(
+            context!!,
+            42,
+            intentNotification,
+            PendingIntent.FLAG_ONE_SHOT
+        )
+        val alarmManager: AlarmManager = context!!.getSystemService(ALARM_SERVICE) as AlarmManager
+        val arrayDate: List<String> = mDate.split(".")
         var month = ""
-        if(arrayDate[1].length == 1){
+        if (arrayDate[1].length == 1) {
             month = "0${arrayDate[1]}"
-            mDate ="${arrayDate[0]}.$month.${arrayDate[2]}"
+            mDate = "${arrayDate[0]}.$month.${arrayDate[2]}"
         }
         val date_notification = "$mDate $timeNotification"
         val date = SimpleDateFormat("dd.MM.yyyy hh:mm").parse(date_notification)
@@ -633,20 +651,20 @@ class CreateTaskWindow : Fragment() {
         alarmManager.set(AlarmManager.RTC_WAKEUP, milliseconds, pendingIntent)
     }
 
- /*   private fun createNotificationChannel() {
+    /*   private fun createNotificationChannel() {
 
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
-            val name : CharSequence = "LemubitReminderChannel"
-            val description = "Channel for Lemubit Reminder"
-            val importance = NotificationManager.IMPORTANCE_DEFAULT
-            val channel = NotificationChannel("notification", name, importance)
-            channel.description = description
+           if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
+               val name : CharSequence = "LemubitReminderChannel"
+               val description = "Channel for Lemubit Reminder"
+               val importance = NotificationManager.IMPORTANCE_DEFAULT
+               val channel = NotificationChannel("notification", name, importance)
+               channel.description = description
 
-            val notificationManager:NotificationManager = context!!.getSystemService(NotificationManager::class.java)!!
-            notificationManager.createNotificationChannel(channel)
-        }
-    }
-*/
+               val notificationManager:NotificationManager = context!!.getSystemService(NotificationManager::class.java)!!
+               notificationManager.createNotificationChannel(channel)
+           }
+       }
+   */
     private fun saveDataTask(): Task {
 
         var photoUri: String? = ""
@@ -654,7 +672,7 @@ class CreateTaskWindow : Fragment() {
         var audioUri: String? = ""
         var timeAudio: String? = ""
 
-        pageViewModel!!.uri.observe(requireActivity(), Observer { uri ->
+        pageViewModel?.uri?.observe(requireActivity(), Observer { uri ->
 
             if (uri != null) {
                 photoUri = uri.photoUri
@@ -672,7 +690,12 @@ class CreateTaskWindow : Fragment() {
         val notification = view!!.findViewById<TextView>(R.id.reminder)
         val comment = view!!.findViewById<EditText>(R.id.comment)
 
-
+        if (listSubTasksView == null) {
+            listSubTasksView = arrayListOf()
+        }
+        if(listSubTask == null){
+            listSubTask = arrayListOf()
+        }
         for (position in 0 until listSubTasksView!!.size) {
             listSubTask!!.add(
                 listSubTasksView!![position]
@@ -682,6 +705,7 @@ class CreateTaskWindow : Fragment() {
             )
             Log.d("Element", listSubTask!![position])
         }
+
 
         val checked_list = hashMapOf<String, Boolean>()
         return Task(
@@ -706,16 +730,15 @@ class CreateTaskWindow : Fragment() {
         super.onPause()
 
         val task = saveDataTask()
-        pageViewModel!!.task.value = task
+        pageViewModel?.task?.value = task
 
         Log.d("OnPAUSE", "onPause")
     }
 
     override fun onStop() {
         super.onStop()
-        onDestroyView()
-
     }
+
     override fun onDestroyView() {
         super.onDestroyView()
         Log.d("onDESTROy", "onPause")
