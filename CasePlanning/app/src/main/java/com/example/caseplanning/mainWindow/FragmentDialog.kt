@@ -2,6 +2,7 @@ package com.example.caseplanning.mainWindow
 
 import android.app.Dialog
 import android.content.DialogInterface
+import android.content.Intent
 import android.graphics.drawable.BitmapDrawable
 import android.media.MediaPlayer
 import android.os.Bundle
@@ -19,8 +20,6 @@ import com.example.caseplanning.CreateTask.StorageFile
 import com.example.caseplanning.DataBase.Task
 import com.example.caseplanning.R
 import com.example.caseplanning.adapter.AdapterRecyclerView
-import com.example.caseplanning.adapter.AdapterRecyclerViewFolder
-import com.example.caseplanning.adapter.AdapterRecyclerViewTaskFolder
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import io.reactivex.disposables.Disposable
 import java.lang.Exception
@@ -51,11 +50,12 @@ class FragmentDialog(
             (view.parent as ViewGroup).removeView(view)
         }
 
-        val materialAlertDialogBuilder = MaterialAlertDialogBuilder(context, R.style.RoundShapeTheme)
-            .setView(view)
-            .setPositiveButton("Ok", this)
-            .setNeutralButton("Открыть таймер", this)
-            .create()
+        val materialAlertDialogBuilder =
+            MaterialAlertDialogBuilder(context, R.style.RoundShapeTheme)
+                .setView(view)
+                .setPositiveButton("Ok", this)
+                .setNeutralButton("Открыть таймер", this)
+                .create()
         createdView(view, materialAlertDialogBuilder)
 
         return materialAlertDialogBuilder
@@ -64,19 +64,22 @@ class FragmentDialog(
 
     override fun onClick(dialog: DialogInterface?, which: Int) {
 
-        when(which){
-            Dialog.BUTTON_NEUTRAL->{
-                fragmentManager!!.beginTransaction().replace(R.id.linerLayout, Timer(time)).addToBackStack(null).commit()
+        when (which) {
+            Dialog.BUTTON_NEUTRAL -> {
+                fragmentManager!!.beginTransaction()
+                    .replace(R.id.linerLayout, TimerChrono(time))
+                    .addToBackStack(null).commit()
                 dialog!!.dismiss()
             }
             Dialog.BUTTON_POSITIVE -> {
                 dialog!!.dismiss()
 
-                if(mDisposable != null && !mDisposable.isDisposed)
+                if (mDisposable != null && !mDisposable.isDisposed)
                     mDisposable.dispose()
             }
         }
     }
+
     private fun createdView(
         view: View,
         dialog: AlertDialog
@@ -103,6 +106,7 @@ class FragmentDialog(
 
             if (dataTask.period != "")
                 periodDay.text = dataTask.period
+
             date.text = dataTask.day
 
             if (dataTask.replay != "Нет >")
@@ -124,7 +128,8 @@ class FragmentDialog(
                 time = dataTask.timer
             } else {
                 dialog.setOnShowListener { dialogInterface ->
-                    (dialogInterface as AlertDialog).getButton(AlertDialog.BUTTON_NEUTRAL).isEnabled = false
+                    (dialogInterface as AlertDialog).getButton(AlertDialog.BUTTON_NEUTRAL).isEnabled =
+                        false
                 }
             }
             if (dataTask.comment != "")
@@ -138,7 +143,7 @@ class FragmentDialog(
                 photo!!.visibility = ImageView.VISIBLE
                 photoText.visibility = TextView.VISIBLE
 
-                val storageFile = StorageFile(".jpg",dataTask.photo!!, context!!)
+                val storageFile = StorageFile(".jpg", dataTask.photo!!, context!!)
                 storageFile.loadImagesFilesMemory(photo)
             }
 
