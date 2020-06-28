@@ -16,13 +16,11 @@ import androidx.lifecycle.ViewModelProviders
 import butterknife.ButterKnife
 import com.example.caseplanning.CreateTask.CreateTaskWindow
 import com.example.caseplanning.CreateTask.MyViewModel
+import com.example.caseplanning.DataBase.Task
+import com.example.caseplanning.EditElements.EditTask
 import com.example.caseplanning.R
 
-class VideoIncrease : Fragment() {
-
-    var pageViewModel: MyViewModel? = null
-    lateinit var videoFile: VideoView
-
+class VideoIncrease(val task: Task?, val tagger : String) : Fragment() {
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -31,32 +29,29 @@ class VideoIncrease : Fragment() {
     ): View? {
         val view = inflater.inflate(R.layout.video_zoom, container, false)
 
-        videoFile = view.findViewById<VideoView>(R.id.videoView)
-
+        val videoFile = view.findViewById<VideoView>(R.id.videoView)
 
         ButterKnife.bind(this, view)
 
-        var videoUri: Uri? = null
-
-        pageViewModel!!.uri.observe(requireActivity(), Observer { uriTypeTask ->
-            if (uriTypeTask != null)
-                videoUri = uriTypeTask.videoUri?.toUri()
-        })
+        val videoUri: Uri? = if(task!!.video != null && task.video !=""){
+            task.video!!.toUri()
+        }else{
+            null
+        }
 
         var mediaController: MediaController? = null
         if (videoUri != null) {
-
-
             mediaController = object : MediaController(context) {
 
                 override fun dispatchKeyEvent(event: KeyEvent): Boolean {
                     if (event.keyCode == KeyEvent.KEYCODE_BACK) {
-                        val createTask: Fragment = CreateTaskWindow()
-                        val transaction = fragmentManager!!.beginTransaction()
-
-                        transaction.replace(R.id.linerLayout, createTask)
-                        transaction.commit()
-
+                        if(tagger == "edit_task") {
+                            fragmentManager!!.beginTransaction().remove(this@VideoIncrease)
+                                .replace(R.id.linerLayout, EditTask(task)).commit()
+                        }else{
+                            fragmentManager!!.beginTransaction().remove(this@VideoIncrease)
+                                .replace(R.id.linerLayout, CreateTaskWindow(task.day, task)).commit()
+                        }
                         return true
                     }
                     return super.dispatchKeyEvent(event)
@@ -73,16 +68,7 @@ class VideoIncrease : Fragment() {
 
     }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-        pageViewModel = ViewModelProviders.of(requireActivity()).get(MyViewModel::class.java)
-    }
-
     override fun onDestroy() {
         super.onDestroy()
-        videoFile.stopPlayback()
-        videoFile.setVideoURI(null)
-        pageViewModel = null
     }
 }

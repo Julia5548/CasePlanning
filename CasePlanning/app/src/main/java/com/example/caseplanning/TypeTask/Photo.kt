@@ -27,90 +27,52 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import butterknife.ButterKnife
 import butterknife.OnClick
+import com.example.caseplanning.CreateTask.CreateTaskWindow
 import com.example.caseplanning.CreateTask.MyViewModel
+import com.example.caseplanning.CreateTask.StorageFile
+import com.example.caseplanning.DataBase.Task
 import com.example.caseplanning.DataBase.UriTypeTask
+import com.example.caseplanning.EditElements.EditTask
 import com.example.caseplanning.Increase.PhotoIncrease
 import com.example.caseplanning.R
 import java.io.File
 import java.io.IOException
 import java.text.SimpleDateFormat
 import java.util.*
+import kotlin.math.E
 
-/*написать комменты, проблема с видом фотографии, нет потверждения на правильность фотографии, нажатие на фотографию, чтобы открылась полность вся, загрузка из галереи */
-class Photo : Fragment() {
+class Photo(val task: Task?, val tagger: String) : Fragment() {
 
     val CAMERA_REQUEST = 1001
     val PERMISSION_CODE = 1000
-    var photo_image: ImageView? = null
-    private var pageViewModel: MyViewModel? = null
-    var videoUri: String? = ""
-    val BYTES_PER_PX = 4.0f
-    var audioFile: String? = ""
-    var timeAudio: String? = ""
     private var mCurrentFile: String? = null
     private var mPhotoFile: File? = null
     private var photoUri: Uri? = null
-    private var mBitmap : Bitmap? = null
 
-
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-
-        val view = inflater.inflate(R.layout.photo, container, false)
-        ButterKnife.bind(this, view)
-
-
-        pageViewModel!!.uri.observe(requireActivity(), Observer { uri ->
-            if (uri != null) {
-                mCurrentFile = uri.photoUri
-                videoUri = uri.videoUri
-                audioFile = uri.audioUri
-                timeAudio = uri.timeAudio
-            }
-        })
-        if (mCurrentFile == null) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                if (context!!.checkSelfPermission(Manifest.permission.CAMERA)
-                    == PackageManager.PERMISSION_DENIED ||
-                    context!!.checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                    == PackageManager.PERMISSION_DENIED
-                ) {
-                    val permission: Array<String> = arrayOf(
-                        Manifest.permission.CAMERA,
-                        Manifest.permission.WRITE_EXTERNAL_STORAGE
-                    )
-                    requestPermissions(permission, PERMISSION_CODE)
-                } else {
-                    openCamera()
-                }
-
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (context!!.checkSelfPermission(Manifest.permission.CAMERA)
+                == PackageManager.PERMISSION_DENIED ||
+                context!!.checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                == PackageManager.PERMISSION_DENIED
+            ) {
+                val permission: Array<String> = arrayOf(
+                    Manifest.permission.CAMERA,
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE
+                )
+                requestPermissions(permission, PERMISSION_CODE)
             } else {
                 openCamera()
             }
-        }else {
 
-            var bitmap:Bitmap? = null
-            if (photo_image != null) {
-                (photo_image!!.drawable as? BitmapDrawable)!!.bitmap.recycle()
-            }
-            photo_image = view.findViewById<ImageButton>(R.id.photoImage)
-
-            bitmap = BitmapFactory.decodeFile(mCurrentFile)
-            mBitmap = bitmap
-
-            loadPhoto()
+        } else {
+            openCamera()
         }
-
-        return view
     }
 
     /*открываем камеру*/
     fun openCamera() {
-
-
         mPhotoFile = createPhotoFile()
         photoUri = createPhotoUri(mPhotoFile)
         val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
@@ -132,24 +94,20 @@ class Photo : Fragment() {
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 
-        var bitmap : Bitmap? = null
         if (requestCode == CAMERA_REQUEST && resultCode == Activity.RESULT_OK) {
-            //фотка сделана, извлекаем картинку
-
-            bitmap = MediaStore.Images.Media.getBitmap(context!!.contentResolver, photoUri!!)
-
-            mBitmap = bitmap
-            if (photo_image != null)
-                (photo_image!!.drawable as? BitmapDrawable)!!.bitmap.recycle()
-
-            photo_image = view!!.findViewById<ImageButton>(R.id.photoImage)
-
-            pageViewModel!!.uri.value =
-                UriTypeTask(photoUri = mCurrentFile, videoUri = videoUri, audioUri = audioFile, timeAudio = timeAudio)
-
+            val name = mCurrentFile!!.split("/")
+            val storage =
+                StorageFile(context = context!!, nameFile = name[9], path = mCurrentFile!!)
+            storage.loadImages()
+            task!!.photo = mCurrentFile!!
+            if (tagger == "edit_task") {
+                fragmentManager!!.beginTransaction().replace(R.id.linerLayout, EditTask(task))
+                    .commit()
+            } else {
+                fragmentManager!!.beginTransaction().replace(R.id.linerLayout, CreateTaskWindow(task.day, task))
+                    .commit()
+            }
             loadPhotoinGallery()
-            loadPhoto()
-
         } else {
             Log.d("Ошибка", "Не получилось сохранить фотографию")
         }
@@ -179,12 +137,6 @@ class Photo : Fragment() {
         return imageFile
     }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        pageViewModel = ViewModelProviders.of(requireActivity()).get(MyViewModel::class.java)
-
-    }
-
     /*разрешение доступа к камере*/
     override fun onRequestPermissionsResult(
         requestCode: Int,
@@ -205,86 +157,10 @@ class Photo : Fragment() {
         }
     }
 
-
-    /*увелечение фотографии*/
-   @OnClick(R.id.photoImage)
-    fun photoZoom() {
-
-        val photoIncrease: Fragment = PhotoIncrease()
-
-        val transaction: FragmentTransaction = fragmentManager!!.beginTransaction()
-
-        transaction.replace(R.id.linerLayout, photoIncrease)
-        transaction.addToBackStack(null)
-        transaction.commit()
-
-
-    }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        pageViewModel = null
-        photo_image?.setImageBitmap(null)
-        mBitmap = null
+    override fun onDestroy() {
+        super.onDestroy()
         mCurrentFile = null
         mPhotoFile = null
         photoUri = null
-        videoUri = null
-        timeAudio = null
-    }
-
-    private fun loadPhoto() {
-
-        if (readBitmapInfo() > MemUtils().megabytesFree()) {
-            subSampleImage(32)
-        } else {
-            photo_image!!.setImageBitmap(mBitmap)
-        }
-    }
-
-    private fun subSampleImage(powerOf: Int) {
-
-        if (powerOf < 1 || powerOf > 32) {
-            return
-        }
-
-        val options = BitmapFactory.Options()
-        options.inJustDecodeBounds = false
-        options.inSampleSize = powerOf
-        val bitmap = BitmapFactory.decodeFile(mCurrentFile, options)
-        photo_image!!.setImageBitmap(bitmap)
-
-    }
-
-    private fun readBitmapInfo(): Float {
-
-        val options = BitmapFactory.Options()
-        options.inJustDecodeBounds = true
-        BitmapFactory.decodeFile(mCurrentFile, options)
-        val imageHeight = options.outHeight
-        val imageWidth = options.outWidth
-
-        return imageWidth * imageHeight * BYTES_PER_PX / MemUtils().BYTES_IN_MB
-    }
-
-    inner class MemUtils {
-
-        val BYTES_IN_MB = 1024.0f * 1024.0f
-
-        fun megabytesFree(): Float {
-
-            val runtime = Runtime.getRuntime()
-            val byteUsed = runtime.totalMemory()
-            val mbUsed = byteUsed / BYTES_IN_MB
-            return megabytesAvailable() - mbUsed
-        }
-
-        private fun megabytesAvailable(): Float {
-
-            val runtime = Runtime.getRuntime()
-            val bytesAvailable = runtime.maxMemory()
-            return bytesAvailable / BYTES_IN_MB
-
-        }
     }
 }

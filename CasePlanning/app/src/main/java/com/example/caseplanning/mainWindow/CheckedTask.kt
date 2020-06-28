@@ -9,25 +9,30 @@ import com.example.caseplanning.DataBase.Folder
 import com.example.caseplanning.DataBase.Task
 import com.google.firebase.auth.FirebaseAuth
 import io.reactivex.disposables.Disposable
+import shark.GcRoot
 
 class CheckedTask() {
 
     private lateinit var mCardView: CardView
     private lateinit var mTextView: TextView
-    private lateinit var mCheckbox : CheckBox
-    private var folder_list : ArrayList<Folder>? = null
+    private lateinit var mCheckbox: CheckBox
+    private var folder_list: ArrayList<Folder>? = null
 
-    constructor(cardView: CardView, textView: TextView, checkbox:CheckBox) : this(){
+    constructor(cardView: CardView, textView: TextView, checkbox: CheckBox) : this() {
         mCardView = cardView
         mTextView = textView
         mCheckbox = checkbox
     }
 
-    private fun getListFolder() : ArrayList<Folder>? = folder_list
+    private fun getListFolder(): ArrayList<Folder>? = folder_list
 
-     fun updateFolder(task: Task, checked: Boolean) {
+    fun updateFolder(
+        task: Task,
+        checked: Boolean,
+        mDay: String?
+    ) {
         folder_list = arrayListOf()
-         val database = DataBase()
+        val database = DataBase()
         var disposable: Disposable? = null
         disposable = database
             .retrieveDataFolders()
@@ -37,12 +42,14 @@ class CheckedTask() {
                         folder_list!!.add(folder)
                     }
                 }
-                if(task.replay != "Нет >"){
+                if (task.replay != "Нет >") {
                     updateReplayTask(
                         mUid = FirebaseAuth.getInstance().currentUser!!.uid,
                         task = task,
-                        checked = checked)
-                }else {
+                        checked = checked,
+                        day = mDay!!
+                    )
+                } else {
                     updateTask(
                         mUid = FirebaseAuth.getInstance().currentUser!!.uid,
                         task = task,
@@ -53,7 +60,7 @@ class CheckedTask() {
             }
     }
 
-    private fun updateReplayTask(mUid: String, task: Task, checked : Boolean) {
+    private fun updateReplayTask(mUid: String, task: Task, checked: Boolean, day: String) {
         val dataBase = DataBase()
         var disposable: Disposable? = null
         disposable = dataBase
@@ -64,7 +71,7 @@ class CheckedTask() {
                         val list = getListFolder()
                         var mTask: Task
                         if (checked) {
-                            val checkedDate = task.day.replace('.', '-')
+                            val checkedDate = day.replace('.', '-')
                             taskData.checkedTasks!![checkedDate] = checked
                             mTask = Task(
                                 name = taskData.name,
@@ -85,7 +92,7 @@ class CheckedTask() {
                                 day = task.day
                             )
                         } else {
-                            val checkedDate = task.day.replace('.', '-')
+                            val checkedDate = day.replace('.', '-')
                             taskData.checkedTasks!!.remove(checkedDate)
                             mTask = Task(
                                 name = taskData.name,
@@ -139,7 +146,7 @@ class CheckedTask() {
         mUid: String,
         task: Task,
         checked: Boolean
-    ){
+    ) {
         val dataBase = DataBase()
         var disposable: Disposable? = null
         disposable = dataBase
@@ -148,8 +155,8 @@ class CheckedTask() {
                 for (taskData in tasks) {
                     if (taskData.name == task.name && taskData.day == task.day) {
                         val list = getListFolder()
-                        var mTask : Task
-                        if(checked) {
+                        var mTask: Task
+                        if (checked) {
                             mTask = Task(
                                 name = taskData.name,
                                 listSubTasks = taskData.listSubTasks,
@@ -167,7 +174,7 @@ class CheckedTask() {
                                 checked = checked,
                                 day = task.day
                             )
-                        }else{
+                        } else {
                             mTask = Task(
                                 name = taskData.name,
                                 listSubTasks = taskData.listSubTasks,
@@ -188,20 +195,24 @@ class CheckedTask() {
                         }
                         dataBase.updateDataTask(mTask, taskData.idTasks!!)
 
-                        for(folder in list!!) {
+                        for (folder in list!!) {
                             if (folder.tasks!!.contains(taskData)) {
                                 folder.tasks!!.remove(taskData)
                                 folder.tasks!!.add(mTask)
                                 var checked_count = 0.0
-                                for(folder_task in folder.tasks!!){
-                                    if(folder_task.checked!!){
+                                for (folder_task in folder.tasks!!) {
+                                    if (folder_task.checked!!) {
                                         checked_count++
                                     }
                                 }
                                 //Расчет для прогресса
-                                val mProgress = (checked_count/folder.tasks!!.size) * 100
+                                val mProgress = (checked_count / folder.tasks!!.size) * 100
 
-                                val update_folder = Folder(name = folder.name, tasks = folder.tasks!!, progress = mProgress.toString())
+                                val update_folder = Folder(
+                                    name = folder.name,
+                                    tasks = folder.tasks!!,
+                                    progress = mProgress.toString()
+                                )
                                 dataBase.updateDataFolder(update_folder, folder.id)
                             }
                         }
@@ -211,10 +222,11 @@ class CheckedTask() {
             }
     }
 
-    private fun onDestroy(disposable : Disposable?){
-        if(disposable != null && !disposable.isDisposed)
+    private fun onDestroy(disposable: Disposable?) {
+        if (disposable != null && !disposable.isDisposed)
             disposable.dispose()
     }
+
     fun checkedTask() {
         mCardView.isEnabled = false
         mCheckbox.isChecked = true

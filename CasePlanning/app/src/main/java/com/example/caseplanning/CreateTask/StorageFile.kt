@@ -6,6 +6,10 @@ import android.widget.ImageView
 import android.widget.Toast
 import android.widget.VideoView
 import androidx.core.net.toUri
+import androidx.fragment.app.FragmentManager
+import com.example.caseplanning.DataBase.Task
+import com.example.caseplanning.EditElements.EditTask
+import com.example.caseplanning.R
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
 import java.io.*
@@ -54,7 +58,6 @@ class StorageFile() {
     }
 
     fun loadVideo() {
-
         //сслылка на видео
         val videoRef: StorageReference? = mStorageReference.child("videos/${mNameFiles}")
         val upload = videoRef?.putFile(mPath.toUri())!!
@@ -97,12 +100,17 @@ class StorageFile() {
             inputStream?.close()
         }
     }
-    fun loadImagesFilesMemory(imageView: ImageView) {
 
-        val downloadFile = mStorageReference.child("images/$mNameFiles")
-        val name = mNameFiles.split(".")
+    fun loadImagesFilesMemory(imageView: ImageView, name: String) {
 
-        val localFile = File.createTempFile(name[0], "jpg")
+        mStorage = FirebaseStorage.getInstance()
+        //ссылка для закрузки и удаления айлов
+        mStorageReference = mStorage.reference
+
+        val downloadFile = mStorageReference.child("images/$name")
+        val name_image = name.split(".")
+
+        val localFile = File.createTempFile(name_image[0], "jpg")
 
         downloadFile.getFile(localFile).addOnSuccessListener {
             val options = BitmapFactory.Options()
@@ -115,25 +123,36 @@ class StorageFile() {
         }
     }
 
-    fun loadVideoFilesMemory(video: VideoView){
-        val downloadFile = mStorageReference.child("videos/${mNameFiles}")
+    fun loadVideoFilesMemory(video: VideoView, name: String, context: Context) {
+
+        mStorage = FirebaseStorage.getInstance()
+        //ссылка для закрузки и удаления айлов
+        mStorageReference = mStorage.reference
+
+        val downloadFile = mStorageReference.child("videos/$name")
         val localFile = downloadFile.downloadUrl
-            .addOnSuccessListener {uri->
+            .addOnSuccessListener { uri ->
                 video.setVideoURI(uri)
                 video.seekTo(1)
             }.addOnFailureListener {
-                Toast.makeText(mContext, "Видео не удалось загрузить", Toast.LENGTH_SHORT)
+                Toast.makeText(context, "Видео не удалось загрузить", Toast.LENGTH_SHORT)
                     .show()
 
             }
     }
-    fun loadAudioFilesMemory(): String{
-        val downloadFile = mStorageReference.child("audios/${mNameFiles}")
-        val name = mNameFiles.split(".")
-        val localFile = File.createTempFile(name[0], "mp3")
+
+    fun loadAudioFilesMemory(name: String, context: Context): String {
+
+        mStorage = FirebaseStorage.getInstance()
+        //ссылка для закрузки и удаления айлов
+        mStorageReference = mStorage.reference
+
+        val downloadFile = mStorageReference.child("audios/$name")
+        val name_audio = name.split(".")
+        val localFile = File.createTempFile(name_audio[0], "mp3")
 
         downloadFile.getFile(localFile).addOnSuccessListener {
-            Toast.makeText(mContext, "Аудио удалось загрузить", Toast.LENGTH_SHORT)
+            Toast.makeText(context, "Аудио удалось загрузить", Toast.LENGTH_SHORT)
                 .show()
 
         }.addOnFailureListener { exception ->

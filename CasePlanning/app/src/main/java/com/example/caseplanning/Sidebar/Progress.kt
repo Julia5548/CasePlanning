@@ -27,7 +27,9 @@ import com.google.firebase.auth.FirebaseAuth
 import com.mikhaellopez.circularprogressbar.CircularProgressBar
 import io.reactivex.disposables.Disposable
 import java.text.SimpleDateFormat
+import java.time.LocalDate
 import java.util.*
+import kotlin.math.roundToLong
 
 class Progress : Fragment(), NavigationView.OnNavigationItemSelectedListener {
 
@@ -223,7 +225,7 @@ class Progress : Fragment(), NavigationView.OnNavigationItemSelectedListener {
         }
         if(checkedCount != 0.0 && total_task != 0.0) {
             val progress_current = (checkedCount / total_task) * 100
-            percent_week.text = "$progress_current%"
+            percent_week.text = "${String.format("%.2f", progress_current)}%"
             progress_week.apply {
                 setProgressWithAnimation(progress_current.toFloat(), 1000)
                 progressMax = 100f
@@ -265,7 +267,7 @@ class Progress : Fragment(), NavigationView.OnNavigationItemSelectedListener {
         val procent_month = view.findViewById<TextView>(R.id.percent_progressMade_month)
         if(checkedCount != 0.0 && totalTask != 0.0) {
             val progress_current = (checkedCount / totalTask) * 100
-            procent_month.text = "$progress_current%"
+            procent_month.text = "${String.format("%.2f", progress_current)}%"
             progress_month.apply {
                 setProgressWithAnimation(progress_current.toFloat(), 1000)
                 progressMax = 100f

@@ -26,25 +26,22 @@ import androidx.lifecycle.ViewModelProviders
 import butterknife.ButterKnife
 import butterknife.OnClick
 import com.example.caseplanning.CreateTask.MyViewModel
+import com.example.caseplanning.CreateTask.StorageFile
+import com.example.caseplanning.DataBase.Task
 import com.example.caseplanning.DataBase.UriTypeTask
 import com.example.caseplanning.R
 import java.io.File
 import java.lang.Exception
 
 
-class AudioTask : Fragment() {
+class AudioTask(val task : Task?, val pageViewModel: MyViewModel?) : Fragment() {
 
     private var mediaRecorder: MediaRecorder? = null
     private var mediaPlayer: MediaPlayer? = null
     private lateinit var fileName: String
     val PERMISSION_CODE = 1000
-    var videoUri: String? = ""
-    var photoUri: String? = ""
-     var chronometer: Chronometer? = null
+    var chronometer: Chronometer? = null
     var timeAudio: String? = ""
-    var audioFile : String? = ""
-
-    private var pageViewModel: MyViewModel? = null
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -55,37 +52,23 @@ class AudioTask : Fragment() {
 
         ButterKnife.bind(this, view)
 
-        chronometer = view!!.findViewById<Chronometer>(R.id.timerText)
+        chronometer = view!!.findViewById(R.id.timerText)
 
         fileName =
             "${Environment.getExternalStorageDirectory().absolutePath}/${System.currentTimeMillis()}record.mp3"
 
-        pageViewModel!!.uri.observe(requireActivity(), Observer { uri ->
-            if (uri != null) {
-                videoUri = uri.videoUri
-                photoUri = uri.photoUri
-                timeAudio = uri.timeAudio
-                audioFile = uri.audioUri!!
-            }
-        })
-
-        if(audioFile != ""){
+        if (task!!.audio != "" && task.audio != null) {
             val playAndStopRecord = view.findViewById<ImageButton>(R.id.playRecordAndStopRecord)
-
             val playAndStopAudio = view.findViewById<ImageButton>(R.id.playAndStopAudio)
+
             playAndStopRecord.visibility = ImageButton.GONE
             playAndStopAudio.visibility = ImageButton.VISIBLE
 
-            fileName = audioFile!!
+            fileName = task.audio!!
+            timeAudio = task.timeAudio!!
         }
 
         return view
-    }
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        pageViewModel = ViewModelProviders.of(requireActivity()).get(MyViewModel::class.java)
-
     }
 
     /*запись и остановка аудио*/
@@ -93,7 +76,6 @@ class AudioTask : Fragment() {
     fun onClickStartRecording() {
 
         val playAndStopRecord = view!!.findViewById<ImageButton>(R.id.playRecordAndStopRecord)
-
         val playAndStopAudio = view!!.findViewById<ImageButton>(R.id.playAndStopAudio)
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -125,7 +107,6 @@ class AudioTask : Fragment() {
                 }
             }
         } else {
-
             if (playAndStopRecord.tag == null) {
                 playAndStopRecord.tag = 1
                 playAndStopRecord.setImageResource(R.drawable.ic_stop_black_24dp)
@@ -171,13 +152,21 @@ class AudioTask : Fragment() {
     /*остановка записи аудио*/
     fun stopRecording() {
         if (mediaRecorder != null) {
+
             mediaRecorder!!.stop()
             chronometer!!.stop()
             timeAudio = chronometer!!.text.toString()
             chronometer!!.base = SystemClock.elapsedRealtime()
-            pageViewModel!!.uri.value =
-                UriTypeTask(audioUri = fileName, photoUri = photoUri, videoUri = videoUri, timeAudio = timeAudio)
-        } else {
+
+            task!!.timeAudio = timeAudio
+            task.audio = fileName
+
+            pageViewModel?.task?.value = task
+
+            val name = fileName.split("/")
+            val storage = StorageFile(nameFile = name[4], path = fileName, context = context!!)
+            storage.loadAudio()
+          } else {
             Log.d("Tag", "Audio stop is not possible")
         }
     }
@@ -188,7 +177,6 @@ class AudioTask : Fragment() {
 
         val playAndStopAudio = view!!.findViewById<ImageButton>(R.id.playAndStopAudio)
         try {
-
             if (playAndStopAudio.tag == null) {
                 releasePlay()
                 mediaPlayer = MediaPlayer()
@@ -200,8 +188,7 @@ class AudioTask : Fragment() {
                 playAndStopAudio.setImageResource(R.drawable.ic_stop_black_24dp)
                 playAndStopAudio.tag = 1
 
-                chronometer!!.setOnChronometerTickListener {
-                    chronometer ->
+                chronometer!!.setOnChronometerTickListener { chronometer ->
                     if (timeAudio != null) {
                         if (chronometer.text.toString() == timeAudio) {
                             chronometer.stop()
@@ -220,7 +207,6 @@ class AudioTask : Fragment() {
                 playAndStopAudio.setImageResource(R.drawable.ic_play_arrow_black_24dp)
                 playAndStopAudio.tag = null
             }
-
         } catch (e: Exception) {
             e.printStackTrace()
         }
@@ -231,7 +217,6 @@ class AudioTask : Fragment() {
             mediaPlayer!!.release()
             mediaPlayer = null
         }
-
     }
 
     /*остановка воспроизведение аудио*/
@@ -240,12 +225,10 @@ class AudioTask : Fragment() {
         if (mediaPlayer != null)
             mediaPlayer!!.stop()
 
-        if(timeAudio == null){
+        if (timeAudio == null) {
             chronometer!!.base = SystemClock.elapsedRealtime()
         }
-
     }
-
     override fun onRequestPermissionsResult(
         requestCode: Int,
         permissions: Array<out String>,
@@ -269,13 +252,7 @@ class AudioTask : Fragment() {
         super.onDestroyView()
         mediaRecorder = null
         mediaPlayer = null
-        videoUri = null
-        photoUri = null
-        pageViewModel = null
         timeAudio = null
         chronometer = null
-
-
     }
-
 }

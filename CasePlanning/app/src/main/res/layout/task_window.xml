@@ -11,10 +11,10 @@
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
-        <androidx.appcompat.widget.Toolbar
-                android:id="@+id/toolbarCreateTask"
-                style="@style/Toolbar"
-                android:layout_marginBottom="20dp" />
+        <com.google.android.material.appbar.MaterialToolbar
+                android:id="@+id/toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize"/>
 
         <LinearLayout
                 android:id="@+id/addTask"
@@ -97,17 +97,22 @@
                 android:id="@+id/type"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal">
+                android:orientation="horizontal"
+                android:baselineAligned="false">
 
-            <FrameLayout
-                    android:id="@+id/video"
+            <include layout="@layout/video"
+                    android:id = "@+id/video"
+                    android:layout_weight="1"
+                    android:visibility="gone"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" />
+                    android:layout_height="wrap_content"/>
 
-            <FrameLayout
-                    android:id="@+id/photo"
+            <include layout="@layout/photo"
+                    android:id = "@+id/photo_image"
+                    android:layout_weight="1"
+                    android:visibility="gone"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" />
+                    android:layout_height="wrap_content"/>
 
         </LinearLayout>
 

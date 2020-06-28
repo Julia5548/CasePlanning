@@ -25,13 +25,11 @@ import io.reactivex.disposables.Disposable
 import java.lang.Exception
 
 class FragmentDialog(
-    val dataTask: Task?,
-    disposable: Disposable?
+    val dataTask: Task?
 ) : DialogFragment(), DialogInterface.OnClickListener {
 
     private var mediaPlayer: MediaPlayer? = null
     private var time: String = ""
-    private val mDisposable = disposable
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -73,9 +71,6 @@ class FragmentDialog(
             }
             Dialog.BUTTON_POSITIVE -> {
                 dialog!!.dismiss()
-
-                if (mDisposable != null && !mDisposable.isDisposed)
-                    mDisposable.dispose()
             }
         }
     }
@@ -146,8 +141,8 @@ class FragmentDialog(
                 photoText.visibility = TextView.VISIBLE
                 val name = dataTask.photo!!.split("/")
 
-                val storageFile = StorageFile(name[9], dataTask.photo!!, context!!)
-                storageFile.loadImagesFilesMemory(photo)
+                val storageFile = StorageFile()
+                storageFile.loadImagesFilesMemory(photo, name = name[9])
             }
 
             if (dataTask.video != "") {
@@ -156,8 +151,8 @@ class FragmentDialog(
 
                 val name = dataTask.video!!.split("/")
 
-                val storageFile = StorageFile(name[6], dataTask.video!!, context!!)
-                storageFile.loadVideoFilesMemory(video)
+                val storageFile = StorageFile()
+                storageFile.loadVideoFilesMemory(video, name[6], context!!)
             }
             if (dataTask.audio != "" && dataTask.timeAudio != "") {
 
@@ -167,10 +162,10 @@ class FragmentDialog(
 
                 val name = dataTask.audio!!.split("/")
 
-                val storageFile = StorageFile(name[4], dataTask.audio!!, context!!)
-                val file = storageFile.loadAudioFilesMemory()
-                playAudio.setOnClickListener {
+                val storageFile = StorageFile()
+                val file = storageFile.loadAudioFilesMemory(name[4], context!!)
 
+                playAudio.setOnClickListener {
                     playAudio(chronometer, view, dataTask.timeAudio!!, file)
                 }
             }

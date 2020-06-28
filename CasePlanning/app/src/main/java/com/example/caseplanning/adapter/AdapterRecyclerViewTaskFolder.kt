@@ -78,7 +78,7 @@ class AdapterRecyclerViewTaskFolder(
             for (task_folder in mFolder.tasks!!) {
                 if (task_folder.name == nameTask) {
                     val checkedTask = CheckedTask(cardView, textView, checkBox)
-                    checkedTask.updateFolder(task_folder, checked)
+                    checkedTask.updateFolder(task_folder, checked, task_folder.day)
                 }
             }
         }

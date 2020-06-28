@@ -2,7 +2,9 @@ package com.example.caseplanning.EditElements
 
 import android.annotation.SuppressLint
 import android.content.Intent
+import android.graphics.BitmapFactory
 import android.graphics.PorterDuff
+import android.graphics.drawable.BitmapDrawable
 import android.os.Build
 import android.os.Bundle
 import android.preference.PreferenceManager
@@ -15,31 +17,40 @@ import androidx.annotation.RequiresApi
 import androidx.appcompat.app.ActionBar
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
+import androidx.core.net.toUri
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import butterknife.*
 import com.example.caseplanning.CreateTask.MyViewModel
 import com.example.caseplanning.CreateTask.TimePicker
 import com.example.caseplanning.DataBase.DataBase
 import com.example.caseplanning.DataBase.Task
-import com.example.caseplanning.DataBase.UriTypeTask
+import com.example.caseplanning.Increase.PhotoIncrease
+import com.example.caseplanning.Increase.VideoIncrease
 import com.example.caseplanning.mainWindow.MainWindowCasePlanning
 import com.example.caseplanning.R
+import com.example.caseplanning.TypeTask.AudioTask
+import com.example.caseplanning.TypeTask.Photo
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.google.firebase.auth.FirebaseAuth
+import kotlin.collections.ArrayList
 
 //обновить еще и в папке
-class EditTask : Fragment() {
+class EditTask(mTask: Task?) : Fragment() {
 
+    var tasksData: Task? = mTask
+    var textPeriod: String? = ""
+    private var listSubTask: ArrayList<String>? = arrayListOf()
+    private var listSubTasksView: ArrayList<View>? = arrayListOf()
+    var pageViewModel: MyViewModel? = null
+    var colorName: String? = ""
 
-    var listSubTask: ArrayList<String>? = null
-    var listSubTasksView: ArrayList<View>? = null
-    private var pageViewModel: MyViewModel? = null
-    var textPeriod = ""
-    var tasksData: Task? = null
-    var colorName = "textBlack"
-    private var btnDeleted: ImageButton? = null
-    private var btnOkSubTasks: ImageButton? = null
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        pageViewModel = ViewModelProviders.of(this).get(MyViewModel::class.java)
+        Log.d("onCreate", "onCreate")
+    }
 
     @SuppressLint("SetTextI18n")
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
@@ -49,39 +60,33 @@ class EditTask : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
 
-        val viewFragment = inflater.inflate(R.layout.edit_task, container, false)
-
-        val toolbar: Toolbar = viewFragment.findViewById(R.id.toolbarCreateTask)
-
+        val view = inflater.inflate(R.layout.edit_task, container, false)
+        val toolbar: Toolbar = view.findViewById(R.id.toolbar)
         val activity = activity as AppCompatActivity?
         activity!!.setSupportActionBar(toolbar)
 
         val actionBar: ActionBar? = activity.supportActionBar
         actionBar!!.title = "Изменить"
+        actionBar.setDisplayHomeAsUpEnabled(true)
 
-        listSubTask = arrayListOf()
-        listSubTasksView = arrayListOf()
+        ButterKnife.bind(this, view)
 
-        ButterKnife.bind(this, viewFragment)
+        Log.d("OnCreateView", "OnCreateView")
 
-        return viewFragment
+        return view
     }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        pageViewModel = ViewModelProviders.of(requireActivity()).get(MyViewModel::class.java)
+    override fun onStart() {
+        super.onStart()
+        restore_data(view!!)
     }
+    private fun restore_data(view:View){
+        Log.d("onViewCreated", "onViewCreated")
 
-    fun getTask(task: Task): Task {
-
-        tasksData = task
-        return task
-
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-
+        pageViewModel?.task?.observe(this, Observer {
+            if (it != null)
+                tasksData = it
+        })
         val editTextTask = view.findViewById<EditText>(R.id.editTextTask)
         val textReplay = view.findViewById<TextView>(R.id.textChoose)
         val notification = view.findViewById<TextView>(R.id.reminder)
@@ -89,108 +94,210 @@ class EditTask : Fragment() {
         val comment = view.findViewById<EditText>(R.id.comment)
         val day = view.findViewById<TextView>(R.id.setupData)
 
-        val dataBase = DataBase()
-        var taskList = arrayListOf<String>()
-        if (arguments != null) {
-            taskList = arguments!!.getStringArrayList("dataTask")!!
-        }
-        val disposable = dataBase
-            .retrieveData(FirebaseAuth.getInstance().currentUser!!.uid)
-            .subscribe { tasks ->
-                for (task in tasks) {
-                    if (task.name == taskList[0] && task.day == taskList[1]) {
-                        getTask(task)
-                    }
-                }
-                if (tasksData != null) {
+        if (tasksData != null) {
+            editTextTask.setText(tasksData!!.name)
 
-                    editTextTask.setText(tasksData!!.name)
-                    notification.text = tasksData!!.notification
-                    timer.text = tasksData!!.timer
-                    comment.setText(tasksData!!.comment)
-                    day.text = tasksData!!.day
-                    textReplay.text = tasksData!!.replay
+            if(tasksData!!.notification != "")
+                notification.text = tasksData!!.notification
 
+            if(tasksData!!.timer != "")
+                timer.text = tasksData!!.timer
 
-                    val radioButtonMorning = view.findViewById<RadioButton>(R.id.radio_morning)
-                    val radioButtonDay = view.findViewById<RadioButton>(R.id.radio_day)
-                    val radioButtonEvening = view.findViewById<RadioButton>(R.id.radio_evening)
-                    val radioButtonOnceAnytime =
-                        view.findViewById<RadioButton>(R.id.radio_onceAnytime)
-                    val color = view.findViewById<ImageButton>(R.id.color)
+            comment.setText(tasksData!!.comment)
+            day.text = tasksData!!.day
 
-                    when (tasksData!!.period) {
-                        radioButtonMorning.text.toString() ->
-                            radioButtonMorning.isChecked = true
-                        radioButtonDay.text.toString() ->
-                            radioButtonDay.isChecked = true
-                        radioButtonEvening.text.toString() ->
-                            radioButtonEvening.isChecked = true
-                        radioButtonOnceAnytime.text.toString() ->
-                            radioButtonOnceAnytime.isChecked = true
-                    }
+            if(tasksData!!.replay != "")
+                textReplay.text = tasksData!!.replay
 
-                    for (subTask in tasksData!!.listSubTasks!!) {
-                        listSubTask!!.add(subTask)
-                    }
-                    if (listSubTask!!.size > 0) {
-                        onClickAddSubTask()
-                    }
+            val radioButtonMorning = view.findViewById<RadioButton>(R.id.radio_morning)
+            val radioButtonDay = view.findViewById<RadioButton>(R.id.radio_day)
+            val radioButtonEvening = view.findViewById<RadioButton>(R.id.radio_evening)
+            val radioButtonOnceAnytime =
+                view.findViewById<RadioButton>(R.id.radio_onceAnytime)
+            val color = view.findViewById<ImageButton>(R.id.color)
 
-                    when (tasksData!!.color!!) {
-                        "yellow" -> {
-                            color.setColorFilter(
-                                resources.getColor(R.color.yellow),
-                                PorterDuff.Mode.SRC_ATOP
-                            )
-                            colorName = "yellow"
-                        }
-                        "green" -> {
-                            color.setColorFilter(
-                                resources.getColor(R.color.green),
-                                PorterDuff.Mode.SRC_ATOP
-                            )
-                            colorName = "green"
-                        }
-
-                        "azure" -> {
-                            color.setColorFilter(
-                                resources.getColor(R.color.azure),
-                                PorterDuff.Mode.SRC_ATOP
-                            )
-                            colorName = "azure"
-                        }
-                        "indigo" -> {
-                            color.setColorFilter(
-                                resources.getColor(R.color.indigo),
-                                PorterDuff.Mode.SRC_ATOP
-                            )
-                            colorName = "indigo"
-                        }
-                        "orchid" -> {
-                            color.setColorFilter(
-                                resources.getColor(R.color.orchid),
-                                PorterDuff.Mode.SRC_ATOP
-                            )
-                            colorName = "orchid"
-                        }
-                        "textBlack" -> {
-                            color.setColorFilter(
-                                resources.getColor(R.color.textBlack),
-                                PorterDuff.Mode.SRC_ATOP
-                            )
-                            colorName = "textBlack"
-                        }
-                    }
-
-                    if (fragmentManager!!.findFragmentById(R.id.photo) == null && tasksData!!.photo != "") {
-                        fragmentManager!!.beginTransaction()
-                            .replace(R.id.photo, PhotoEdit(tasksData!!.photo))
-                            .commit()
-                    }
-                }
+            when (tasksData!!.period) {
+                radioButtonMorning.text.toString() ->
+                    radioButtonMorning.isChecked = true
+                radioButtonDay.text.toString() ->
+                    radioButtonDay.isChecked = true
+                radioButtonEvening.text.toString() ->
+                    radioButtonEvening.isChecked = true
+                radioButtonOnceAnytime.text.toString() ->
+                    radioButtonOnceAnytime.isChecked = true
+                else -> textPeriod = ""
             }
 
+            if (tasksData!!.listSubTasks!!.size > 0) {
+                restoreSubTask()
+            }
+
+            when (tasksData!!.color!!) {
+                "yellow" -> {
+                    color.setColorFilter(
+                        resources.getColor(R.color.yellow),
+                        PorterDuff.Mode.SRC_ATOP
+                    )
+                    colorName = "yellow"
+                }
+                "green" -> {
+                    color.setColorFilter(
+                        resources.getColor(R.color.green),
+                        PorterDuff.Mode.SRC_ATOP
+                    )
+                    colorName = "green"
+                }
+
+                "azure" -> {
+                    color.setColorFilter(
+                        resources.getColor(R.color.azure),
+                        PorterDuff.Mode.SRC_ATOP
+                    )
+                    colorName = "azure"
+                }
+                "indigo" -> {
+                    color.setColorFilter(
+                        resources.getColor(R.color.indigo),
+                        PorterDuff.Mode.SRC_ATOP
+                    )
+                    colorName = "indigo"
+                }
+                "orchid" -> {
+                    color.setColorFilter(
+                        resources.getColor(R.color.orchid),
+                        PorterDuff.Mode.SRC_ATOP
+                    )
+                    colorName = "orchid"
+                }
+                "textBlack" -> {
+                    color.setColorFilter(
+                        resources.getColor(R.color.textBlack),
+                        PorterDuff.Mode.SRC_ATOP
+                    )
+                    colorName = "textBlack"
+                }
+            }
+            if (tasksData!!.photo != "" || tasksData!!.video != "" || tasksData!!.audio != "")
+                loadMedia()
+        }
+    }
+
+    private fun restoreSubTask() {
+        if (tasksData!!.listSubTasks!!.size > 0) {
+            listSubTasksView = arrayListOf()
+
+            val linerLayoutSubTask = view!!.findViewById<LinearLayout>(R.id.editSubTask)
+
+            for (subTask in tasksData!!.listSubTasks!!) {
+
+                val inflate = LayoutInflater.from(context)
+                val view_sub = inflate.inflate(R.layout.add_sub_tasks, null, false) as ViewGroup
+                val relativeLayoutSubTasks = view_sub.findViewById<RelativeLayout>(R.id.rel)
+                val btnDeleted = view_sub.findViewById<ImageButton>(R.id.btnDeleted)
+                val btnOkSubTasks = view_sub.findViewById<ImageButton>(R.id.btnOkCreate)
+
+                relativeLayoutSubTasks!!.layoutParams = RelativeLayout.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.WRAP_CONTENT
+                )
+
+                val edit = relativeLayoutSubTasks.findViewById<EditText>(R.id.editTextSubTasks)
+                edit.setText(subTask)
+
+                btnDeleted!!.setOnClickListener { onClickDeletedSubTask(view_sub) }
+
+                btnOkSubTasks!!.setOnClickListener {
+                    onClickCreateSubTask(
+                        view_sub,
+                        btnDeleted,
+                        btnOkSubTasks
+                    )
+                }
+                btnOkSubTasks.performClick()
+                listSubTasksView!!.add(view_sub)
+
+                linerLayoutSubTask!!.addView(relativeLayoutSubTasks)
+            }
+        }
+    }
+
+    @OnClick(R.id.photoImage)
+    fun photo_zoom() {
+        val photoIncrease: Fragment = PhotoIncrease(tasksData)
+        fragmentManager!!.beginTransaction()
+            .addToBackStack(null)
+            .replace(R.id.linerLayout, photoIncrease)
+            .commit()
+    }
+
+    @OnTouch(R.id.videoView)
+    fun video_zoom(){
+        val videoIncrease : Fragment = VideoIncrease(tasksData, "edit_task")
+        fragmentManager!!.beginTransaction()
+            .addToBackStack(null)
+            .replace(R.id.linerLayout, videoIncrease)
+            .commit()
+    }
+
+    private fun loadMedia() {
+        if (tasksData!!.photo != null && tasksData!!.photo != "") {
+            val relativeLayout: RelativeLayout = view!!.findViewById(R.id.photo_image)
+            relativeLayout.visibility = View.VISIBLE
+            var imageView:ImageView? = null
+            if (imageView != null) {
+                (imageView.drawable as? BitmapDrawable)!!.bitmap.recycle()
+            }
+            imageView = view!!.findViewById<ImageButton>(R.id.photoImage)
+
+            val options = BitmapFactory.Options()
+            options.inJustDecodeBounds = false
+            options.inSampleSize = 42
+            val bitmap = BitmapFactory.decodeFile(tasksData!!.photo!!, options)
+            imageView!!.setImageBitmap(bitmap)
+        }
+
+        if (tasksData!!.video != null && tasksData!!.video != "") {
+            val relativeLayout: RelativeLayout = view!!.findViewById(R.id.video)
+            relativeLayout.visibility = View.VISIBLE
+            val video = view!!.findViewById<VideoView>(R.id.videoView)
+            video.setVideoURI(tasksData!!.video!!.toUri())
+            video.seekTo(1)
+        }
+
+        if (tasksData!!.audio != null && tasksData!!.audio != "") {
+            val audio: Fragment = AudioTask(tasksData, null)
+            fragmentManager!!.beginTransaction().add(R.id.audio, audio).commit()
+        }
+    }
+
+    /*добавление фото задачи*/
+    @OnClick(R.id.btnAddPhoto)
+    fun onClickAddPhoto() {
+        var photo = fragmentManager!!.findFragmentByTag("photo")
+        if (photo == null) {
+            tasksData = saveDataTask()
+            photo = Photo(tasksData, "edit_task")
+            fragmentManager!!.beginTransaction().add(photo, "photo").commit()
+        }
+    }
+
+    /*добавление видео задачи*/
+    @OnClick(R.id.btnAddVideo)
+    fun onClickAddVideo() {
+        var video = fragmentManager!!.findFragmentByTag("video")
+        if(video == null){
+            tasksData = saveDataTask()
+            video = Video(tasksData, "edit_task")
+            fragmentManager!!.beginTransaction().add(video, "video").commit()
+        }
+
+    }
+
+    /*добавление аудио задачи*/
+    @OnClick(R.id.addAudio)
+    fun onClickAddAudio() {
+        val audio = AudioTask(tasksData, pageViewModel)
+        fragmentManager!!.beginTransaction().add(R.id.audio, audio).commit()
     }
 
     @SuppressLint("SetTextI18n")
@@ -218,10 +325,9 @@ class EditTask : Fragment() {
     fun onClickColor() {
 
         val color = view!!.findViewById<ImageButton>(R.id.color)
-
         val view = layoutInflater.inflate(R.layout.colors, null)
         val colorList = view.findViewById<ListView>(R.id.listColors)
-        val colors = arrayListOf<String>(
+        val colors = arrayListOf(
             "Желтый",
             "Зеленый",
             "Лазурный",
@@ -285,6 +391,7 @@ class EditTask : Fragment() {
                     )
                     colorName = "textBlack"
                 }
+                else -> colorName = ""
             }
             materialAlertDialogBuilder.dismiss()
         }
@@ -341,12 +448,12 @@ class EditTask : Fragment() {
     @OnClick(R.id.addSubTasks)
     fun onClickAddSubTask() {
 
+        val btnAddSubTask = view!!.findViewById<TextView>(R.id.addSubTasks)
         val linerLayoutSubTask = view!!.findViewById<LinearLayout>(R.id.editSubTask)
-
-        var viewFr = layoutInflater.inflate(R.layout.add_sub_tasks, null, false)
-
-        var relativeLayoutSubTasks = viewFr.findViewById<RelativeLayout>(R.id.rel)
-
+        val view = layoutInflater.inflate(R.layout.add_sub_tasks, null, false)
+        val relativeLayoutSubTasks = view.findViewById<RelativeLayout>(R.id.rel)
+        val btnDeleted = view.findViewById<ImageButton>(R.id.btnDeleted)
+        val btnOkSubTasks = view.findViewById<ImageButton>(R.id.btnOkCreate)
 
         relativeLayoutSubTasks.layoutParams = LinearLayout.LayoutParams(
             ViewGroup.LayoutParams.MATCH_PARENT,
@@ -356,75 +463,25 @@ class EditTask : Fragment() {
         if (relativeLayoutSubTasks.parent != null) {
             (relativeLayoutSubTasks.parent as ViewGroup).removeView(relativeLayoutSubTasks)
         }
+        listSubTasksView!!.add(view)
+        linerLayoutSubTask.addView(relativeLayoutSubTasks)
 
-        if (listSubTask!!.size > 0) {
+        btnDeleted!!.setOnClickListener { onClickDeletedSubTask(view) }
 
-            listSubTasksView = arrayListOf()
-
-            for (subTask in listSubTask!!) {
-
-                viewFr = layoutInflater.inflate(R.layout.add_sub_tasks, null, false)
-
-                relativeLayoutSubTasks = viewFr.findViewById<RelativeLayout>(R.id.rel)
-
-                relativeLayoutSubTasks.layoutParams = LinearLayout.LayoutParams(
-                    ViewGroup.LayoutParams.MATCH_PARENT,
-                    ViewGroup.LayoutParams.WRAP_CONTENT
-                )
-                val editTextSubTasks = viewFr.findViewById<EditText>(R.id.editTextSubTasks)
-
-                editTextSubTasks.setText(subTask)
-
-                if (relativeLayoutSubTasks.parent != null) {
-                    (relativeLayoutSubTasks.parent as ViewGroup).removeView(
-                        relativeLayoutSubTasks
-                    )
-                }
-
-                btnDeleted = viewFr.findViewById<ImageButton>(R.id.btnDeleted)
-                btnDeleted!!.setOnClickListener { onClickDeletedSubTask(viewFr) }
-
-                btnOkSubTasks = viewFr.findViewById<ImageButton>(R.id.btnOkCreate)
-                btnOkSubTasks!!.setOnClickListener {
-                    onClickCreateSubTask(
-                        viewFr,
-                        btnDeleted!!,
-                        btnOkSubTasks!!
-                    )
-                }
-                btnOkSubTasks!!.performClick()
-                listSubTasksView!!.add(viewFr)
-                linerLayoutSubTask.addView(relativeLayoutSubTasks)
-            }
-
-            listSubTask = arrayListOf()
-        } else {
-
-            listSubTasksView!!.add(viewFr)
-            linerLayoutSubTask.addView(relativeLayoutSubTasks)
-
-            btnDeleted = viewFr.findViewById<ImageButton>(R.id.btnDeleted)
-            btnDeleted!!.setOnClickListener { onClickDeletedSubTask(viewFr) }
-
-            btnOkSubTasks = viewFr.findViewById<ImageButton>(R.id.btnOkCreate)
-            btnOkSubTasks!!.setOnClickListener {
-                onClickCreateSubTask(
-                    viewFr,
-                    btnDeleted!!,
-                    btnOkSubTasks!!
-                )
-            }
-            val btnAddSubTask = view!!.findViewById<TextView>(R.id.addSubTasks)
-            btnAddSubTask.isEnabled = false
+        btnOkSubTasks!!.setOnClickListener {
+            onClickCreateSubTask(
+                view,
+                btnDeleted,
+                btnOkSubTasks
+            )
         }
-
+        btnAddSubTask.isEnabled = false
         Log.d("Size", "${listSubTasksView!!.size}")
     }
 
     /*удаляет подзадачу*/
     fun onClickDeletedSubTask(viewSubTask: View) {
 
-        // relativeLayoutSubTasks.visibility = RelativeLayout.GONE
         (viewSubTask.parent as LinearLayout).removeView(viewSubTask)
         listSubTasksView!!.remove(viewSubTask)
         Log.d("Size", "${listSubTasksView!!.size}")
@@ -530,14 +587,15 @@ class EditTask : Fragment() {
     }
 
     /*получаем данные введенные пользователем в editText и передаем в активити WindowTask*/
-    @OnClick(R.id.add)
-    fun onclickAdd() {
+    @OnClick(R.id.edit)
+    fun onclickEdit() {
 
         val task = saveDataTask()
         val dataBaseTask = DataBase()
-        dataBaseTask.updateDataTask(task, tasksData!!.idTasks!!)
+        dataBaseTask.updateDataTask(task, task.idTasks!!)
 
-        val intent = Intent(activity!!.applicationContext, MainWindowCasePlanning()::class.java)
+        pageViewModel?.task?.value = null
+        val intent = Intent(context, MainWindowCasePlanning :: class.java)
         startActivity(intent)
     }
 
@@ -548,25 +606,27 @@ class EditTask : Fragment() {
         var audioUri: String? = ""
         var timeAudio: String? = ""
 
-
         if (tasksData != null) {
             photoUri = tasksData!!.photo
             audioUri = tasksData!!.audio
             timeAudio = tasksData!!.timeAudio
             videoUri = tasksData!!.video
         }
+
         val editTextTask = view!!.findViewById<EditText>(R.id.editTextTask)
         val textReplay = view!!.findViewById<TextView>(R.id.textChoose)
         val replay = textReplay.text.toString()
-
         val date = view!!.findViewById<TextView>(R.id.setupData)
-
         val timer = view!!.findViewById<TextView>(R.id.timer)
-
         val notification = view!!.findViewById<TextView>(R.id.reminder)
-
         val comment = view!!.findViewById<EditText>(R.id.comment)
 
+        if (listSubTasksView == null) {
+            listSubTasksView = arrayListOf()
+        }
+        if (listSubTask == null) {
+            listSubTask = arrayListOf()
+        }
 
         for (position in 0 until listSubTasksView!!.size) {
             listSubTask!!.add(
@@ -575,43 +635,62 @@ class EditTask : Fragment() {
                     .text
                     .toString()
             )
-            Log.d("Element", listSubTask!![position])
+            Log.d("Element", "$position ${listSubTask!![position]}")
         }
         return Task(
             name = editTextTask.text.toString(),
             color = colorName,
-            period = textPeriod,
+            period = textPeriod!!,
             replay = replay,
             day = date.text.toString(),
             timer = timer.text.toString(),
             notification = notification.text.toString(),
             comment = comment.text.toString(),
             listSubTasks = listSubTask!!,
+            checkedTasks = tasksData!!.checkedTasks,
             audio = audioUri,
             timeAudio = timeAudio,
             video = videoUri.toString(),
-            photo = photoUri
+            photo = photoUri,
+            idTasks = tasksData!!.idTasks
         )
     }
 
     override fun onPause() {
         super.onPause()
+        listSubTask = arrayListOf()
         val task = saveDataTask()
         pageViewModel?.task?.value = task
-        pageViewModel?.uri?.value = UriTypeTask(photoUri = task.photo, videoUri = task.video, audioUri = task.audio, timeAudio = task.timeAudio )
-
-
         Log.d("OnPAUSEEdit", "onPause")
+    }
+
+    override fun onStop() {
+        super.onStop()
+        Log.d("OnStop", "onStop")
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        Log.d("onDestroyView", "onDestroyView")
+        listSubTask = null
+        pageViewModel = null
+        listSubTasksView = null
+        colorName = null
+        textPeriod = null
     }
 
     override fun onDestroy() {
         super.onDestroy()
+        Log.d("OnDestroy", "onDestroy")
+        tasksData = null
         listSubTask = null
         listSubTasksView = null
-        btnDeleted = null
-        btnOkSubTasks = null
+        colorName = null
+        textPeriod = null
         pageViewModel = null
     }
 
-
+    override fun onDetach() {
+        super.onDetach()
+    }
 }

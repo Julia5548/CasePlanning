@@ -2,6 +2,7 @@ package com.example.caseplanning.DataBase
 
 import com.google.firebase.database.IgnoreExtraProperties
 import com.shrikanthravi.collapsiblecalendarview.data.Day
+import java.io.Serializable
 import java.util.*
 import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
@@ -24,4 +25,4 @@ data class Task(
     var timer:String ="",
     var checked :Boolean? = false,
     var notification:String = ""
-)
+):Serializable

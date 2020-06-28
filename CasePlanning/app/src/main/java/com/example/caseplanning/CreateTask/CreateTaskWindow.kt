@@ -1,10 +1,10 @@
 package com.example.caseplanning.CreateTask
 
 import android.annotation.SuppressLint
-import android.app.*
-import android.content.Context.ALARM_SERVICE
 import android.content.Intent
+import android.graphics.BitmapFactory
 import android.graphics.PorterDuff
+import android.graphics.drawable.BitmapDrawable
 import android.os.Build
 import android.os.Bundle
 import android.preference.PreferenceManager
@@ -17,35 +17,40 @@ import androidx.annotation.RequiresApi
 import androidx.appcompat.app.ActionBar
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
+import androidx.core.net.toUri
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentTransaction
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import butterknife.ButterKnife
 import butterknife.OnCheckedChanged
 import butterknife.OnClick
+import butterknife.OnTouch
 import com.example.caseplanning.DataBase.DataBase
 import com.example.caseplanning.DataBase.Task
-import com.example.caseplanning.Notification.NotificationBroadcast
-import com.example.caseplanning.Notification.NotificationService
+import com.example.caseplanning.EditElements.Video
+import com.example.caseplanning.Increase.PhotoIncrease
+import com.example.caseplanning.Increase.VideoIncrease
 import com.example.caseplanning.R
 import com.example.caseplanning.TypeTask.AudioTask
 import com.example.caseplanning.TypeTask.Photo
-import com.example.caseplanning.TypeTask.Video
 import com.example.caseplanning.mainWindow.MainWindowCasePlanning
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import java.text.SimpleDateFormat
 import java.util.*
 
-class CreateTaskWindow : Fragment() {
+class CreateTaskWindow(val date_task: String?, mTask : Task?) : Fragment() {
 
     var listSubTask: ArrayList<String>? = null
     var listSubTasksView: ArrayList<View>? = null
     private var pageViewModel: MyViewModel? = null
     var textPeriod = ""
     var colorName = ""
-    private var btnDeleted: ImageButton? = null
-    private var btnOkSubTasks: ImageButton? = null
+    var task: Task? = mTask
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        // retainInstance = true
+        pageViewModel = ViewModelProviders.of(this).get(MyViewModel::class.java)
+    }
 
     @SuppressLint("SetTextI18n")
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
@@ -55,10 +60,8 @@ class CreateTaskWindow : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
 
-        val viewFragment = inflater.inflate(R.layout.task_window, container, false)
-
-        val toolbar: Toolbar = viewFragment.findViewById(R.id.toolbarCreateTask)
-
+        val view = inflater.inflate(R.layout.task_window, container, false)
+        val toolbar: Toolbar = view.findViewById(R.id.toolbar)
         val activity = activity as AppCompatActivity?
         activity!!.setSupportActionBar(toolbar)
 
@@ -68,46 +71,24 @@ class CreateTaskWindow : Fragment() {
         listSubTask = arrayListOf()
         listSubTasksView = arrayListOf()
 
-        ButterKnife.bind(this, viewFragment)
+        ButterKnife.bind(this, view)
 
-        val date = viewFragment.findViewById<TextView>(R.id.setupData)
-        pageViewModel!!.day.observe(this, Observer { day ->
-            if (day != null) {
-                date.text = day
-            }
-        })
+        val date = view.findViewById<TextView>(R.id.setupData)
+        date.text = date_task!!
 
-        return viewFragment
+        return view
     }
 
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        retainInstance = true
-        pageViewModel = ViewModelProviders.of(requireActivity()).get(MyViewModel::class.java)
-
+    override fun onStart() {
+        super.onStart()
+        restore_data(view!!)
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        var task: Task? = null
+    private fun restore_data(view: View) {
 
-        pageViewModel!!.task.observe(requireActivity(), Observer<Task> { tasks ->
-            if (tasks != null)
-                task = Task(
-                    name = tasks.name,
-                    period = tasks.period,
-                    replay = tasks.replay,
-                    photo = tasks.photo,
-                    video = tasks.video,
-                    audio = tasks.audio,
-                    notification = tasks.notification,
-                    listSubTasks = tasks.listSubTasks,
-                    color = tasks.color,
-                    day = tasks.day,
-                    comment = tasks.comment,
-                    timer = tasks.timer
-                )
+        pageViewModel?.task?.observe(requireActivity(), Observer<Task> { tasks ->
+            if(tasks != null)
+                task = tasks
         })
 
         val editTextTask = view.findViewById<EditText>(R.id.editTextTask)
@@ -116,20 +97,23 @@ class CreateTaskWindow : Fragment() {
         val timer = view.findViewById<TextView>(R.id.timer)
         val comment = view.findViewById<EditText>(R.id.comment)
         val day = view.findViewById<TextView>(R.id.setupData)
-        if (fragmentManager!!.findFragmentById(R.id.photo) != null) {
-            fragmentManager!!.beginTransaction().replace(R.id.photo, Photo()).commit()
-        }
-        if (fragmentManager!!.findFragmentById(R.id.audio) != null) {
-            fragmentManager!!.beginTransaction().replace(R.id.audio, AudioTask()).commit()
-        }
-        if (fragmentManager!!.findFragmentById(R.id.video) != null) {
-            fragmentManager!!.beginTransaction().replace(R.id.video, Video()).commit()
-        }
+
         if (task != null) {
 
             editTextTask.setText(task!!.name)
-            notification.text = task!!.notification
-            timer.text = task!!.timer
+
+            if (task!!.notification != "")
+                notification.text = task!!.notification
+
+            if (task!!.timer != "")
+                timer.text = task!!.timer
+
+            if (arguments != null) {
+                textReplay.text = arguments!!.getString("Replay")
+            } else {
+                textReplay.text = task!!.replay
+            }
+
             comment.setText(task!!.comment)
             day.text = task!!.day
 
@@ -197,19 +181,102 @@ class CreateTaskWindow : Fragment() {
                     radioButtonEvening.isChecked = true
                 radioButtonOnceAnytime.text.toString() ->
                     radioButtonOnceAnytime.isChecked = true
+                else -> textPeriod = ""
             }
 
-            if (arguments != null) {
-                textReplay.text = arguments!!.getString("Replay")
-            } else {
-                textReplay.text = task!!.replay
+            if (task!!.listSubTasks!!.size > 0)
+                restoreSubTask()
+
+            if (task!!.photo != "" || task!!.video != "" || task!!.audio != "")
+                loadMedia()
+        }
+    }
+
+    private fun loadMedia() {
+
+        if (task!!.photo != null && task!!.photo != "") {
+            val relativeLayout: RelativeLayout = view!!.findViewById(R.id.photo_image)
+            relativeLayout.visibility = View.VISIBLE
+            var imageView: ImageView? = null
+            if (imageView != null) {
+                (imageView.drawable as? BitmapDrawable)!!.bitmap.recycle()
             }
+            imageView = view!!.findViewById<ImageButton>(R.id.photoImage)
+
+            val options = BitmapFactory.Options()
+            options.inJustDecodeBounds = false
+            options.inSampleSize = 42
+            val bitmap = BitmapFactory.decodeFile(task!!.photo!!, options)
+            imageView!!.setImageBitmap(bitmap)
+        }
+
+        if (task!!.video != null && task!!.video != "") {
+            val relativeLayout: RelativeLayout = view!!.findViewById(R.id.video)
+            relativeLayout.visibility = View.VISIBLE
+            val video = view!!.findViewById<VideoView>(R.id.videoView)
+            video.setVideoURI(task!!.video!!.toUri())
+            video.seekTo(1)
+        }
+
+        if (task!!.audio != null && task!!.audio != "") {
+            val audio: Fragment = AudioTask(task, null)
+            fragmentManager!!.beginTransaction().add(R.id.audio, audio).commit()
+        }
+    }
+
+    @OnClick(R.id.photoImage)
+    fun photo_zoom() {
+        val photoIncrease: Fragment = PhotoIncrease(task)
+        fragmentManager!!.beginTransaction()
+            .addToBackStack(null)
+            .replace(R.id.linerLayout, photoIncrease)
+            .commit()
+    }
+
+    @OnTouch(R.id.videoView)
+    fun video_zoom() {
+        val videoIncrease: Fragment = VideoIncrease(task, "create_task")
+        fragmentManager!!.beginTransaction()
+            .addToBackStack(null)
+            .replace(R.id.linerLayout, videoIncrease)
+            .commit()
+    }
+
+    private fun restoreSubTask() {
+        if (task!!.listSubTasks!!.size > 0) {
+            listSubTasksView = arrayListOf()
+
+            val linerLayoutSubTask = view!!.findViewById<LinearLayout>(R.id.editSubTask)
 
             for (subTask in task!!.listSubTasks!!) {
-                listSubTask!!.add(subTask)
-            }
-            if (listSubTask!!.size > 0) {
-                onClickAddSubTask()
+
+                val inflate = LayoutInflater.from(context)
+                val view_sub = inflate.inflate(R.layout.add_sub_tasks, null, false) as ViewGroup
+                val relativeLayoutSubTasks = view_sub.findViewById<RelativeLayout>(R.id.rel)
+                val btnDeleted = view_sub.findViewById<ImageButton>(R.id.btnDeleted)
+                val btnOkSubTasks = view_sub.findViewById<ImageButton>(R.id.btnOkCreate)
+
+                relativeLayoutSubTasks!!.layoutParams = RelativeLayout.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.WRAP_CONTENT
+                )
+
+                val edit = relativeLayoutSubTasks.findViewById<EditText>(R.id.editTextSubTasks)
+                edit.setText(subTask)
+
+                btnDeleted!!.setOnClickListener { onClickDeletedSubTask(view_sub) }
+
+                btnOkSubTasks!!.setOnClickListener {
+                    onClickCreateSubTask(
+                        view_sub,
+                        btnDeleted,
+                        btnOkSubTasks
+                    )
+                }
+                btnOkSubTasks.performClick()
+                listSubTasksView!!.add(view_sub)
+
+                linerLayoutSubTask!!.addView(relativeLayoutSubTasks)
             }
         }
     }
@@ -316,34 +383,30 @@ class CreateTaskWindow : Fragment() {
     /*добавление фото задачи*/
     @OnClick(R.id.btnAddPhoto)
     fun onClickAddPhoto() {
-
-        val photo: Fragment = Photo()
-        val transaction: FragmentTransaction = fragmentManager!!.beginTransaction()
-
-        transaction.add(R.id.photo, photo)
-        transaction.commit()
+        var photo = fragmentManager!!.findFragmentByTag("photo")
+        if (photo == null) {
+            task = saveDataTask()
+            photo = Photo(task, "create_task")
+            fragmentManager!!.beginTransaction().add(photo, "photo").commit()
+        }
     }
 
     /*добавление видео задачи*/
     @OnClick(R.id.btnAddVideo)
     fun onClickAddVideo() {
-
-        val video: Fragment = Video()
-        val transaction: FragmentTransaction = fragmentManager!!.beginTransaction()
-
-        transaction.add(R.id.video, video)
-        transaction.commit()
+        var video = fragmentManager!!.findFragmentByTag("video")
+        if (video == null) {
+            task = saveDataTask()
+            video = Video(task, "create_task")
+            fragmentManager!!.beginTransaction().add(video, "video").commit()
+        }
     }
 
     /*добавление аудио задачи*/
     @OnClick(R.id.addAudio)
     fun onClickAddAudio() {
-
-        val audio = AudioTask()
-        val transaction: FragmentTransaction = fragmentManager!!.beginTransaction()
-
-        transaction.add(R.id.audio, audio)
-        transaction.commit()
+        val audio = AudioTask(task, pageViewModel)
+        fragmentManager!!.beginTransaction().add(R.id.audio, audio).commit()
     }
 
     @OnCheckedChanged
@@ -396,12 +459,12 @@ class CreateTaskWindow : Fragment() {
     @OnClick(R.id.addSubTasks)
     fun onClickAddSubTask() {
 
+        val btnAddSubTask = view!!.findViewById<TextView>(R.id.addSubTasks)
         val linerLayoutSubTask = view!!.findViewById<LinearLayout>(R.id.editSubTask)
-
-        var viewFr = layoutInflater.inflate(R.layout.add_sub_tasks, null, false)
-
-        var relativeLayoutSubTasks = viewFr.findViewById<RelativeLayout>(R.id.rel)
-
+        val view = layoutInflater.inflate(R.layout.add_sub_tasks, null, false)
+        val relativeLayoutSubTasks = view.findViewById<RelativeLayout>(R.id.rel)
+        val btnDeleted = view.findViewById<ImageButton>(R.id.btnDeleted)
+        val btnOkSubTasks = view.findViewById<ImageButton>(R.id.btnOkCreate)
 
         relativeLayoutSubTasks.layoutParams = LinearLayout.LayoutParams(
             ViewGroup.LayoutParams.MATCH_PARENT,
@@ -411,68 +474,19 @@ class CreateTaskWindow : Fragment() {
         if (relativeLayoutSubTasks.parent != null) {
             (relativeLayoutSubTasks.parent as ViewGroup).removeView(relativeLayoutSubTasks)
         }
+        listSubTasksView!!.add(view)
+        linerLayoutSubTask.addView(relativeLayoutSubTasks)
 
-        if (listSubTask!!.size > 0) {
+        btnDeleted!!.setOnClickListener { onClickDeletedSubTask(view) }
 
-            listSubTasksView = arrayListOf()
-
-            for (subTask in listSubTask!!) {
-
-                viewFr = layoutInflater.inflate(R.layout.add_sub_tasks, null, false)
-
-                relativeLayoutSubTasks = viewFr.findViewById<RelativeLayout>(R.id.rel)
-
-                relativeLayoutSubTasks.layoutParams = LinearLayout.LayoutParams(
-                    ViewGroup.LayoutParams.MATCH_PARENT,
-                    ViewGroup.LayoutParams.WRAP_CONTENT
-                )
-                val editTextSubTasks = viewFr.findViewById<EditText>(R.id.editTextSubTasks)
-
-                editTextSubTasks.setText(subTask)
-
-                if (relativeLayoutSubTasks.parent != null) {
-                    (relativeLayoutSubTasks.parent as ViewGroup).removeView(
-                        relativeLayoutSubTasks
-                    )
-                }
-
-                btnDeleted = viewFr.findViewById<ImageButton>(R.id.btnDeleted)
-                btnDeleted!!.setOnClickListener { onClickDeletedSubTask(viewFr) }
-
-                btnOkSubTasks = viewFr.findViewById<ImageButton>(R.id.btnOkCreate)
-                btnOkSubTasks!!.setOnClickListener {
-                    onClickCreateSubTask(
-                        viewFr,
-                        btnDeleted!!,
-                        btnOkSubTasks!!
-                    )
-                }
-                btnOkSubTasks!!.performClick()
-                listSubTasksView!!.add(viewFr)
-                linerLayoutSubTask.addView(relativeLayoutSubTasks)
-            }
-
-            listSubTask = arrayListOf()
-        } else {
-
-            listSubTasksView!!.add(viewFr)
-            linerLayoutSubTask.addView(relativeLayoutSubTasks)
-
-            btnDeleted = viewFr.findViewById<ImageButton>(R.id.btnDeleted)
-            btnDeleted!!.setOnClickListener { onClickDeletedSubTask(viewFr) }
-
-            btnOkSubTasks = viewFr.findViewById<ImageButton>(R.id.btnOkCreate)
-            btnOkSubTasks!!.setOnClickListener {
-                onClickCreateSubTask(
-                    viewFr,
-                    btnDeleted!!,
-                    btnOkSubTasks!!
-                )
-            }
-            val btnAddSubTask = view!!.findViewById<TextView>(R.id.addSubTasks)
-            btnAddSubTask.isEnabled = false
+        btnOkSubTasks!!.setOnClickListener {
+            onClickCreateSubTask(
+                view,
+                btnDeleted,
+                btnOkSubTasks
+            )
         }
-
+        btnAddSubTask.isEnabled = false
         Log.d("Size", "${listSubTasksView!!.size}")
     }
 
@@ -594,63 +608,46 @@ class CreateTaskWindow : Fragment() {
     fun onclickAdd() {
 
         val task = saveDataTask()
-        var name: List<String>
-        if (task.audio != null && task.audio != "") {
-            name = task.audio!!.split("/")
-            val storageFile = StorageFile(name[4], task.audio!!, context!!)
-            storageFile.loadAudio()
-        }
-        if (task.photo != null && task.photo != ""){
-            name = task.photo!!.split("/")
-            val storageFile = StorageFile(name[9], task.photo!!, context!!)
-            storageFile.loadImages()
-        }
-        if(task.video != null && task.video != ""){
-            name = task.video!!.split("/")
-            val storageFile = StorageFile(name[6], task.video!!, context!!)
-            storageFile.loadVideo()
-        }
+
         // createNotificationChannel()
         //  scheduleNotification(task.day, task.notification, task.name!!)
 
         val dataBaseTask = DataBase()
         dataBaseTask.createTask(task)
 
-        pageViewModel!!.task.value = null
-        pageViewModel!!.uri.value = null
-        pageViewModel!!.day.value = null
+        pageViewModel?.task?.value = null
 
-        onDestroyView()
-        val intent = Intent(activity!!.applicationContext, MainWindowCasePlanning()::class.java)
+        val intent = Intent(context, MainWindowCasePlanning::class.java)
         startActivity(intent)
     }
 
-    @SuppressLint("SimpleDateFormat")
-    private fun scheduleNotification(day: String, timeNotification: String, name: String) {
-        var mDate = day
-        val intentNotification = Intent(context!!, NotificationBroadcast::class.java)
-        intentNotification.putExtra("name_task", name)
-        intentNotification.putExtra("time_notification", timeNotification)
-        val pendingIntent = PendingIntent.getBroadcast(
-            context!!,
-            42,
-            intentNotification,
-            PendingIntent.FLAG_ONE_SHOT
-        )
-        val alarmManager: AlarmManager = context!!.getSystemService(ALARM_SERVICE) as AlarmManager
-        val arrayDate: List<String> = mDate.split(".")
-        var month = ""
-        if (arrayDate[1].length == 1) {
-            month = "0${arrayDate[1]}"
-            mDate = "${arrayDate[0]}.$month.${arrayDate[2]}"
-        }
-        val date_notification = "$mDate $timeNotification"
-        val date = SimpleDateFormat("dd.MM.yyyy hh:mm").parse(date_notification)
-        val milliseconds = date!!.time
+    /* @SuppressLint("SimpleDateFormat")
+     private fun scheduleNotification(day: String, timeNotification: String, name: String) {
 
-        alarmManager.set(AlarmManager.RTC_WAKEUP, milliseconds, pendingIntent)
-    }
+         var mDate = day
+         val intentNotification = Intent(context!!, NotificationBroadcast::class.java)
+         intentNotification.putExtra("name_task", name)
+         intentNotification.putExtra("time_notification", timeNotification)
+         val pendingIntent = PendingIntent.getBroadcast(
+             context!!,
+             42,
+             intentNotification,
+             PendingIntent.FLAG_ONE_SHOT
+         )
+         val alarmManager: AlarmManager = context!!.getSystemService(ALARM_SERVICE) as AlarmManager
+         val arrayDate: List<String> = mDate.split(".")
+         var month = ""
+         if (arrayDate[1].length == 1) {
+             month = "0${arrayDate[1]}"
+             mDate = "${arrayDate[0]}.$month.${arrayDate[2]}"
+         }
+         val date_notification = "$mDate $timeNotification"
+         val date = SimpleDateFormat("dd.MM.yyyy hh:mm").parse(date_notification)
+         val milliseconds = date!!.time
 
+         alarmManager.set(AlarmManager.RTC_WAKEUP, milliseconds, pendingIntent)
+     }
+ */
     /*   private fun createNotificationChannel() {
 
            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
@@ -667,20 +664,18 @@ class CreateTaskWindow : Fragment() {
    */
     private fun saveDataTask(): Task {
 
+
         var photoUri: String? = ""
         var videoUri: String? = ""
         var audioUri: String? = ""
         var timeAudio: String? = ""
 
-        pageViewModel?.uri?.observe(requireActivity(), Observer { uri ->
-
-            if (uri != null) {
-                photoUri = uri.photoUri
-                videoUri = uri.videoUri
-                audioUri = uri.audioUri
-                timeAudio = uri.timeAudio
-            }
-        })
+        if (task != null) {
+            photoUri = task!!.photo
+            audioUri = task!!.audio
+            timeAudio = task!!.timeAudio
+            videoUri = task!!.video
+        }
 
         val editTextTask = view!!.findViewById<EditText>(R.id.editTextTask)
         val textReplay = view!!.findViewById<TextView>(R.id.textChoose)
@@ -693,7 +688,7 @@ class CreateTaskWindow : Fragment() {
         if (listSubTasksView == null) {
             listSubTasksView = arrayListOf()
         }
-        if(listSubTask == null){
+        if (listSubTask == null) {
             listSubTask = arrayListOf()
         }
         for (position in 0 until listSubTasksView!!.size) {
@@ -728,11 +723,10 @@ class CreateTaskWindow : Fragment() {
 
     override fun onPause() {
         super.onPause()
-
+        listSubTask = arrayListOf()
         val task = saveDataTask()
         pageViewModel?.task?.value = task
-
-        Log.d("OnPAUSE", "onPause")
+        Log.d("Onpause", "onPause")
     }
 
     override fun onStop() {
@@ -741,12 +735,22 @@ class CreateTaskWindow : Fragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
-        Log.d("onDESTROy", "onPause")
+        Log.d("onDestroyView", "onDestroyView")
+        listSubTask = null
+        pageViewModel = null
+        listSubTasksView = null
+    }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        Log.d("OnDestroy", "onDestroy")
+        task = null
         listSubTask = null
         listSubTasksView = null
-        btnDeleted = null
-        btnOkSubTasks = null
         pageViewModel = null
+    }
+
+    override fun onDetach() {
+        super.onDetach()
     }
 }

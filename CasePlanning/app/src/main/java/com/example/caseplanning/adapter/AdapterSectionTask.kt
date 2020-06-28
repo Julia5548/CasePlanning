@@ -9,7 +9,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
-import androidx.cardview.widget.CardView
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.RecyclerView
 import com.example.caseplanning.DataBase.DataBase
@@ -19,6 +18,7 @@ import com.example.caseplanning.EditElements.EditTask
 import com.example.caseplanning.R
 import com.example.caseplanning.mainWindow.CheckedTask
 import com.example.caseplanning.mainWindow.FragmentDialog
+import com.example.caseplanning.mainWindow.WindowTask
 import com.google.android.material.card.MaterialCardView
 import com.google.android.material.checkbox.MaterialCheckBox
 import com.intrusoft.sectionedrecyclerview.SectionRecyclerViewAdapter
@@ -44,7 +44,6 @@ class AdapterSectionTask(
     var folder_list: ArrayList<Folder>? = null
     val mDay: String? = day
     val mUid: String = uid
-
 
     inner class ChildViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
@@ -95,6 +94,7 @@ class AdapterSectionTask(
 
         if (task.color != "")
             drawColorTask(task.color!!, childViewHolder)
+
         if (task.checked != null && task.checked!!) {
             val checkedTask = CheckedTask(
                 childViewHolder.cardItem,
@@ -103,7 +103,8 @@ class AdapterSectionTask(
             )
             checkedTask.checkedTask()
         }
-        if (task.checkedTasks!!.isNotEmpty()) {
+        val checkedDate = mDay?.replace('.', '-')
+        if (task.checkedTasks!!.isNotEmpty() && task.checkedTasks!!.containsKey(checkedDate)) {
             val checkedTask = CheckedTask(
                 childViewHolder.cardItem,
                 childViewHolder.dataChild,
@@ -153,20 +154,15 @@ class AdapterSectionTask(
                         true
                     }
                     R.id.edit -> {
-                        val editTask: Fragment = EditTask()
-                        val arg = Bundle()
-                        val arrayListTask = arrayListOf(task.name, task.day)
-                        arg.putStringArrayList("dataTask", arrayListTask)
-                        editTask.arguments = arg
-
+                        val editTask: Fragment = EditTask(task)
                         (context as AppCompatActivity).supportFragmentManager
                             .beginTransaction()
+                            .remove(WindowTask())
                             .replace(R.id.linerLayout, editTask)
                             .commit()
                         true
                     }
                     R.id.delete -> {
-
                         disposable = dataBaseTask
                             .retrieveData(mUid)
                             .subscribe { tasks ->
@@ -201,21 +197,12 @@ class AdapterSectionTask(
         }
 
         childViewHolder.cardItem.setOnClickListener { viewHolder ->
-            disposable = dataBaseTask
-                .retrieveData(mUid)
-                .subscribe({ tasks ->
-                    for (taskData in tasks) {
-                        if (taskData.name == task.name && taskData.day == task.day) {
-                            FragmentDialog(taskData, disposable).show(
-                                (context as AppCompatActivity).supportFragmentManager,
-                                "Dialog"
-                            )
-                        }
-                    }
-                },
-                    { trowable ->
-                        trowable.printStackTrace()
-                    })
+            if (task.day == mDay) {
+                FragmentDialog(task).show(
+                    (context as AppCompatActivity).supportFragmentManager,
+                    "Dialog"
+                )
+            }
         }
 
         if (disposable != null && !disposable!!.isDisposed)
@@ -228,7 +215,7 @@ class AdapterSectionTask(
                 childViewHolder.checkedTask
             )
 
-            checkedTask.updateFolder(task, isChecked)
+            checkedTask.updateFolder(task, isChecked, mDay)
             mData.removeAll(mData)
             notifyDataChanged(mData)
         }

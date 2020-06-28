@@ -5,6 +5,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.*
+import android.widget.CalendarView
 import android.widget.TextView
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
@@ -37,20 +38,16 @@ import io.reactivex.disposables.Disposable
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.collections.ArrayList
+import kotlin.properties.Delegates
 
 
 class WindowTask : Fragment(), NavigationView.OnNavigationItemSelectedListener {
 
-
     private var search: MaterialSearchView? = null
     private var mDrawerLayout: DrawerLayout? = null
-    private var mToggle: ActionBarDrawerToggle? = null
-    private var calendarView: CollapsibleCalendar? = null
-    private var access_users: ArrayList<String>? = arrayListOf<String>()
-    private lateinit var pageViewModel: MyViewModel
+    private var access_users: ArrayList<String>? = arrayListOf()
     private var disposable: Disposable? = null
-    private var currentText: String? = null
-    private lateinit var adapterSectionTask: AdapterSectionTask
+    private var date_task by Delegates.notNull<String>()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -71,14 +68,14 @@ class WindowTask : Fragment(), NavigationView.OnNavigationItemSelectedListener {
         search!!.closeSearch()
         /*боковое меню*/
         mDrawerLayout = viewFragment.findViewById(R.id.drawerLayout)
-        mToggle = ActionBarDrawerToggle(
+        val mToggle = ActionBarDrawerToggle(
             activity, mDrawerLayout,
             R.string.Open,
             R.string.Close
         )
-        mDrawerLayout!!.addDrawerListener(mToggle!!)
+        mDrawerLayout!!.addDrawerListener(mToggle)
         /*проверяем состояние*/
-        mToggle!!.syncState()
+        mToggle.syncState()
         /*добавление стрелки для закрытия бокового меню, делает ее кликабельной*/
         actionBar.setDisplayHomeAsUpEnabled(true)
 
@@ -135,30 +132,28 @@ class WindowTask : Fragment(), NavigationView.OnNavigationItemSelectedListener {
     override fun onCreate(savedInstanceState: Bundle?) {
         setHasOptionsMenu(true)
         super.onCreate(savedInstanceState)
-        pageViewModel = ViewModelProviders.of(requireActivity()).get(MyViewModel::class.java)
     }
 
     @SuppressLint("SimpleDateFormat")
     fun calendar(view: View, uid: String, mDate: String) {
 
-        calendarView = view.findViewById(R.id.linearLayoutCalendar)
-        var day = calendarView!!.selectedDay
+        val calendarView : CollapsibleCalendar = view.findViewById(R.id.linearLayoutCalendar)
+        var day = calendarView.selectedDay
 
         val date_current = if (mDate == "") {
             "${day!!.day}.${day.month}.${day.year}"
         } else {
             mDate
         }
+        date_task = "${day!!.day}.${day.month}.${day.year}"
         listTask(view, date_current, uid)
 
-        pageViewModel.day.value = date_current
-
-        calendarView!!.setCalendarListener(object : CollapsibleCalendar.CalendarListener {
+        calendarView.setCalendarListener(object : CollapsibleCalendar.CalendarListener {
             override fun onDaySelect() {
-                day = calendarView!!.selectedDay
+                day = calendarView.selectedDay
                 val date = "${day!!.day}.${day!!.month + 1}.${day!!.year}"
+                date_task = date
                 listTask(view, date, uid)
-                pageViewModel.day.value = date
             }
 
             override fun onClickListener() {}
@@ -206,78 +201,21 @@ class WindowTask : Fragment(), NavigationView.OnNavigationItemSelectedListener {
                 for (task in tasks) {
                     if (date == task.day || week == task.replay.toLowerCase(Locale.ROOT)) {
                         if (task.checked!!) {
-                            checkedList.add(
-                                Task(
-                                    name = task.name!!,
-                                    day = task.day,
-                                    color = task.color,
-                                    checked = task.checked,
-                                    replay = task.replay
-                                )
-                            )
+                            checkedList.add(task)
                         } else {
                             val checkedDate = date.replace('.', '-')
                             if (task.checkedTasks!!.containsKey(checkedDate)) {
                                 val value = task.checkedTasks!![checkedDate]!!
                                 if (value) {
-                                    checkedList.add(
-                                        Task(
-                                            name = task.name!!,
-                                            day = task.day,
-                                            color = task.color,
-                                            checked = task.checked,
-                                            replay = task.replay,
-                                            checkedTasks = task.checkedTasks
-                                        )
-                                    )
+                                    checkedList.add(task)
                                 }
                             } else {
                                 when (task.period) {
-                                    "Утро" -> stringListMorning.add(
-                                        Task(
-                                            name = task.name!!,
-                                            day = task.day,
-                                            color = task.color,
-                                            checked = task.checked,
-                                            replay = task.replay
-                                        )
-                                    )
-                                    "День" -> stringListDay.add(
-                                        Task(
-                                            name = task.name!!,
-                                            day = task.day,
-                                            color = task.color,
-                                            checked = task.checked,
-                                            replay = task.replay
-                                        )
-                                    )
-                                    "Вечер" -> stringListEvening.add(
-                                        Task(
-                                            name = task.name!!,
-                                            day = task.day,
-                                            color = task.color,
-                                            checked = task.checked,
-                                            replay = task.replay
-                                        )
-                                    )
-                                    "Один раз в любое время" -> stringList.add(
-                                        Task(
-                                            name = task.name!!,
-                                            day = task.day,
-                                            color = task.color,
-                                            checked = task.checked,
-                                            replay = task.replay
-                                        )
-                                    )
-                                    else -> stringList.add(
-                                        Task(
-                                            name = task.name!!,
-                                            day = task.day,
-                                            color = task.color,
-                                            checked = task.checked,
-                                            replay = task.replay
-                                        )
-                                    )
+                                    "Утро" -> stringListMorning.add(task)
+                                    "День" -> stringListDay.add(task)
+                                    "Вечер" -> stringListEvening.add(task)
+                                    "Один раз в любое время" -> stringList.add(task)
+                                    else -> stringList.add(task)
                                 }
                             }
                         }
@@ -299,7 +237,7 @@ class WindowTask : Fragment(), NavigationView.OnNavigationItemSelectedListener {
                 if (checkedList.isNotEmpty())
                     sections.add(SectionHeader(checkedList, "\r"))
 
-                adapterSectionTask = AdapterSectionTask(context!!, sections, date, uid)
+                val adapterSectionTask = AdapterSectionTask(context!!, sections, date, uid)
                 listTasks.adapter = adapterSectionTask
             },
                 { throwable ->
@@ -374,20 +312,13 @@ class WindowTask : Fragment(), NavigationView.OnNavigationItemSelectedListener {
     fun onClickBtnAdd() {
 
         val createTask: Fragment =
-            CreateTaskWindow()
+            CreateTaskWindow(date_task, null)
         val transaction: FragmentTransaction = fragmentManager!!.beginTransaction()
 
         transaction.replace(R.id.linerLayout, createTask)
         transaction.addToBackStack(null)
         transaction.commit()
 
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        if (mToggle!!.onOptionsItemSelected(item)) {
-            return true
-        }
-        return super.onOptionsItemSelected(item)
     }
 
     /*обработчик кнопок меню*/
@@ -468,7 +399,7 @@ class WindowTask : Fragment(), NavigationView.OnNavigationItemSelectedListener {
             else -> {
                 val dataBaseTask = DataBase()
                 val list_users = getListAccessUsers()
-                if (!list_users.isEmpty()) {
+                if (list_users.isNotEmpty()) {
                     for (user_uid in list_users) {
                         disposable = dataBaseTask
                             .retrieveDataUser(user_uid)
@@ -489,8 +420,6 @@ class WindowTask : Fragment(), NavigationView.OnNavigationItemSelectedListener {
         if (disposable != null && !disposable!!.isDisposed)
             disposable!!.dispose()
         access_users = null
-        currentText = null
-        mToggle = null
         search = null
         mDrawerLayout?.closeDrawer(GravityCompat.START)
         mDrawerLayout = null
@@ -502,9 +431,7 @@ class WindowTask : Fragment(), NavigationView.OnNavigationItemSelectedListener {
         super.onDestroyView()
         if (disposable != null && !disposable!!.isDisposed)
             disposable!!.dispose()
-        mToggle = null
         access_users = null
-        currentText = null
         search = null
         mDrawerLayout?.closeDrawer(GravityCompat.START)
         mDrawerLayout = null

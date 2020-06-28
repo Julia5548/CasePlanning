@@ -32,7 +32,8 @@
         <activity android:name=".ResetPassword" />
         <activity
                 android:name=".mainWindow.MainWindowCasePlanning"
-                android:largeHeap="true" />
+                android:largeHeap="true"
+                android:configChanges="orientation|screenSize"/>
         <activity android:name=".sign_up.SignUp" />
         <activity android:name=".MainActivity">
             <intent-filter>

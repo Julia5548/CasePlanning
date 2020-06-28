@@ -1,11 +1,10 @@
-package com.example.caseplanning.TypeTask
+package com.example.caseplanning.EditElements
 
 import android.Manifest
 import android.app.Activity
 import android.content.ContentValues
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -17,56 +16,27 @@ import android.view.ViewGroup
 import android.widget.*
 import androidx.core.net.toUri
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import butterknife.ButterKnife
 import butterknife.OnTouch
 import com.example.caseplanning.CreateTask.CreateTaskWindow
 import com.example.caseplanning.CreateTask.MyViewModel
+import com.example.caseplanning.CreateTask.StorageFile
+import com.example.caseplanning.DataBase.Task
 import com.example.caseplanning.DataBase.UriTypeTask
 import com.example.caseplanning.Increase.VideoIncrease
 import com.example.caseplanning.R
 
-class Video : Fragment() {
+
+class Video(val task: Task?, val tagger : String) : Fragment() {
 
     val CAMERA_REQUEST = 1
     val PERMISSION_CODE = 1001
-    var videoFie: VideoView? = null
     var outputUriFile: Uri? = null
-    var pageViewModel: MyViewModel? = null
-    var photoUri: String? = ""
-    var audioFile: String? = ""
-    var timeAudio: String? = ""
 
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
 
-        var videoUri:String? = ""
-        val view = inflater.inflate(R.layout.video, container, false)
-
-        videoFie = view.findViewById<VideoView>(R.id.videoFile)
-
-        ButterKnife.bind(this, view)
-
-        pageViewModel!!.uri.observe(requireActivity(), Observer { uri ->
-            if (uri != null) {
-                videoUri = uri.videoUri
-                photoUri = uri.photoUri
-                audioFile = uri.audioUri
-                timeAudio = uri.timeAudio
-                if(videoUri != ""){
-                    outputUriFile = videoUri!!.toUri()
-                }else{
-                    outputUriFile = null
-                }
-            }
-        })
-
-
-        if (outputUriFile == null) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 if (context!!.checkSelfPermission(Manifest.permission.CAMERA)
                     == PackageManager.PERMISSION_DENIED ||
@@ -85,18 +55,7 @@ class Video : Fragment() {
             } else {
                 openCamera()
             }
-        } else {
-            videoFie!!.setVideoURI(outputUriFile)
-            videoFie!!.seekTo(1)
         }
-
-        return view
-    }
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        pageViewModel = ViewModelProviders.of(requireActivity()).get(MyViewModel::class.java)
-    }
 
     fun openCamera() {
 
@@ -115,11 +74,21 @@ class Video : Fragment() {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == CAMERA_REQUEST && resultCode == Activity.RESULT_OK) {
             //фотка сделана, извлекаем картинку
-            videoFie!!.setVideoURI(outputUriFile)
-            videoFie!!.seekTo(1)
-            pageViewModel!!.uri.value =
-                UriTypeTask(videoUri = outputUriFile.toString(), photoUri = photoUri, audioUri = audioFile, timeAudio = timeAudio)
-        } else {
+            val file = outputUriFile.toString()
+            val name = file.split("/")
+
+            val storage = StorageFile(context = context!!, nameFile = name[6], path = file)
+            storage.loadVideo()
+
+            task!!.video = file
+            if(tagger == "edit_task") {
+                fragmentManager!!.beginTransaction().replace(R.id.linerLayout, EditTask(task))
+                    .commit()
+            }else{
+                fragmentManager!!.beginTransaction().replace(R.id.linerLayout, CreateTaskWindow(task.day, task))
+                    .commit()
+            }
+          } else {
             Log.d("Ошибка", "Не удалось сохранить видео")
         }
     }
@@ -143,26 +112,8 @@ class Video : Fragment() {
         }
     }
 
-    @OnTouch(R.id.videoFile)
-    fun videoZoom() {
-        val videoIncrease: Fragment = VideoIncrease()
-        val transaction = fragmentManager!!.beginTransaction()
-
-        transaction.replace(R.id.linerLayout, videoIncrease)
-        transaction.addToBackStack(null)
-        transaction.commit()
-
-    }
-
     override fun onDestroyView() {
         super.onDestroyView()
-
-        pageViewModel = null
-        videoFie?.setVideoURI(null)
         outputUriFile = null
-        audioFile = null
-        photoUri = null
-        timeAudio = null
-
     }
 }
