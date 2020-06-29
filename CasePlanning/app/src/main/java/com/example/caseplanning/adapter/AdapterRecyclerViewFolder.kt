@@ -48,6 +48,18 @@ class AdapterRecyclerViewFolder(
 
     override fun getItemCount(): Int = mData.size
 
+    fun update(folders: ArrayList<Folder>, currentTask: ArrayList<Int>, progress: ArrayList<Float>){
+        this.mData.clear()
+        this.mData.addAll(folders)
+
+        this.mCurrentTask.clear()
+        this.mCurrentTask.addAll(currentTask)
+
+        this.mProgress.clear()
+        this.mProgress.addAll(progress)
+        notifyDataSetChanged()
+    }
+
     @SuppressLint("SetTextI18n")
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
 
