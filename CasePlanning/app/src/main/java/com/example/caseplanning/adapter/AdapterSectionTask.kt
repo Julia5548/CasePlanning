@@ -214,8 +214,11 @@ class AdapterSectionTask(
                 childViewHolder.dataChild,
                 childViewHolder.checkedTask
             )
-
-            checkedTask.updateFolder(task, isChecked, mDay)
+            if(task.replay != "Нет >") {
+                checkedTask.updateReplayTask(task, isChecked, mDay!!)
+            }else{
+                checkedTask.updateTask(task, isChecked)
+            }
             mData.removeAll(mData)
             notifyDataChanged(mData)
         }

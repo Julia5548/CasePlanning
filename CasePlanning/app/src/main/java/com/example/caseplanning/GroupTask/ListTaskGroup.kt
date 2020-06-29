@@ -1,10 +1,12 @@
 package com.example.caseplanning.GroupTask
 
+import android.annotation.SuppressLint
 import android.graphics.Color
 import android.os.Bundle
 import android.view.*
 import android.widget.LinearLayout
 import android.widget.TextView
+import android.widget.Toast
 import androidx.annotation.NonNull
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
@@ -22,9 +24,12 @@ import com.example.caseplanning.adapter.AdapterRecyclerViewTaskFolder
 import com.example.caseplanning.adapter.SwipeToDeleteCallback
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
+import com.google.android.material.textfield.TextInputLayout
 import com.google.firebase.auth.FirebaseAuth
 import com.mikhaellopez.circularprogressbar.CircularProgressBar
 import org.w3c.dom.Text
+import java.text.SimpleDateFormat
+import java.util.*
 
 class ListTaskGroup(
     folder: Folder
@@ -73,71 +78,32 @@ class ListTaskGroup(
             }
             R.id.add_task_group -> {
                 val database = DataBase()
-                var task_item: Array<String?>
-                val tasks_list = arrayListOf<Task>()
-                val checkedTask = arrayListOf<Task>()
-                var position = 0
-                val disposable = database
-                    .retrieveData(FirebaseAuth.getInstance().currentUser!!.uid)
-                    .subscribe { tasks ->
-                        task_item = if (mFolder!!.tasks != null) {
-                            arrayOfNulls(tasks.size - mFolder!!.tasks!!.size)
-                        } else {
-                            arrayOfNulls(tasks.size)
-                        }
-                        for (task in tasks) {
-                            if (mFolder!!.tasks != null && !mFolder!!.tasks!!.contains(task)) {
-                                task_item[position] = task.name!!
-                                tasks_list.add(task)
-                                position++
-                            }
-                        }
-                        val checkedItems = BooleanArray(task_item.size)
-                        for (positionChecked in task_item.indices)
-                            checkedItems[positionChecked] = false
+                val view = layoutInflater.inflate(R.layout.create_folder, null)
+                val outlinedTextField = view.findViewById<TextInputLayout>(R.id.outlinedTextField)
+                outlinedTextField.hint = "Наименование задачи"
 
-                        MaterialAlertDialogBuilder(context)
-                            .setTitle("Список задач")
-                            .setMultiChoiceItems(
-                                task_item,
-                                checkedItems
-                            ) { dialog, which, isChecked ->
-                                checkedItems[which] = isChecked
-                            }
-                            .setPositiveButton("Ок") { dialog, which ->
-                                if (mFolder!!.tasks?.size != 0) {
-                                    for (positionList in mFolder!!.tasks!!.indices)
-                                        checkedTask.add(mFolder!!.tasks!![positionList])
-                                }
-                                for (idItems in checkedItems.indices) {
-                                    if (checkedItems[idItems]) {
-                                        if (tasks_list[idItems].name == task_item[idItems])
-                                            checkedTask.add(tasks_list[idItems])
-                                    }
-                                }
-                                var checked_count = 0.0
-                                for (folder_task in checkedTask) {
-                                    if (folder_task.checked!!) {
-                                        checked_count++
-                                    }
-                                }
-                                //Расчет для прогресса
-                                val progress: Double = (checked_count / checkedTask.size) * 100
-                                val folder = Folder(
-                                    name = mFolder!!.name,
-                                    tasks = checkedTask,
-                                    progress = progress.toString()
-                                )
-                                database.updateDataFolder(folder = folder, key = mFolder!!.id)
-                                dialog.dismiss()
-                            }
-                            .setNegativeButton("Отмена") { dialogInterface, which ->
-                                dialogInterface.dismiss()
-                            }
+                MaterialAlertDialogBuilder(context)
+                    .setTitle("Добавить задачу")
+                    .setView(view)
+                    .setPositiveButton("Добавить") { dialogInterface, id ->
+                        val nameNewTask = outlinedTextField.editText!!.text.toString()
+                        val task = Task(name = nameNewTask, checked = false)
+                        val calendar= Calendar.getInstance()
+                        val format = SimpleDateFormat("dd.MM.yyyy", Locale.getDefault())
+                        val formatedDate = format.format(calendar.time)
+                        mFolder!!.tasks!!.add(task)
+                        mFolder!!.date = formatedDate
+                        database.updateDataFolder(folder = mFolder!!, key = mFolder!!.id)
+
+                        Toast.makeText(
+                            context,
+                            "Задача $nameNewTask успешно создана",
+                            Toast.LENGTH_SHORT
+                        )
                             .show()
                     }
-                if (disposable != null && disposable.isDisposed)
-                    disposable.dispose()
+                    .setNegativeButton("Отменить", null)
+                    .show()
             }
         }
         return super.onOptionsItemSelected(item)
@@ -150,12 +116,7 @@ class ListTaskGroup(
 
         if (mFolder!!.tasks != null) {
             for (task in mFolder!!.tasks!!) {
-                if (task.checked == false)
-                    taskList.add(task)
-            }
-            for (task in mFolder!!.tasks!!) {
-                if (task.checked!!)
-                    taskList.add(task)
+                taskList.add(task)
             }
 
             listTask.layoutManager = LinearLayoutManager(context)
@@ -198,7 +159,8 @@ class ListTaskGroup(
                     val folder = Folder(
                         name = mFolder!!.name,
                         tasks = mFolder!!.tasks,
-                        progress = progress.toString()
+                        progress = progress.toString(),
+                        date = mFolder!!.date
                     )
                     dataBaseTask.updateDataFolder(folder, mFolder!!.id)
                     mAdapterFolderTask!!.notifyDataSetChanged()

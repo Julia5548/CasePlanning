@@ -1,5 +1,6 @@
 package com.example.caseplanning.GroupTask
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
@@ -41,6 +42,9 @@ import com.google.android.material.textfield.TextInputLayout
 import com.google.firebase.auth.FirebaseAuth
 import com.miguelcatalan.materialsearchview.MaterialSearchView
 import io.reactivex.disposables.Disposable
+import java.text.SimpleDateFormat
+import java.util.*
+import kotlin.collections.ArrayList
 
 class GroupTask : Fragment(), NavigationView.OnNavigationItemSelectedListener,
     AdapterView.OnItemClickListener {
@@ -64,10 +68,6 @@ class GroupTask : Fragment(), NavigationView.OnNavigationItemSelectedListener,
         actionBar!!.title = "Группы задач"
 
         ButterKnife.bind(this, viewFragment)
-
-        /*кнопка поиска*/
-        val search = viewFragment.findViewById<MaterialSearchView>(R.id.search)
-        search.closeSearch()
 
         /*боковое меню*/
         mDrawerLayout = viewFragment.findViewById<DrawerLayout>(R.id.drawerLayout)
@@ -117,6 +117,7 @@ class GroupTask : Fragment(), NavigationView.OnNavigationItemSelectedListener,
                 val current_task = arrayListOf<Int>()
                 val progress = arrayListOf<Float>()
                 for (folder in folders) {
+                    restore_file(folder)
                     folder_list.add(folder)
                     current_task.add(folder.tasks!!.size)
                     progress.add(folder.progress.toFloat())
@@ -125,16 +126,61 @@ class GroupTask : Fragment(), NavigationView.OnNavigationItemSelectedListener,
                     AdapterRecyclerViewFolder(context!!, folder_list, current_task, progress)
                 listFolder.adapter = mAdapterFolder
                 enableSwipeToDeleteAndUndo(listFolder)
+
+                if(!disposable.isDisposed)
+                    disposable.dispose()
             },
                 { throwable ->
                     throwable.printStackTrace()
                 })
     }
 
-    private fun enableSwipeToDeleteAndUndo(listFolder: RecyclerView) {
+    @SuppressLint("SimpleDateFormat")
+    private fun convertFormat(day: String): Date? {
+        if(day != "") {
+            var date = day
+            val arrayDate: List<String> = date.split(".")
+            val month: String
+            if (arrayDate[1].length == 1) {
+                month = "0${arrayDate[1]}"
+                date = "${arrayDate[0]}.$month.${arrayDate[2]}"
+            }
+            val dayTask: String
+            if (arrayDate[0].length == 1) {
+                dayTask = "0${arrayDate[0]}"
+                date = "$dayTask.${arrayDate[1]}.${arrayDate[2]}"
+            }
+            val format = SimpleDateFormat("dd.MM.yyy")
+            val formatedDay = format.parse(date)
+            return formatedDay
+        }else{
+            return null
+        }
+    }
+
+    private fun restore_file(folder: Folder) {
+        val calendar= Calendar.getInstance()
+        val format = SimpleDateFormat("dd.MM.yyyy", Locale.getDefault())
+        val formatedDate = format.format(calendar.time)
+        val date = format.parse(formatedDate)!!
+        if(date != convertFormat(folder.date)){
+            for ((position,task) in folder.tasks!!.withIndex()){
+                task.checked = false
+                folder.tasks!![position] = task
+            }
+            folder.progress = "0"
+            folder.date = formatedDate
+            val dataBase  = DataBase()
+            dataBase.updateDataFolder(folder, folder.id)
+        }
+    }
+
+    private fun enableSwipeToDeleteAndUndo(
+        listFolder: RecyclerView
+    ) {
         val dataBaseTask = DataBase()
         val relativeLayout = view!!.findViewById<RelativeLayout>(R.id.relativeLayout)
-        var taskList: ArrayList<Task>? = null
+        var taskList: ArrayList<Task>?
         val swipeToDeleteCallback: SwipeToDeleteCallback =
             object : SwipeToDeleteCallback(context!!) {
                 override fun onSwiped(
@@ -143,6 +189,8 @@ class GroupTask : Fragment(), NavigationView.OnNavigationItemSelectedListener,
                 ) {
                     val position = viewHolder.adapterPosition
                     val item: String = mAdapterFolder!!.mData[position].name
+                    val progress = mAdapterFolder!!.mData[position].progress
+                    val date = mAdapterFolder!!.mData[position].date
                     taskList = mAdapterFolder!!.mData[position].tasks
                     dataBaseTask.deletedDataFolder(mAdapterFolder!!.mData[position].id)
                     mAdapterFolder!!.mData.removeAt(position)
@@ -159,9 +207,11 @@ class GroupTask : Fragment(), NavigationView.OnNavigationItemSelectedListener,
                                 id = "",
                                 name = item,
                                 tasks = taskList,
-                                progress = mAdapterFolder!!.mData[position].progress
+                                progress = progress,
+                                date = date
                             )
                         dataBaseTask.createFolder(folderItem)
+                        mAdapterFolder!!.mData.add(folderItem)
                         mAdapterFolder!!.notifyDataSetChanged()
                         listFolder.scrollToPosition(position)
                     }
@@ -185,7 +235,12 @@ class GroupTask : Fragment(), NavigationView.OnNavigationItemSelectedListener,
                 val outlinedTextField = view.findViewById<TextInputLayout>(R.id.outlinedTextField)
                 val nameNewFolder = outlinedTextField.editText!!.text.toString()
                 val listTask = arrayListOf<Task>()
-                val folder = Folder(name = nameNewFolder, tasks = listTask, progress = "0")
+
+                val calendar= Calendar.getInstance()
+                val format = SimpleDateFormat("dd.MM.yyyy", Locale.getDefault())
+                val formatedDate = format.format(calendar.time)
+
+                val folder = Folder(name = nameNewFolder, tasks = listTask, progress = "0", date = formatedDate)
 
                 dataBaseTask.createFolder(folder)
 

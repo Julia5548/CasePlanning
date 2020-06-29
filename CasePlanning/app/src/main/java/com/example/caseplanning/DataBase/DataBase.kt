@@ -134,7 +134,8 @@ class DataBase {
                                     id = key,
                                     name = value.name,
                                     tasks = value.tasks,
-                                    progress = value.progress
+                                    progress = value.progress,
+                                    date = value.date
                                 ))
                             }
                         }

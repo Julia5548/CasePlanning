@@ -27,9 +27,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.mikhaellopez.circularprogressbar.CircularProgressBar
 import io.reactivex.disposables.Disposable
 import java.text.SimpleDateFormat
-import java.time.LocalDate
 import java.util.*
-import kotlin.math.roundToLong
 
 class Progress : Fragment(), NavigationView.OnNavigationItemSelectedListener {
 
@@ -88,49 +86,57 @@ class Progress : Fragment(), NavigationView.OnNavigationItemSelectedListener {
     }
 
     @SuppressLint("SimpleDateFormat")
-    private fun dayWeek(view : View) {
+    private fun dayWeek(view: View) {
+
+        val dateFormat = SimpleDateFormat("dd.MM.yyyy", Locale.getDefault())
+
         var calendar = Calendar.getInstance()
+        val date = Date()
+        calendar.time = date
         val current_week = calendar.get(Calendar.DAY_OF_WEEK)
         val starting_week = 1
         val last_week = 6
 
-        val week_format = SimpleDateFormat("EEEE")
-        val week = week_format.format(current_week)
-
         val amount_startingDay: Int
         val amount_lastDay: Int
 
-        val startingDay: String
-        val lastDay: String
-        val dateFormat = SimpleDateFormat("dd.MM.yyyy", Locale.getDefault())
+        val startingDay: Date
+        val lastDay: Date
 
         if (current_week != 0) {
             amount_startingDay = starting_week - current_week + 1
             calendar.add(Calendar.DAY_OF_YEAR, amount_startingDay)
-            startingDay = dateFormat.format(calendar.time)
+            val startingDayWeek = dateFormat.format(calendar.time)
+            startingDay = dateFormat.parse(startingDayWeek)!!
 
             calendar = Calendar.getInstance()
 
             amount_lastDay = last_week + 2 - current_week
             calendar.add(Calendar.DAY_OF_YEAR, amount_lastDay)
-            lastDay = dateFormat.format(calendar.time)
+            val lastDayWeek = dateFormat.format(calendar.time)
+            lastDay = dateFormat.parse(lastDayWeek)!!
 
         } else {
             val today = Date()
-            lastDay = dateFormat.format(today)
+            val lastDayWeek = dateFormat.format(today)
+            lastDay = dateFormat.parse(lastDayWeek)!!
 
             calendar.add(Calendar.DAY_OF_YEAR, -6)
-            startingDay = dateFormat.format(calendar.time)
+            val startingDayWeek = dateFormat.format(calendar.time)
+            startingDay = dateFormat.parse(startingDayWeek)!!
         }
+
+        calendar = Calendar.getInstance()
+
         calendar.set(Calendar.DAY_OF_MONTH, calendar.getActualMaximum(Calendar.DAY_OF_MONTH))
-        val last = calendar.time
-        val lastDayMonth = dateFormat.format(last)
+        val last = dateFormat.format(calendar.time)
+        val lastDayMonth = dateFormat.parse(last)!!
 
         calendar.set(Calendar.DAY_OF_MONTH, calendar.getActualMinimum(Calendar.DAY_OF_MONTH))
-        val start = calendar.time
-        val startDayMonth = dateFormat.format(start)
+        val start = dateFormat.format(calendar.time)
+        val startDayMonth = dateFormat.parse(start)!!
 
-        getTask(startingDay, lastDay, week, view, lastDayMonth, startDayMonth)
+        getTask(startingDay, lastDay, view, lastDayMonth, startDayMonth)
 
     }
 
@@ -138,43 +144,39 @@ class Progress : Fragment(), NavigationView.OnNavigationItemSelectedListener {
     @Suppress("UNUSED_CHANGED_VALUE")
     @SuppressLint("SimpleDateFormat")
     private fun getTask(
-        startingDay: String,
-        lastDay: String,
-        week: String,
+        startingDay: Date,
+        lastDay: Date,
         view: View,
-        lastDayMonth: String,
-        startDayMonth: String
+        lastDayMonth: Date,
+        startDayMonth: Date
     ) {
         val dataBase = DataBase()
         disposable = dataBase
             .retrieveData(FirebaseAuth.getInstance().currentUser!!.uid)
             .subscribe { listTask ->
                 checkedTask(view, listTask)
-                progressWeek(view, startingDay, lastDay, week, listTask)
+                progressWeek(view, startingDay, lastDay, listTask)
                 var checkedCount = 0.0
                 var total_task = 0.0
                 for (task in listTask) {
-                    var date = task.day
-                    val arrayDate: List<String> = date.split(".")
-                    val month: String
-
-                    if (arrayDate[1].length == 1) {
-                        month = "0${arrayDate[1]}"
-                        date = "${arrayDate[0]}.$month.${arrayDate[2]}"
-                    }
-
-                    if (startDayMonth <= date ||
-                        date <= lastDayMonth
-                    ) {
+                    val date = convertFormat(task.day)!!
+                    if (date in startDayMonth..lastDayMonth ||
+                            task.replay != "Нет >") {
                         total_task++
                         if (task.checked!!) {
                             checkedCount++
                         } else {
-                            val checkedDate = date.replace('.', '-')
-                            if (task.checkedTasks!!.containsKey(checkedDate)) {
-                                val value = task.checkedTasks!![checkedDate]!!
-                                if (value) {
-                                    checkedCount++
+                            for (day in task.checkedTasks!!.keys) {
+                                val dayFormat = day.replace('-', '.')
+                                val date_checked = convertFormat(dayFormat)!!
+                                if (date_checked in startDayMonth..lastDayMonth) {
+                                    val checkedDate = day.replace('.', '-')
+                                    if (task.checkedTasks!!.containsKey(checkedDate)) {
+                                        val value = task.checkedTasks!![checkedDate]!!
+                                        if (value) {
+                                            checkedCount++
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -188,49 +190,48 @@ class Progress : Fragment(), NavigationView.OnNavigationItemSelectedListener {
     @SuppressLint("SimpleDateFormat", "SetTextI18n")
     private fun progressWeek(
         view: View,
-        startingDay: String,
-        lastDay: String,
-        week: String,
+        startingDay: Date,
+        lastDay: Date,
         listTask: List<Task>?
     ) {
-        val progress_week = view.findViewById<CircularProgressBar>(R.id.progress_made_week)
+        val progress_week =
+            view.findViewById<CircularProgressBar>(R.id.progress_made_week)
         val percent_week = view.findViewById<TextView>(R.id.percent_progress_made)
         var checkedCount = 0.0
         var total_task = 0.0
         for (task in listTask!!) {
-            var date = task.day
-            val arrayDate: List<String> = date.split(".")
-            val month: String
-            if (arrayDate[1].length == 1) {
-                month = "0${arrayDate[1]}"
-                date = "${arrayDate[0]}.$month.${arrayDate[2]}"
-            }
-            if (startingDay <= date ||
-                date <= lastDay ||
-                task.replay.toLowerCase(Locale.ROOT) == week
-            ) {
+            val date = convertFormat(task.day)!!
+            if (date in startingDay..lastDay || task.replay != "Нет >")
+            {
                 total_task++
                 if (task.checked!!) {
                     checkedCount++
                 } else {
-                    val checkedDate = task.day.replace('.', '-')
-                    if (task.checkedTasks!!.containsKey(checkedDate)) {
-                        val value = task.checkedTasks!![checkedDate]!!
-                        if (value) {
-                            checkedCount++
+                    for (day in task.checkedTasks!!.keys) {
+                        val dayFormat = day.replace('-', '.')
+                        val formatedDate = convertFormat(dayFormat)!!
+                        if (formatedDate in startingDay..lastDay) {
+                            val checkedDate = day.replace('.', '-')
+                            if (task.checkedTasks!!.containsKey(checkedDate)) {
+                                val value = task.checkedTasks!![checkedDate]!!
+                                if (value) {
+                                    checkedCount++
+                                }
+                            }
                         }
                     }
+
                 }
             }
         }
-        if(checkedCount != 0.0 && total_task != 0.0) {
+        if (checkedCount != 0.0 && total_task != 0.0) {
             val progress_current = (checkedCount / total_task) * 100
-            percent_week.text = "${String.format("%.2f", progress_current)}%"
+            percent_week.text = "${String.format("%.1f", progress_current)}%"
             progress_week.apply {
                 setProgressWithAnimation(progress_current.toFloat(), 1000)
                 progressMax = 100f
             }
-        }else{
+        } else {
             progress_week.apply {
                 setProgressWithAnimation(0F, 1000)
                 progressMax = 100f
@@ -238,10 +239,29 @@ class Progress : Fragment(), NavigationView.OnNavigationItemSelectedListener {
         }
     }
 
+    @SuppressLint("SimpleDateFormat")
+    private fun convertFormat(day: String): Date? {
+        var date = day
+        val arrayDate: List<String> = date.split(".")
+        val month: String
+        if (arrayDate[1].length == 1) {
+            month = "0${arrayDate[1]}"
+            date = "${arrayDate[0]}.$month.${arrayDate[2]}"
+        }
+        val dayTask:String
+        if(arrayDate[0].length == 1){
+            dayTask = "0${arrayDate[0]}"
+            date = "$dayTask.${arrayDate[1]}.${arrayDate[2]}"
+        }
+        val format = SimpleDateFormat("dd.MM.yyy")
+        val formatedDay = format.parse(date)
+        return formatedDay
+    }
+
     private fun checkedTask(view: View, listTask: List<Task>?) {
         val count_task = view.findViewById<TextView>(R.id.count_task)
         var count_checkedTask = 0
-        for(task in listTask!!) {
+        for (task in listTask!!) {
             if (task.checked!!) {
                 count_checkedTask++
             } else {
@@ -260,19 +280,20 @@ class Progress : Fragment(), NavigationView.OnNavigationItemSelectedListener {
         totalTask: Double
     ) {
 
-        if(disposable != null && !disposable!!.isDisposed)
+        if (disposable != null && !disposable!!.isDisposed)
             disposable!!.dispose()
 
-        val progress_month = view!!.findViewById<CircularProgressBar>(R.id.progress_made_month)
+        val progress_month =
+            view!!.findViewById<CircularProgressBar>(R.id.progress_made_month)
         val procent_month = view.findViewById<TextView>(R.id.percent_progressMade_month)
-        if(checkedCount != 0.0 && totalTask != 0.0) {
+        if (checkedCount != 0.0 && totalTask != 0.0) {
             val progress_current = (checkedCount / totalTask) * 100
-            procent_month.text = "${String.format("%.2f", progress_current)}%"
+            procent_month.text = "${String.format("%.1f", progress_current)}%"
             progress_month.apply {
                 setProgressWithAnimation(progress_current.toFloat(), 1000)
                 progressMax = 100f
             }
-        }else{
+        } else {
             progress_month.apply {
                 setProgressWithAnimation(0F, 1000)
                 progressMax = 100f

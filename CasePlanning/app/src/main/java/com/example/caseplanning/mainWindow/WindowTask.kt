@@ -69,15 +69,13 @@ class WindowTask : Fragment(), NavigationView.OnNavigationItemSelectedListener {
         /*боковое меню*/
         mDrawerLayout = viewFragment.findViewById(R.id.drawerLayout)
         val mToggle = ActionBarDrawerToggle(
-            activity, mDrawerLayout,
+            activity, mDrawerLayout, toolbar,
             R.string.Open,
             R.string.Close
         )
         mDrawerLayout!!.addDrawerListener(mToggle)
         /*проверяем состояние*/
         mToggle.syncState()
-        /*добавление стрелки для закрытия бокового меню, делает ее кликабельной*/
-        actionBar.setDisplayHomeAsUpEnabled(true)
 
         /*подключение обработчика события кнопок бокового меню*/
         val navigationView = viewFragment.findViewById<NavigationView>(R.id.navigationView)
@@ -176,6 +174,11 @@ class WindowTask : Fragment(), NavigationView.OnNavigationItemSelectedListener {
         if (arrayDate[1].length == 1) {
             month = "0${arrayDate[1]}"
             mDate = "${arrayDate[0]}.$month.${arrayDate[2]}"
+        }
+        val day:String
+        if(arrayDate[0].length == 1){
+            day = "0${arrayDate[0]}"
+            mDate = "$day.${arrayDate[1]}.${arrayDate[2]}"
         }
         val format = SimpleDateFormat("dd.MM.yyyy")
         val getDate = format.parse(mDate)
