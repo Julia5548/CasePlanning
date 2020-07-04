@@ -5,22 +5,21 @@ import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.*
-import android.widget.CalendarView
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.core.view.GravityCompat
+import androidx.core.view.get
+import androidx.core.view.size
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentTransaction
-import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import butterknife.ButterKnife
 import butterknife.OnClick
 import com.example.caseplanning.CreateTask.CreateTaskWindow
-import com.example.caseplanning.CreateTask.MyViewModel
 import com.example.caseplanning.DataBase.DataBase
 import com.example.caseplanning.DataBase.Task
 import com.example.caseplanning.GroupTask.GroupTask
@@ -38,6 +37,7 @@ import io.reactivex.disposables.Disposable
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.collections.ArrayList
+import kotlin.collections.HashMap
 import kotlin.properties.Delegates
 
 
@@ -45,9 +45,10 @@ class WindowTask : Fragment(), NavigationView.OnNavigationItemSelectedListener {
 
     private var search: MaterialSearchView? = null
     private var mDrawerLayout: DrawerLayout? = null
-    private var access_users: ArrayList<String>? = arrayListOf()
+    private var access_users: HashMap<String, String>? = hashMapOf()
     private var disposable: Disposable? = null
     private var date_task by Delegates.notNull<String>()
+    private var uid_friends : String? = null
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -91,11 +92,15 @@ class WindowTask : Fragment(), NavigationView.OnNavigationItemSelectedListener {
             nameUser.text = user.displayName
             emailUser.text = user.email
         }
+        nameUser.setOnClickListener {
+            Toast.makeText(context, "Мяу", Toast.LENGTH_SHORT)
+                .show()
+        }
+
         disposable = dataBase!!
-            .retrieveDataUser(FirebaseAuth.getInstance().currentUser!!.uid)
+            .retrieveAccess(user.uid)
             .subscribe({ user ->
-                access_users = user.accessUsers
-                addAccessUsers(user.accessUsers, navigationView, dataBase)
+                addAccessUsers(user, navigationView, dataBase)
             },
                 { throwable ->
                     throwable.printStackTrace()
@@ -106,23 +111,22 @@ class WindowTask : Fragment(), NavigationView.OnNavigationItemSelectedListener {
         return viewFragment
     }
 
-    private fun getListAccessUsers(): ArrayList<String> = access_users!!
     private fun addAccessUsers(
-        accessUsers: ArrayList<String>,
+        accessUsers: HashMap<String, String>,
         navigationView: NavigationView?,
         dataBase: DataBase
     ) {
         val menu = navigationView!!.menu
+        if (menu.size >= 7) {
+            for(position in 6 until menu.size())
+                menu[position].subMenu.clear()
+        }
         val subMenu = menu.addSubMenu("Пользователи")
-
         if (accessUsers.isNotEmpty()) {
-            for (user_uid in accessUsers) {
-                disposable = dataBase
-                    .retrieveDataUser(user_uid)
-                    .subscribe { user ->
-                        subMenu.add(user.name)
-                        navigationView.invalidate()
-                    }
+            for ((user_uid, userName) in accessUsers) {
+                subMenu.add(0, 6, 0, userName)
+                this.access_users!![user_uid] = userName
+                navigationView.invalidate()
             }
         }
     }
@@ -135,7 +139,7 @@ class WindowTask : Fragment(), NavigationView.OnNavigationItemSelectedListener {
     @SuppressLint("SimpleDateFormat")
     fun calendar(view: View, uid: String, mDate: String) {
 
-        val calendarView : CollapsibleCalendar = view.findViewById(R.id.linearLayoutCalendar)
+        val calendarView: CollapsibleCalendar = view.findViewById(R.id.linearLayoutCalendar)
         var day = calendarView.selectedDay
 
         val date_current = if (mDate == "") {
@@ -175,8 +179,8 @@ class WindowTask : Fragment(), NavigationView.OnNavigationItemSelectedListener {
             month = "0${arrayDate[1]}"
             mDate = "${arrayDate[0]}.$month.${arrayDate[2]}"
         }
-        val day:String
-        if(arrayDate[0].length == 1){
+        val day: String
+        if (arrayDate[0].length == 1) {
             day = "0${arrayDate[0]}"
             mDate = "$day.${arrayDate[1]}.${arrayDate[2]}"
         }
@@ -316,11 +320,8 @@ class WindowTask : Fragment(), NavigationView.OnNavigationItemSelectedListener {
 
         val createTask: Fragment =
             CreateTaskWindow(date_task, null)
-        val transaction: FragmentTransaction = fragmentManager!!.beginTransaction()
-
-        transaction.replace(R.id.linerLayout, createTask)
-        transaction.addToBackStack(null)
-        transaction.commit()
+        fragmentManager!!.beginTransaction().replace(R.id.linerLayout, createTask)
+            .addToBackStack(null).commit()
 
     }
 
@@ -331,7 +332,12 @@ class WindowTask : Fragment(), NavigationView.OnNavigationItemSelectedListener {
             R.id.groupTask -> {
 
                 val groupTask: Fragment =
-                    GroupTask()
+                    GroupTask(access_users)
+                val arguments = Bundle()
+                if(uid_friends != null) {
+                    arguments.putString("uid_friends", uid_friends)
+                    groupTask.arguments = arguments
+                }
                 fragmentManager!!.beginTransaction()
                     .replace(R.id.linerLayout, groupTask)
                     .addToBackStack(null)
@@ -348,7 +354,7 @@ class WindowTask : Fragment(), NavigationView.OnNavigationItemSelectedListener {
             /*доступ к задачам другим людям*/
             R.id.access -> {
 
-                val access: Fragment = Access()
+                val access: Fragment = Access(access_users)
                 fragmentManager!!.beginTransaction()
                     .replace(R.id.linerLayout, access)
                     .addToBackStack(null)
@@ -359,7 +365,7 @@ class WindowTask : Fragment(), NavigationView.OnNavigationItemSelectedListener {
             R.id.progress -> {
 
                 val progress: Fragment =
-                    Progress()
+                    Progress(access_users)
                 fragmentManager!!.beginTransaction()
                     .replace(R.id.linerLayout, progress)
                     .addToBackStack(null)
@@ -370,7 +376,7 @@ class WindowTask : Fragment(), NavigationView.OnNavigationItemSelectedListener {
             R.id.setting -> {
 
                 val setting: Fragment =
-                    Setting()
+                    Setting(access_users)
                 fragmentManager!!.beginTransaction()
                     .replace(R.id.linerLayout, setting)
                     .addToBackStack(null)
@@ -381,7 +387,7 @@ class WindowTask : Fragment(), NavigationView.OnNavigationItemSelectedListener {
             R.id.techSupport -> {
 
                 val techSupport: Fragment =
-                    TechSupport()
+                    TechSupport(access_users)
                 fragmentManager!!.beginTransaction()
                     .replace(R.id.linerLayout, techSupport)
                     .addToBackStack(null)
@@ -400,16 +406,10 @@ class WindowTask : Fragment(), NavigationView.OnNavigationItemSelectedListener {
                 startActivity(intent)
             }
             else -> {
-                val dataBaseTask = DataBase()
-                val list_users = getListAccessUsers()
-                if (list_users.isNotEmpty()) {
-                    for (user_uid in list_users) {
-                        disposable = dataBaseTask
-                            .retrieveDataUser(user_uid)
-                            .subscribe { user ->
-                                if (menuItem.title == user.name!!)
-                                    calendar(view!!, user_uid, "")
-                            }
+                for ((uid, name) in access_users!!) {
+                    if (menuItem.title == name) {
+                        uid_friends = uid
+                        calendar(view!!, uid, "")
                     }
                 }
             }

@@ -1,16 +1,13 @@
 package com.example.caseplanning.GroupTask
 
-import android.annotation.SuppressLint
 import android.graphics.Color
 import android.os.Bundle
 import android.view.*
 import android.widget.LinearLayout
-import android.widget.TextView
 import android.widget.Toast
 import androidx.annotation.NonNull
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
-import androidx.core.view.isNotEmpty
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -25,17 +22,17 @@ import com.example.caseplanning.adapter.SwipeToDeleteCallback
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.textfield.TextInputLayout
-import com.google.firebase.auth.FirebaseAuth
-import com.mikhaellopez.circularprogressbar.CircularProgressBar
-import org.w3c.dom.Text
 import java.text.SimpleDateFormat
 import java.util.*
+import kotlin.collections.ArrayList
 
 class ListTaskGroup(
-    folder: Folder
+    folder: Folder,
+    val uid: String
 ) : Fragment() {
 
     var mFolder: Folder? = folder
+    private var taskList : ArrayList<Task>? = null
     var mAdapterFolderTask: AdapterRecyclerViewTaskFolder? = null
 
     override fun onCreateView(
@@ -73,7 +70,10 @@ class ListTaskGroup(
         val id = item.itemId
         when (id) {
             android.R.id.home -> {
-                val groupTask: Fragment = GroupTask()
+                val groupTask: Fragment = GroupTask(null)
+                val arg = Bundle()
+                arg.putString("uid_friends", uid)
+                groupTask.arguments = arg
                 fragmentManager!!.beginTransaction().replace(R.id.linerLayout, groupTask).commit()
             }
             R.id.add_task_group -> {
@@ -93,8 +93,11 @@ class ListTaskGroup(
                         val formatedDate = format.format(calendar.time)
                         mFolder!!.tasks!!.add(task)
                         mFolder!!.date = formatedDate
-                        database.updateDataFolder(folder = mFolder!!, key = mFolder!!.id)
 
+                        taskList!!.add(task)
+                        mAdapterFolderTask!!.update(taskList!!,mFolder)
+
+                        database.updateDataFolder(folder = mFolder!!, key = mFolder!!.id, uid = uid)
                         Toast.makeText(
                             context,
                             "Задача $nameNewTask успешно создана",
@@ -112,16 +115,16 @@ class ListTaskGroup(
     private fun listTaskGroup(view: View) {
 
         val listTask = view.findViewById<RecyclerView>(R.id.list_task_group)
-        val taskList = arrayListOf<Task>()
-
+        taskList = arrayListOf()
+        val data = arrayListOf<Task>()
         if (mFolder!!.tasks != null) {
             for (task in mFolder!!.tasks!!) {
-                taskList.add(task)
+                taskList!!.add(task)
+                data.add(task)
             }
-
             listTask.layoutManager = LinearLayoutManager(context)
             mAdapterFolderTask =
-                AdapterRecyclerViewTaskFolder(context!!, taskList, mFolder)
+                AdapterRecyclerViewTaskFolder(context!!, data, mFolder, uid)
             listTask.adapter = mAdapterFolderTask
 
             enableSwipeToDeleteAndUndo(listTask, view)
@@ -142,7 +145,8 @@ class ListTaskGroup(
                     if (mFolder!!.tasks!!.contains(deleted_item)) {
                         mFolder!!.tasks!!.remove(deleted_item)
                     }
-                    mAdapterFolderTask!!.mData.removeAt(position)
+                    taskList!!.removeAt(position)
+                    mAdapterFolderTask!!.update(taskList!!,mFolder)
 
                     var checked_count = 0.0
                     for (folder_task in mFolder!!.tasks!!) {
@@ -162,8 +166,8 @@ class ListTaskGroup(
                         progress = progress.toString(),
                         date = mFolder!!.date
                     )
-                    dataBaseTask.updateDataFolder(folder, mFolder!!.id)
-                    mAdapterFolderTask!!.notifyDataSetChanged()
+                    dataBaseTask.updateDataFolder(folder, mFolder!!.id, uid)
+
                     val snackbar = Snackbar.make(
                         linearLayout,
                         "Задача была удалена из папки",
@@ -172,12 +176,14 @@ class ListTaskGroup(
                     snackbar.setAction("Отменить") { _ ->
                         mFolder!!.tasks!!.add(deleted_item)
 
+                        taskList!!.add(deleted_item)
+                        mAdapterFolderTask!!.update(taskList!!,mFolder)
+
                         //Расчет для прогресса
                         progress = (checked_count / mFolder!!.tasks!!.size) * 100
                         folder.progress = progress.toString()
 
-                        dataBaseTask.updateDataFolder(folder, mFolder!!.id)
-                        mAdapterFolderTask!!.notifyDataSetChanged()
+                        dataBaseTask.updateDataFolder(folder, mFolder!!.id, uid)
                         listFolder.scrollToPosition(position)
                     }
                     snackbar.setActionTextColor(Color.YELLOW)

@@ -12,6 +12,8 @@ import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.core.view.GravityCompat
+import androidx.core.view.get
+import androidx.core.view.size
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.Fragment
 import butterknife.ButterKnife
@@ -28,8 +30,10 @@ import com.mikhaellopez.circularprogressbar.CircularProgressBar
 import io.reactivex.disposables.Disposable
 import java.text.SimpleDateFormat
 import java.util.*
+import kotlin.collections.HashMap
 
-class Progress : Fragment(), NavigationView.OnNavigationItemSelectedListener {
+class Progress(val accessUsers: HashMap<String, String>?) : Fragment(),
+    NavigationView.OnNavigationItemSelectedListener {
 
     var mDrawerLayout: DrawerLayout? = null
     var disposable: Disposable? = null
@@ -80,9 +84,31 @@ class Progress : Fragment(), NavigationView.OnNavigationItemSelectedListener {
             emailUser.text = user.email
         }
 
+        if (accessUsers != null) {
+            addAccessUsers(accessUsers, navigationView)
+        }
+
         dayWeek(view)
 
         return view
+    }
+
+    private fun addAccessUsers(
+        accessUsers: HashMap<String, String>,
+        navigationView: NavigationView?
+    ) {
+        val menu = navigationView!!.menu
+        if (menu.size >= 7) {
+            for (position in 6 until menu.size())
+                menu[position].subMenu.clear()
+        }
+        val subMenu = menu.addSubMenu("Пользователи")
+        if (accessUsers.isNotEmpty()) {
+            for ((uid, user) in accessUsers) {
+                subMenu.add(0, 6, 0, user)
+                navigationView.invalidate()
+            }
+        }
     }
 
     @SuppressLint("SimpleDateFormat")
@@ -161,7 +187,8 @@ class Progress : Fragment(), NavigationView.OnNavigationItemSelectedListener {
                 for (task in listTask) {
                     val date = convertFormat(task.day)!!
                     if (date in startDayMonth..lastDayMonth ||
-                            task.replay != "Нет >") {
+                        task.replay != "Нет >"
+                    ) {
                         total_task++
                         if (task.checked!!) {
                             checkedCount++
@@ -201,8 +228,7 @@ class Progress : Fragment(), NavigationView.OnNavigationItemSelectedListener {
         var total_task = 0.0
         for (task in listTask!!) {
             val date = convertFormat(task.day)!!
-            if (date in startingDay..lastDay || task.replay != "Нет >")
-            {
+            if (date in startingDay..lastDay || task.replay != "Нет >") {
                 total_task++
                 if (task.checked!!) {
                     checkedCount++
@@ -248,8 +274,8 @@ class Progress : Fragment(), NavigationView.OnNavigationItemSelectedListener {
             month = "0${arrayDate[1]}"
             date = "${arrayDate[0]}.$month.${arrayDate[2]}"
         }
-        val dayTask:String
-        if(arrayDate[0].length == 1){
+        val dayTask: String
+        if (arrayDate[0].length == 1) {
             dayTask = "0${arrayDate[0]}"
             date = "$dayTask.${arrayDate[1]}.${arrayDate[2]}"
         }
@@ -308,7 +334,7 @@ class Progress : Fragment(), NavigationView.OnNavigationItemSelectedListener {
             R.id.groupTask -> {
 
                 val groupTask: Fragment =
-                    GroupTask()
+                    GroupTask(accessUsers)
                 fragmentManager!!.beginTransaction()
                     .replace(R.id.linerLayout, groupTask)
                     .addToBackStack(null)
@@ -325,7 +351,7 @@ class Progress : Fragment(), NavigationView.OnNavigationItemSelectedListener {
             /*доступ к задачам другим людям*/
             R.id.access -> {
 
-                val access: Fragment = Access()
+                val access: Fragment = Access(accessUsers)
                 fragmentManager!!.beginTransaction()
                     .replace(R.id.linerLayout, access)
                     .addToBackStack(null)
@@ -336,7 +362,7 @@ class Progress : Fragment(), NavigationView.OnNavigationItemSelectedListener {
             R.id.progress -> {
 
                 val progress: Fragment =
-                    Progress()
+                    Progress(accessUsers)
                 fragmentManager!!.beginTransaction()
                     .replace(R.id.linerLayout, progress)
                     .addToBackStack(null)
@@ -347,7 +373,7 @@ class Progress : Fragment(), NavigationView.OnNavigationItemSelectedListener {
             R.id.setting -> {
 
                 val setting: Fragment =
-                    Setting()
+                    Setting(accessUsers)
                 fragmentManager!!.beginTransaction()
                     .replace(R.id.linerLayout, setting)
                     .addToBackStack(null)
@@ -358,7 +384,7 @@ class Progress : Fragment(), NavigationView.OnNavigationItemSelectedListener {
             R.id.techSupport -> {
 
                 val techSupport: Fragment =
-                    TechSupport()
+                    TechSupport(accessUsers)
                 fragmentManager!!.beginTransaction()
                     .replace(R.id.linerLayout, techSupport)
                     .addToBackStack(null)
@@ -374,6 +400,16 @@ class Progress : Fragment(), NavigationView.OnNavigationItemSelectedListener {
                     Intent(activity!!.applicationContext, MainActivity::class.java)
                 //intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
                 startActivity(intent)
+            }
+            else -> {
+                for ((uid, name) in accessUsers!!) {
+                    if (menuItem.title == name) {
+                        val windowTask: Fragment =
+                            WindowTask()
+                        fragmentManager!!.beginTransaction()
+                            .replace(R.id.linerLayout, windowTask).addToBackStack(null).commit()
+                    }
+                }
             }
         }
         mDrawerLayout!!.closeDrawer(GravityCompat.START)

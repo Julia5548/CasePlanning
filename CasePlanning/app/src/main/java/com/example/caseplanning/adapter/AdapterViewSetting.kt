@@ -15,18 +15,19 @@ import com.example.caseplanning.Setting.Account
 import com.google.android.material.card.MaterialCardView
 import com.google.firebase.auth.FirebaseAuth
 import io.reactivex.disposables.Disposable
+import java.util.*
+import kotlin.collections.HashMap
 
 class AdapterViewSetting(
     val context: Context,
     data: HashMap<String, String>,
     val name: String?,
     val email: String?,
-    shared_user: ArrayList<String>
+    shared_user: HashMap<String, String>
 ) : RecyclerView.Adapter<AdapterViewSetting.ViewHolder>() {
 
     val mData: HashMap<String, String> = data
-    var mSharedUsers: ArrayList<String> = shared_user
-    var list_uid: ArrayList<String>? = null
+    var mSharedUsers: HashMap<String, String> = shared_user
 
     inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
@@ -51,65 +52,61 @@ class AdapterViewSetting(
 
         holder.cardView.setOnClickListener {
             if (holder.position == 0) {
-                createListUid()
+                users()
             } else {
                 (context as AppCompatActivity).supportFragmentManager.beginTransaction()
-                    .replace(R.id.linerLayout, Account(name!!, email!!, mSharedUsers))
+                    .replace(R.id.linerLayout, Account(name!!, email!!))
                     .addToBackStack(null)
                     .commit()
             }
         }
     }
 
-    fun update(shared_user: ArrayList<String>) {
+    fun update(shared_user: HashMap<String, String>) {
         mSharedUsers.clear()
-        this.mSharedUsers.addAll(shared_user)
+        this.mSharedUsers.putAll(shared_user)
         notifyDataSetChanged()
     }
 
-    private fun getListUid(): ArrayList<String>? = list_uid
-
-    private fun createListUid() {
-        val dataBaseTask = DataBase()
+    private fun users(){
+        val dataBase = DataBase()
         var disposable: Disposable? = null
-        list_uid = arrayListOf()
-        disposable = dataBaseTask
-            .retrieveDataUid()
-            .subscribe { uids ->
-                if (list_uid != null) {
-                    if (list_uid!!.size > 0) {
-                        list_uid = arrayListOf()
-                    }
-                    for (uid_user in uids)
-                        list_uid!!.add(uid_user.id!!)
-                    listUsers(disposable)
+        disposable = dataBase
+            .readUser()
+            .subscribe {users->
+                val list_uid = hashMapOf<String,Users>()
+                for((key, name) in users) {
+                    val user = Users(name = name)
+                    list_uid[key] = user
                 }
+                listUsers(list_uid, disposable)
             }
     }
+    private fun listUsers(list_users: HashMap<String, Users>, disposable: Disposable?) {
 
-    private fun listUsers(disposable: Disposable?) {
-
-        if(disposable!= null && !disposable.isDisposed)
+        if(disposable != null && !disposable.isDisposed)
             disposable.dispose()
-        val users_shared = mutableMapOf<String, Users>()
-        val users_acces = mutableMapOf<String, Users>()
-        val dataBaseTask = DataBase()
-        val uids = getListUid()
-        if (uids != null) {
+
+        val users_shared = hashMapOf<String, Users>()
+        val users_access = hashMapOf<String, Users>()
+        val dataBase = DataBase()
+        if (list_users.isNotEmpty()) {
             var position = 1
-            for (uid in uids) {
-                val mDisposable = dataBaseTask
-                    .retrieveDataUser(uid)
-                    .subscribe { user_data ->
-                        if (user_data.accessUsers.contains(FirebaseAuth.getInstance().currentUser!!.uid)) {
-                            users_acces[uid] = user_data
+            for ((uid, user) in list_users) {
+                val mDisposable = dataBase
+                    .retrieveAccess(uid)
+                    .subscribe { accessUsers ->
+                        if (accessUsers.keys.contains(FirebaseAuth.getInstance().currentUser!!.uid)) {
+                            user.accessUsers = accessUsers
+                            users_access[uid] = user
                         }
                         if(mSharedUsers.contains(uid)){
-                            users_shared[uid] = user_data
+                            user.accessUsers = accessUsers
+                            users_shared[uid] = user
                         }
-                        if(position == uids.size) {
+                        if(position == list_users.size) {
                             (context as AppCompatActivity).supportFragmentManager.beginTransaction()
-                                .replace(R.id.linerLayout, AccessSetting(users_acces, users_shared))
+                                .replace(R.id.linerLayout, AccessSetting(users_access, users_shared))
                                 .addToBackStack(null)
                                 .commit()
                         }

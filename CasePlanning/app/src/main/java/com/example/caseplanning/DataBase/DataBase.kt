@@ -2,6 +2,8 @@ package com.example.caseplanning.DataBase
 
 import android.util.Log
 import com.androidhuman.rxfirebase2.database.RxFirebaseDatabase
+import com.androidhuman.rxfirebase2.database.childEvents
+import com.androidhuman.rxfirebase2.database.data
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
 import io.reactivex.Observable
@@ -88,21 +90,23 @@ class DataBase {
         }
     }
 
-    fun readUser(uid: String): Observable<Users> {
+    fun readUser(): Observable<HashMap<String, String>> {
         val databaseReference =
-            FirebaseDatabase.getInstance().reference.child(uid)
+            FirebaseDatabase.getInstance().reference
                 .child("Users")
         /*подключаем класс подписки, оформляем подписчика */
-        return object : Observable<Users>() {
-            override fun subscribeActual(observer: Observer<in Users>?) {
+        return object : Observable<HashMap<String, String>>() {
+            override fun subscribeActual(observer: Observer<in HashMap<String, String>>?) {
                 /*подкллючаем RxFirebaseDatabase подключаем изменения данных и подписчиков,
                 получаем данные из данных*/
                 val disposal = RxFirebaseDatabase
                     .dataChanges(databaseReference)
                     .subscribe(fun(dataSnapshot: DataSnapshot) {
-                        var users = Users()
+                        val listUsers: GenericTypeIndicator<HashMap<String, String>> =
+                            object : GenericTypeIndicator<HashMap<String, String>>() {}
+                        var users = HashMap<String, String>()
                         if (dataSnapshot.exists()) {
-                            users = dataSnapshot.getValue(Users::class.java)!!
+                            users = dataSnapshot.getValue(listUsers)!!
                         }
 /*получаем очередной список*/
                         observer!!.onNext(users)
@@ -114,10 +118,36 @@ class DataBase {
         }
     }
 
-    private fun readFolder(): Observable<List<Folder>> {
+    private fun readAccess(uid: String) : Observable<HashMap<String, String>>{
+        val reference = FirebaseDatabase.getInstance().reference
+            .child(uid)
+            .child("accessUsers")
+        return object : Observable<HashMap<String, String>>(){
+            override fun subscribeActual(observer: Observer<in HashMap<String, String>>?) {
+                val disposal = RxFirebaseDatabase
+                    .dataChanges(reference)
+                    .subscribe(fun(dataSnapshot : DataSnapshot){
+                        val genericAccess = object : GenericTypeIndicator<HashMap<String, String>>(){}
+                        val access = HashMap<String, String>()
+                        if(dataSnapshot.exists()){
+                            val data = dataSnapshot.getValue(genericAccess)
+                            for(( uid_access, user) in data!!){
+                                access[uid_access] = user
+                            }
+                        }
+                        observer!!.onNext(access)
+                    },
+                        {t: Throwable? ->
+                            t!!.printStackTrace()
+                        })
+            }
+
+        }
+    }
+    private fun readFolder(uid:String): Observable<List<Folder>> {
 
         val databaseReference =
-            FirebaseDatabase.getInstance().reference.child(FirebaseAuth.getInstance().currentUser!!.uid)
+            FirebaseDatabase.getInstance().reference.child(uid)
                 .child("Folders")
         return object : Observable<List<Folder>>() {
             override fun subscribeActual(observer: Observer<in List<Folder>>?) {
@@ -148,12 +178,10 @@ class DataBase {
         }
     }
 
-    fun createUser(name: String?, email: String?) {
-        val users = Users(name = name, email = email)
+    fun createUser(users: HashMap<String, String>) {
         FirebaseDatabase
             .getInstance()
             .reference
-            .child(FirebaseAuth.getInstance().currentUser!!.uid)
             .child("Users")
             .setValue(users)
     }
@@ -166,21 +194,28 @@ class DataBase {
             .push()
             .setValue(task)
 
-    fun createFolder(folder: Folder) = FirebaseDatabase
+    fun createFolder(uid : String,folder: Folder) = FirebaseDatabase
             .getInstance()
             .reference
-            .child(FirebaseAuth.getInstance().currentUser!!.uid)
+            .child(uid)
             .child("Folders")
             .push()
             .setValue(folder)
 
-    fun updateDataUser(access_user: Users, key:String){
+    fun updateDataUser(access_user: HashMap<String, String>){
         FirebaseDatabase
             .getInstance()
             .reference
-            .child(key)
             .child("Users")
             .setValue(access_user)
+    }
+    fun updateAccessUsers(accessUsers : HashMap<String, String>, uid: String){
+        FirebaseDatabase
+            .getInstance()
+            .reference
+            .child(uid)
+            .child("accessUsers")
+            .setValue(accessUsers)
     }
 
     fun updateDataTask(task: Task, key: String) = FirebaseDatabase
@@ -191,10 +226,10 @@ class DataBase {
             .child(key)
             .setValue(task)
 
-    fun updateDataFolder(folder : Folder, key : String) = FirebaseDatabase
+    fun updateDataFolder(folder : Folder, key : String, uid: String) = FirebaseDatabase
         .getInstance()
         .reference
-        .child(FirebaseAuth.getInstance().currentUser!!.uid)
+        .child(uid)
         .child("Folders")
         .child(key)
         .setValue(folder)
@@ -207,10 +242,10 @@ class DataBase {
             .child(key)
             .removeValue()
 
-    fun deletedDataFolder(key:String) = FirebaseDatabase
+    fun deletedDataFolder(uid: String, key:String) = FirebaseDatabase
             .getInstance()
             .reference
-            .child(FirebaseAuth.getInstance().currentUser!!.uid)
+            .child(uid)
             .child("Folders")
             .child(key)
             .removeValue()
@@ -219,16 +254,20 @@ class DataBase {
         return readData(uid)
     }
 
-    fun retrieveDataUser(uid: String): Observable<Users> {
-        return readUser(uid)
+    fun retrieveAccess(uid: String): Observable<HashMap<String, String>>{
+        return readAccess(uid)
+    }
+
+    fun retrieveDataUser(): Observable<HashMap<String, String>> {
+        return readUser()
     }
 
     fun retrieveDataUid(): Observable<List<UID>> {
         return readUid()
     }
 
-    fun retrieveDataFolders(): Observable<List<Folder>> {
-        return readFolder()
+    fun retrieveDataFolders(uid:String): Observable<List<Folder>> {
+        return readFolder(uid)
     }
 
     fun deletedUser(uid: String) = FirebaseDatabase

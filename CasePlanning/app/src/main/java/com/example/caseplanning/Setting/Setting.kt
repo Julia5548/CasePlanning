@@ -11,6 +11,8 @@ import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.core.view.GravityCompat
+import androidx.core.view.get
+import androidx.core.view.size
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -29,7 +31,7 @@ import com.google.android.material.navigation.NavigationView
 import com.google.firebase.auth.FirebaseAuth
 import io.reactivex.disposables.Disposable
 
-class Setting: Fragment(), NavigationView.OnNavigationItemSelectedListener {
+class Setting(val accessUsers: HashMap<String, String>?) : Fragment(), NavigationView.OnNavigationItemSelectedListener {
 
     var mDrawerLayout: DrawerLayout? = null
 
@@ -75,19 +77,42 @@ class Setting: Fragment(), NavigationView.OnNavigationItemSelectedListener {
         val dataBase = DataBase()
         var disposable:Disposable? = null
         disposable = dataBase
-            .readUser(user.uid)
+            .retrieveAccess(user.uid)
             .subscribe { users->
-                listSetting(view, user.displayName, user.email, users.accessUsers, disposable)
+                listSetting(view, user.displayName, user.email, users, disposable)
             }
+
+        if (accessUsers != null) {
+            addAccessUsers(accessUsers, navigationView)
+        }
 
         return view
     }
+
+    private fun addAccessUsers(
+        accessUsers: HashMap<String, String>,
+        navigationView: NavigationView?
+    ) {
+        val menu = navigationView!!.menu
+        if (menu.size >= 7) {
+            for (position in 6 until menu.size())
+                menu[position].subMenu.clear()
+        }
+        val subMenu = menu.addSubMenu("Пользователи")
+        if (accessUsers.isNotEmpty()) {
+            for ((uid, user) in accessUsers) {
+                subMenu.add(0, 6, 0, user)
+                navigationView.invalidate()
+            }
+        }
+    }
+
 
     private fun listSetting(
         view: View,
         name: String?,
         email: String?,
-        shared_user: ArrayList<String>,
+        shared_user: HashMap<String, String>,
         disposable: Disposable?
     ) {
         val listSetting = view.findViewById<RecyclerView>(R.id.list_setting)
@@ -95,12 +120,12 @@ class Setting: Fragment(), NavigationView.OnNavigationItemSelectedListener {
         val setting_list = HashMap<String, String>()
         setting_list["Доступ"] = "Управление доступом"
         setting_list["Аккаунт"] = "Управление аккаунтом"
-        val mAdapterFolder = AdapterViewSetting(context!!, setting_list, name, email, shared_user)
+        val mAdapterSetting = AdapterViewSetting(context!!, setting_list, name, email, shared_user)
 
         if (shared_user.isNullOrEmpty())
-            mAdapterFolder.update(shared_user)
+            mAdapterSetting.update(shared_user)
 
-        listSetting.adapter = mAdapterFolder
+        listSetting.adapter = mAdapterSetting
 
 
     }
@@ -115,7 +140,7 @@ class Setting: Fragment(), NavigationView.OnNavigationItemSelectedListener {
             R.id.groupTask -> {
 
                 val groupTask: Fragment =
-                    GroupTask()
+                    GroupTask(accessUsers)
                 fragmentManager!!.beginTransaction()
                     .replace(R.id.linerLayout, groupTask)
                     .addToBackStack(null)
@@ -132,7 +157,7 @@ class Setting: Fragment(), NavigationView.OnNavigationItemSelectedListener {
             /*доступ к задачам другим людям*/
             R.id.access -> {
 
-                val access: Fragment = Access()
+                val access: Fragment = Access(accessUsers)
                 fragmentManager!!.beginTransaction()
                     .replace(R.id.linerLayout, access)
                     .addToBackStack(null)
@@ -143,7 +168,7 @@ class Setting: Fragment(), NavigationView.OnNavigationItemSelectedListener {
             R.id.progress -> {
 
                 val progress: Fragment =
-                    Progress()
+                    Progress(accessUsers)
                 fragmentManager!!.beginTransaction()
                     .replace(R.id.linerLayout, progress)
                     .addToBackStack(null)
@@ -154,7 +179,7 @@ class Setting: Fragment(), NavigationView.OnNavigationItemSelectedListener {
             R.id.setting -> {
 
                 val setting: Fragment =
-                    Setting()
+                    Setting(accessUsers)
                 fragmentManager!!.beginTransaction()
                     .replace(R.id.linerLayout, setting)
                     .addToBackStack(null)
@@ -165,7 +190,7 @@ class Setting: Fragment(), NavigationView.OnNavigationItemSelectedListener {
             R.id.techSupport -> {
 
                 val techSupport: Fragment =
-                    TechSupport()
+                    TechSupport(accessUsers)
                 fragmentManager!!.beginTransaction()
                     .replace(R.id.linerLayout, techSupport)
                     .addToBackStack(null)
@@ -179,6 +204,16 @@ class Setting: Fragment(), NavigationView.OnNavigationItemSelectedListener {
                 val intent = Intent(activity!!.applicationContext, MainActivity::class.java)
                 //intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
                 startActivity(intent)
+            }
+            else -> {
+                for ((uid, name) in accessUsers!!) {
+                    if (menuItem.title == name){
+                        val windowTask: Fragment =
+                            WindowTask()
+                        fragmentManager!!.beginTransaction()
+                            .replace(R.id.linerLayout, windowTask).addToBackStack(null).commit()
+                    }
+                }
             }
         }
         mDrawerLayout!!.closeDrawer(GravityCompat.START)

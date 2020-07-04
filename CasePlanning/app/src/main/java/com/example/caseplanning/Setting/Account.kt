@@ -3,47 +3,33 @@ package com.example.caseplanning.Setting
 import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
-import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import android.widget.Toast
-import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.cardview.widget.CardView
-import androidx.core.view.GravityCompat
-import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.Fragment
 import butterknife.ButterKnife
 import butterknife.OnClick
 import com.example.caseplanning.DataBase.DataBase
-import com.example.caseplanning.DataBase.Users
-import com.example.caseplanning.GroupTask.GroupTask
 import com.example.caseplanning.MainActivity
 import com.example.caseplanning.R
-import com.example.caseplanning.Sidebar.Access
-import com.example.caseplanning.Sidebar.Progress
-import com.example.caseplanning.Sidebar.TechSupport
-import com.example.caseplanning.mainWindow.WindowTask
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.google.android.material.navigation.NavigationView
 import com.google.android.material.textfield.TextInputEditText
 import com.google.firebase.auth.*
+import io.reactivex.disposables.Disposable
 
 class Account(
     name: String,
-    email: String,
-    accessUsers: ArrayList<String>
-) : Fragment(),
-    NavigationView.OnNavigationItemSelectedListener {
+    email: String
+) : Fragment() {
 
-    var mDrawerLayout: DrawerLayout? = null
     var mName: String? = name
-    var mEmail: String?= email
-    var mail : TextView? = null
-    var nickname : TextView? = null
-    var mAccessUsers : ArrayList<String>? = accessUsers
+    var mEmail: String? = email
+    var mail: TextView? = null
+    var nickname: TextView? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -64,40 +50,14 @@ class Account(
         actionBar!!.title = "Личная информация"
 
         ButterKnife.bind(this, view)
-
-        /*боковое меню*/
-        mDrawerLayout = view.findViewById<DrawerLayout>(R.id.drawerLayout)
-        /*подключение обработчика события кнопок бокового меню*/
-        val navigationView = view.findViewById<NavigationView>(R.id.navigationView)
-        navigationView.setNavigationItemSelectedListener(this)
-
-        val navHeader = navigationView.getHeaderView(0)
-        val emailUser = navHeader.findViewById<TextView>(R.id.emailText)
-        val nameUser = navHeader.findViewById<TextView>(R.id.nameUser)
-
-        val mToggle = ActionBarDrawerToggle(
-            activity, mDrawerLayout, toolbar,
-            R.string.Open, R.string.Close
-        )
-
-        mDrawerLayout!!.addDrawerListener(mToggle)
-        /*проверяем состояние*/
-        mToggle.syncState()
-
-        val user = FirebaseAuth.getInstance().currentUser!!
-        user.let {
-            nameUser.text = user.displayName
-            emailUser.text = user.email
-        }
-
         personalInformation(view)
         return view
     }
 
     private fun personalInformation(view: View) {
 
-        nickname = view.findViewById<TextView>(R.id.nick_text)
-        mail = view.findViewById<TextView>(R.id.mail_text)
+        nickname = view.findViewById(R.id.nick_text)
+        mail = view.findViewById(R.id.mail_text)
 
         nickname!!.text = mName
         mail!!.text = mEmail
@@ -106,14 +66,32 @@ class Account(
         val card_mail = view.findViewById<CardView>(R.id.mail_card)
 
         card_nick.setOnClickListener {
-            updateNickname()
+            getListUsers("update")
         }
         card_mail.setOnClickListener {
             updateMail()
         }
     }
 
-    private fun updateNickname() {
+    private fun getListUsers(tagger : String) {
+        val dataBase = DataBase()
+        var disposable: Disposable? = null
+        disposable = dataBase
+            .readUser()
+            .subscribe {
+                if (tagger == "update") {
+                    updateNickname(it, disposable)
+                }else{
+                    updateAccessUsers(it, "deleted")
+                }
+            }
+
+    }
+
+    private fun updateNickname(
+        users: HashMap<String, String>,
+        disposable: Disposable?
+    ) {
         val view = LayoutInflater.from(context).inflate(R.layout.update_information, null)
         val new_information = view.findViewById<TextInputEditText>(R.id.update_information)
         new_information.setText(mName!!)
@@ -132,8 +110,18 @@ class Account(
                         if (it.isSuccessful) {
                             mName = new_information.text.toString()
                             nickname!!.text = mName
+
+                            for ((key, value) in users)
+                                if (key == user.uid) {
+                                    users[key] = mName!!
+                                }
+
                             val dataBase = DataBase()
-                            dataBase.updateDataUser(Users(name = mName!!, email = mEmail!!, accessUsers = mAccessUsers!!), user.uid)
+                            dataBase.updateDataUser(users)
+                            if (disposable != null && !disposable.isDisposed)
+                                disposable.dispose()
+                            updateAccessUsers(users, "update")
+
                             Toast.makeText(
                                 context,
                                 "Никнейм успешно изменен",
@@ -156,6 +144,40 @@ class Account(
             .show()
     }
 
+    private fun updateAccessUsers(
+        users: HashMap<String, String>,
+        tagger: String
+    ) {
+        val database = DataBase()
+        val currentUid = FirebaseAuth.getInstance().currentUser!!.uid
+        var disposabl: Disposable? = null
+        for ((uid, _) in users) {
+            disposabl = database
+                .retrieveAccess(uid)
+                .subscribe {
+                    if (uid != currentUid) {
+                        if (tagger == "update") {
+                            if (it.containsKey(currentUid))
+                                it[currentUid] = mName!!
+                            database.updateAccessUsers(it, uid)
+                        } else {
+                            if (it.containsKey(currentUid))
+                                it.remove(currentUid)
+                            database.updateAccessUsers(it, uid)
+                        }
+                    } else {
+                        if (tagger == "deleted") {
+                            users.remove(currentUid)
+                            database.updateDataUser(users)
+                        }
+                    }
+                    if (disposabl != null && !disposabl!!.isDisposed)
+                        disposabl!!.dispose()
+                }
+        }
+
+    }
+
     private fun updateMail() {
 
         val view = LayoutInflater.from(context).inflate(R.layout.update_information, null)
@@ -173,7 +195,7 @@ class Account(
                         if (it.isSuccessful) {
                             user.sendEmailVerification()
                                 .addOnCompleteListener {
-                                    if(it.isSuccessful){
+                                    if (it.isSuccessful) {
                                         mEmail = new_information.text.toString()
                                         mail!!.text = mEmail
                                         Toast.makeText(
@@ -182,6 +204,8 @@ class Account(
                                             Toast.LENGTH_SHORT
                                         ).show()
                                     }
+                                    val intent = Intent(context, MainActivity::class.java)
+                                    startActivity(intent)
                                 }
                                 .addOnFailureListener {
                                     Toast.makeText(
@@ -226,6 +250,8 @@ class Account(
                                 Toast.LENGTH_SHORT
                             ).show()
                         }
+                        val intent = Intent(context, MainActivity::class.java)
+                        startActivity(intent)
                     }
                     .addOnFailureListener {
                         Toast.makeText(
@@ -276,6 +302,7 @@ class Account(
                     .addOnCompleteListener {
                         user.delete()
                             .addOnCompleteListener {
+                                getListUsers("deleted")
                                 val dataBase = DataBase()
                                 dataBase.deletedUser(user.uid)
                                 if (it.isSuccessful) {
@@ -284,6 +311,7 @@ class Account(
                                         "Ваш аккаунт успешно удален",
                                         Toast.LENGTH_SHORT
                                     ).show()
+
                                     val intent = Intent(context, MainActivity::class.java)
                                     startActivity(intent)
                                 }
@@ -311,86 +339,8 @@ class Account(
             .show()
     }
 
-    override fun onNavigationItemSelected(menuItem: MenuItem): Boolean {
-        when (menuItem.itemId) {
-            /*группа задач*/
-            R.id.groupTask -> {
-
-                val groupTask: Fragment =
-                    GroupTask()
-                fragmentManager!!.beginTransaction()
-                    .replace(R.id.linerLayout, groupTask)
-                    .addToBackStack(null)
-                    .commit()
-            }
-            R.id.tasks -> {
-                val windowTask: Fragment =
-                    WindowTask()
-                fragmentManager!!.beginTransaction()
-                    .replace(R.id.linerLayout, windowTask)
-                    .addToBackStack(null)
-                    .commit()
-            }
-            /*доступ к задачам другим людям*/
-            R.id.access -> {
-
-                val access: Fragment = Access()
-                fragmentManager!!.beginTransaction()
-                    .replace(R.id.linerLayout, access)
-                    .addToBackStack(null)
-                    .commit()
-
-            }
-            /*прогресс выполнения задач*/
-            R.id.progress -> {
-
-                val progress: Fragment =
-                    Progress()
-                fragmentManager!!.beginTransaction()
-                    .replace(R.id.linerLayout, progress)
-                    .addToBackStack(null)
-                    .commit()
-
-            }
-            /*настройки*/
-            R.id.setting -> {
-
-                val setting: Fragment =
-                    Setting()
-                fragmentManager!!.beginTransaction()
-                    .replace(R.id.linerLayout, setting)
-                    .addToBackStack(null)
-                    .commit()
-
-            }
-            /*техподдержка*/
-            R.id.techSupport -> {
-
-                val techSupport: Fragment =
-                    TechSupport()
-                fragmentManager!!.beginTransaction()
-                    .replace(R.id.linerLayout, techSupport)
-                    .addToBackStack(null)
-                    .commit()
-
-            }
-            /*выход пользователя из системы*/
-            R.id.signOut -> {
-                val mAuth = FirebaseAuth.getInstance()
-                mAuth.signOut()
-                val intent = Intent(activity!!.applicationContext, MainActivity::class.java)
-                //intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
-                startActivity(intent)
-            }
-        }
-        mDrawerLayout!!.closeDrawer(GravityCompat.START)
-        onDestroy()
-        return true
-    }
     override fun onDestroy() {
         super.onDestroy()
-        mDrawerLayout!!.removeAllViews()
-        mAccessUsers = null
         nickname = null
         mail = null
         mEmail = null

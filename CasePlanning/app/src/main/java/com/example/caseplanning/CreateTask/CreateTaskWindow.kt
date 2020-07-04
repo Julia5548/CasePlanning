@@ -274,7 +274,6 @@ class CreateTaskWindow(val date_task: String?, mTask : Task?) : Fragment() {
                     )
                 }
                 btnOkSubTasks.performClick()
-                listSubTasksView!!.add(view_sub)
 
                 linerLayoutSubTask!!.addView(relativeLayoutSubTasks)
             }
@@ -405,6 +404,7 @@ class CreateTaskWindow(val date_task: String?, mTask : Task?) : Fragment() {
     /*добавление аудио задачи*/
     @OnClick(R.id.addAudio)
     fun onClickAddAudio() {
+        task = saveDataTask()
         val audio = AudioTask(task, pageViewModel)
         fragmentManager!!.beginTransaction().add(R.id.audio, audio).commit()
     }
@@ -474,7 +474,6 @@ class CreateTaskWindow(val date_task: String?, mTask : Task?) : Fragment() {
         if (relativeLayoutSubTasks.parent != null) {
             (relativeLayoutSubTasks.parent as ViewGroup).removeView(relativeLayoutSubTasks)
         }
-        listSubTasksView!!.add(view)
         linerLayoutSubTask.addView(relativeLayoutSubTasks)
 
         btnDeleted!!.setOnClickListener { onClickDeletedSubTask(view) }
@@ -487,7 +486,6 @@ class CreateTaskWindow(val date_task: String?, mTask : Task?) : Fragment() {
             )
         }
         btnAddSubTask.isEnabled = false
-        Log.d("Size", "${listSubTasksView!!.size}")
     }
 
     /*удаляет подзадачу*/
@@ -495,7 +493,8 @@ class CreateTaskWindow(val date_task: String?, mTask : Task?) : Fragment() {
 
         // relativeLayoutSubTasks.visibility = RelativeLayout.GONE
         (viewSubTask.parent as LinearLayout).removeView(viewSubTask)
-        listSubTasksView!!.remove(viewSubTask)
+        if(listSubTasksView!!.contains(viewSubTask))
+            listSubTasksView!!.remove(viewSubTask)
         Log.d("Size", "${listSubTasksView!!.size}")
 
         val btnAddSubTask = view!!.findViewById<TextView>(R.id.addSubTasks)
@@ -524,6 +523,9 @@ class CreateTaskWindow(val date_task: String?, mTask : Task?) : Fragment() {
                 viewFr
             )
         }
+        listSubTasksView!!.add(viewFr)
+
+        Log.d("Size", "${listSubTasksView!!.size}")
         btnOkSubTasks.visibility = ImageButton.GONE
     }
 

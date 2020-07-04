@@ -9,7 +9,11 @@ import com.example.caseplanning.R
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textfield.TextInputLayout
 
-class EditFolder (val context : Context?, folder: Folder){
+class EditFolder(
+    val context: Context?,
+    folder: Folder,
+    val uid: String
+){
 
     val mFolder = folder
 
@@ -28,7 +32,7 @@ class EditFolder (val context : Context?, folder: Folder){
                 val nameNewFolder = outlinedTextField.editText!!.text.toString()
                 val folder = Folder(name = nameNewFolder, tasks = mFolder.tasks, progress = mFolder.progress)
 
-                dataBaseTask.updateDataFolder(folder, mFolder.id)
+                dataBaseTask.updateDataFolder(folder, mFolder.id, uid)
                 Toast.makeText(context, "Папка $nameNewFolder успешно изменена", Toast.LENGTH_SHORT)
                     .show()
             }

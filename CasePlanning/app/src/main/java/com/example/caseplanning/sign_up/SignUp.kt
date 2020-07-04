@@ -23,8 +23,6 @@ class SignUp : AppCompatActivity() {
 
     private var mAuth: FirebaseAuth? = null
     private var mName_user: String = ""
-    private var list_users: ArrayList<String>? = arrayListOf()
-    private var list_uid: ArrayList<String>? = arrayListOf()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -111,64 +109,35 @@ class SignUp : AppCompatActivity() {
             errorProgress(progressButton, 0)
         } else {
             mName_user = name
-            createListUid(nameUserEdit, email, password, progressButton)
+            listUsers(nameUserEdit, email, password, progressButton)
         }
     }
 
-    private fun getListUid(): ArrayList<String>? = list_uid
-
-    private fun getUser(): ArrayList<String>? = list_users
-
-    private fun createListUid(
-        nameUserEdit: EditText,
-        email: String,
-        password: String,
-        progressButton: ProgressButton
-    ) {
-        val dataBaseTask = DataBase()
-        var disposable : Disposable? = null
-        disposable = dataBaseTask
-            .retrieveDataUid()
-            .subscribe { uids ->
-                if (list_uid != null) {
-                    if (list_uid!!.size > 0) {
-                        list_uid = arrayListOf()
-                    }
-                    for (uid_user in uids)
-                        list_uid!!.add(uid_user.id!!)
-                    listUsers(nameUserEdit, email, password, progressButton, disposable)
-                }
-            }
-    }
 
     private fun listUsers(
         nameUserEdit: EditText,
         email: String,
         password: String,
-        progressButton: ProgressButton,
-        disposable: Disposable?
+        progressButton: ProgressButton
     ) {
-        if (disposable != null && !disposable.isDisposed)
-            disposable.dispose()
 
         val dataBaseTask = DataBase()
-        var mDisposable : Disposable? = null
-        val uids = getListUid()
-        if (uids != null) {
-            for (uid in uids) {
-                 mDisposable = dataBaseTask
-                    .retrieveDataUser(uid)
-                    .subscribe { user_data ->
-                        list_users!!.add(user_data.name!!)
-                        if (list_users!!.size == uids.size)
-                            signUpUser(nameUserEdit, email, password, progressButton, mDisposable)
-                    }
+        var mDisposable: Disposable? = null
+        mDisposable = dataBaseTask
+            .retrieveDataUser()
+            .subscribe { user_data ->
+                if (!user_data.containsValue(mName_user)) {
+                    signUpUser(user_data, email, password, progressButton, mDisposable)
+                } else {
+                    errorProgress(progressButton, 800)
+                    nameUserEdit.error = "Такой ник уже существует, введите другой"
+                    nameUserEdit.requestFocus()
+                }
             }
-        }
     }
 
     private fun signUpUser(
-        nameUserEdit: EditText,
+        users: HashMap<String, String>,
         email: String,
         password: String,
         progressButton: ProgressButton,
@@ -178,56 +147,46 @@ class SignUp : AppCompatActivity() {
         if (mDisposable != null && !mDisposable.isDisposed)
             mDisposable.dispose()
 
-        progressButton.buttonActivated()
-
-        val users = getUser()
-        if (users!!.size == list_uid!!.size) {
-            if (users.contains(mName_user)) {
-                nameUserEdit.error = "Такой ник уже существует, введите другой"
-                nameUserEdit.requestFocus()
-                errorProgress(progressButton, 800)
-            } else {
-                mAuth!!.createUserWithEmailAndPassword(email, password)
-                    .addOnCompleteListener(
-                        this
-                    ) { created_user ->
-                        if (created_user.isSuccessful) {
-                            val user = mAuth!!.currentUser
-                            val displayName = UserProfileChangeRequest.Builder()
-                                .setDisplayName(mName_user).build()
-                            user?.updateProfile(displayName)
-                            user?.sendEmailVerification()?.addOnCompleteListener(this)
-                            { sented_email ->
-                                if (sented_email.isSuccessful) {
-                                    Toast.makeText(
-                                        applicationContext,
-                                        "Регистрация прошла успешно. Потдвердите свою почту!",
-                                        Toast.LENGTH_SHORT
-                                    ).show()
-                                    val dataBase = DataBase()
-                                    dataBase.createUser(mName_user, email)
-                                    successfulProgress(progressButton, 2500)
-                                } else {
-                                    errorProgress(progressButton, 2500)
-                                    Toast.makeText(
-                                        applicationContext,
-                                        sented_email.exception!!.message,
-                                        Toast.LENGTH_SHORT
-                                    ).show()
-                                }
-                            }
-                        } else {
-                            errorProgress(progressButton, 2500)
-                            Log.d("TAG: ", "Регистрация не прошла", created_user.exception)
+        mAuth!!.createUserWithEmailAndPassword(email, password)
+            .addOnCompleteListener(
+                this
+            ) { created_user ->
+                if (created_user.isSuccessful) {
+                    val user = mAuth!!.currentUser
+                    val displayName = UserProfileChangeRequest.Builder()
+                        .setDisplayName(mName_user).build()
+                    user?.updateProfile(displayName)
+                    user?.sendEmailVerification()?.addOnCompleteListener(this)
+                    { sented_email ->
+                        if (sented_email.isSuccessful) {
                             Toast.makeText(
                                 applicationContext,
-                                "Регистрация не прошла",
+                                "Регистрация прошла успешно. Потдвердите свою почту!",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                            val dataBase = DataBase()
+                            users[user.uid] = mName_user
+                            dataBase.createUser(users)
+                            successfulProgress(progressButton, 2500)
+                        } else {
+                            errorProgress(progressButton, 2500)
+                            Toast.makeText(
+                                applicationContext,
+                                sented_email.exception!!.message,
                                 Toast.LENGTH_SHORT
                             ).show()
                         }
                     }
+                } else {
+                    errorProgress(progressButton, 2500)
+                    Log.d("TAG: ", "Регистрация не прошла", created_user.exception)
+                    Toast.makeText(
+                        applicationContext,
+                        "Регистрация не прошла",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
             }
-        }
     }
 
     /*возврат на предыдущую страницу*/
@@ -245,7 +204,5 @@ class SignUp : AppCompatActivity() {
     override fun onDestroy() {
         super.onDestroy()
         mAuth = null
-        list_uid = null
-        list_users = null
     }
 }

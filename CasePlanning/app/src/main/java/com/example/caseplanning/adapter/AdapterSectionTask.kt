@@ -2,7 +2,6 @@ package com.example.caseplanning.adapter
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -12,7 +11,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.RecyclerView
 import com.example.caseplanning.DataBase.DataBase
-import com.example.caseplanning.DataBase.Folder
 import com.example.caseplanning.DataBase.Task
 import com.example.caseplanning.EditElements.EditTask
 import com.example.caseplanning.R
@@ -41,7 +39,6 @@ class AdapterSectionTask(
     private val mData: ArrayList<SectionHeader> = data
     var disposable: Disposable? = null
     val dataBaseTask = DataBase()
-    var folder_list: ArrayList<Folder>? = null
     val mDay: String? = day
     val mUid: String = uid
 
@@ -101,7 +98,7 @@ class AdapterSectionTask(
                 childViewHolder.dataChild,
                 childViewHolder.checkedTask
             )
-            checkedTask.checkedTask()
+            checkedTask.checkedTask(task.checked!!)
         }
         val checkedDate = mDay?.replace('.', '-')
         if (task.checkedTasks!!.isNotEmpty() && task.checkedTasks!!.containsKey(checkedDate)) {
@@ -110,7 +107,35 @@ class AdapterSectionTask(
                 childViewHolder.dataChild,
                 childViewHolder.checkedTask
             )
-            checkedTask.checkedTask()
+            checkedTask.checkedTask(task.checkedTasks!!.get(checkedDate!!)!!)
+        }
+
+
+        childViewHolder.cardItem.setOnClickListener{ viewHolder ->
+            if (task.day == mDay) {
+                FragmentDialog(task).show(
+                    (context as AppCompatActivity).supportFragmentManager,
+                    "Dialog"
+                )
+            }
+        }
+
+        if (disposable != null && !disposable!!.isDisposed)
+            disposable!!.dispose()
+
+        childViewHolder.checkedTask.setOnCheckedChangeListener{ buttonView, isChecked ->
+            val checkedTask = CheckedTask(
+                childViewHolder.cardItem,
+                childViewHolder.dataChild,
+                childViewHolder.checkedTask
+            )
+            if (task.replay != "Нет >") {
+                checkedTask.updateReplayTask(task, isChecked, mDay!!)
+            } else {
+                checkedTask.updateTask(task, isChecked)
+            }
+            mData.removeAll(mData)
+            notifyDataChanged(mData)
         }
 
         childViewHolder.txtOptionDigit.setOnClickListener { view ->
@@ -143,7 +168,7 @@ class AdapterSectionTask(
                                 year += 1
                                 nextDate = "${tomorrowDay}.${month}.${year}"
                             }
-                            updateFolder(database = dataBaseTask, task = task, nextDate = nextDate)
+                            tomorrowTask(task, nextDate)
 
                         }
                         Toast.makeText(
@@ -163,17 +188,9 @@ class AdapterSectionTask(
                         true
                     }
                     R.id.delete -> {
-                        disposable = dataBaseTask
-                            .retrieveData(mUid)
-                            .subscribe { tasks ->
-                                for (taskData in tasks) {
-                                    if (taskData.name == task.name && taskData.day == task.day) {
-                                        dataBaseTask.deletedDataTask(taskData.idTasks!!)
-                                    }
-                                }
-                                mData.removeAll(mData)
-                                notifyDataChanged(mData)
-                            }
+                        dataBaseTask.deletedDataTask(task.idTasks!!)
+                        mData.removeAll(mData)
+                        notifyDataChanged(mData)
                         Toast.makeText(context, "Задача удалена", Toast.LENGTH_SHORT)
                             .show()
                         true
@@ -181,7 +198,6 @@ class AdapterSectionTask(
                     else -> false
                 }
             }
-
             try {
                 val fieldPopupMenu = PopupMenu::class.java.getDeclaredField("mPopup")
                 fieldPopupMenu.isAccessible = true
@@ -196,32 +212,6 @@ class AdapterSectionTask(
             popupMenu.show()
         }
 
-        childViewHolder.cardItem.setOnClickListener { viewHolder ->
-            if (task.day == mDay) {
-                FragmentDialog(task).show(
-                    (context as AppCompatActivity).supportFragmentManager,
-                    "Dialog"
-                )
-            }
-        }
-
-        if (disposable != null && !disposable!!.isDisposed)
-            disposable!!.dispose()
-
-        childViewHolder.checkedTask.setOnCheckedChangeListener { buttonView, isChecked ->
-            val checkedTask = CheckedTask(
-                childViewHolder.cardItem,
-                childViewHolder.dataChild,
-                childViewHolder.checkedTask
-            )
-            if(task.replay != "Нет >") {
-                checkedTask.updateReplayTask(task, isChecked, mDay!!)
-            }else{
-                checkedTask.updateTask(task, isChecked)
-            }
-            mData.removeAll(mData)
-            notifyDataChanged(mData)
-        }
     }
 
     private fun drawColorTask(
@@ -239,62 +229,11 @@ class AdapterSectionTask(
         }
     }
 
-    private fun getListFolder(): ArrayList<Folder>? = folder_list
-    private fun updateFolder(database: DataBase, task: Task, nextDate: String) {
-        folder_list = arrayListOf()
-        disposable = database
-            .retrieveDataFolders()
-            .subscribe { folders ->
-                for (folder in folders) {
-                    if (!folder.tasks.isNullOrEmpty()) {
-                        folder_list!!.add(folder)
-                    }
-                }
-                tomorrowTask(task, nextDate)
-            }
-    }
-
     private fun tomorrowTask(task: Task, nextDate: String) {
-        disposable = dataBaseTask
-            .retrieveData(mUid)
-            .subscribe { tasks ->
-                for (taskData in tasks) {
-                    if (taskData.name == task.name && taskData.day == task.day) {
-                        val list = getListFolder()
-                        val mTask = Task(
-                            name = taskData.name,
-                            listSubTasks = taskData.listSubTasks,
-                            photo = taskData.photo,
-                            audio = taskData.audio,
-                            timeAudio = taskData.timeAudio,
-                            video = taskData.video,
-                            comment = taskData.comment,
-                            timer = taskData.timer,
-                            notification = taskData.notification,
-                            color = taskData.color,
-                            replay = taskData.replay,
-                            period = taskData.period,
-                            day = nextDate
-                        )
+        task.day = nextDate
+        dataBaseTask.updateDataTask(task, task.idTasks!!)
 
-                        for (folder in list!!) {
-                            if (folder.tasks!!.contains(taskData)) {
-                                folder.tasks!!.remove(taskData)
-                                folder.tasks!!.add(mTask)
-                                val update_folder = Folder(
-                                    name = folder.name,
-                                    tasks = folder.tasks!!,
-                                    progress = folder.progress
-                                )
-                                dataBaseTask.updateDataFolder(update_folder, folder.id)
-                            }
-                        }
-                        dataBaseTask.updateDataTask(mTask, taskData.idTasks!!)
-                    }
-                }
-
-                mData.removeAll(mData)
-                notifyDataChanged(mData)
-            }
+        mData.removeAll(mData)
+        notifyDataChanged(mData)
     }
 }

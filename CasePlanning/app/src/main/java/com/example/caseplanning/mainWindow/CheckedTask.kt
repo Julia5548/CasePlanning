@@ -1,5 +1,6 @@
 package com.example.caseplanning.mainWindow
 
+import android.content.Context
 import android.graphics.Paint
 import android.widget.CheckBox
 import android.widget.TextView
@@ -7,7 +8,6 @@ import androidx.cardview.widget.CardView
 import com.example.caseplanning.DataBase.DataBase
 import com.example.caseplanning.DataBase.Folder
 import com.example.caseplanning.DataBase.Task
-import io.reactivex.disposables.Disposable
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -16,7 +16,11 @@ class CheckedTask() {
     private lateinit var mCardView: CardView
     private lateinit var mTextView: TextView
     private lateinit var mCheckbox: CheckBox
+    private lateinit var mContext: Context
 
+    constructor(context: Context):this(){
+        mContext = context
+    }
     constructor(cardView: CardView, textView: TextView, checkbox: CheckBox) : this() {
         mCardView = cardView
         mTextView = textView
@@ -27,7 +31,8 @@ class CheckedTask() {
         task: Task,
         checked: Boolean,
         folder: Folder?,
-        position: Int
+        position: Int,
+        uid : String
     ) {
 
         val database = DataBase()
@@ -49,7 +54,7 @@ class CheckedTask() {
             //Расчет для прогресса
             val mProgress = (checked_count / folder.tasks!!.size) * 100
             folder.progress = mProgress.toString()
-            database.updateDataFolder(folder, folder.id)
+            database.updateDataFolder(folder, folder.id, uid)
         }
     }
 
@@ -77,10 +82,17 @@ class CheckedTask() {
         dataBase.updateDataTask(task, task.idTasks!!)
     }
 
-    fun checkedTask() {
-        mCardView.isEnabled = false
-        mCheckbox.isChecked = true
-        mTextView.isEnabled = false
-        mTextView.paintFlags = mTextView.paintFlags or Paint.STRIKE_THRU_TEXT_FLAG
+    fun checkedTask(checked: Boolean) {
+        if (checked) {
+            mCardView.isEnabled = false
+            mCheckbox.isChecked = checked
+            mTextView.isEnabled = false
+            mTextView.paintFlags = mTextView.paintFlags or Paint.STRIKE_THRU_TEXT_FLAG
+        }else{
+            mCardView.isEnabled = true
+            mCheckbox.isChecked = checked
+            mTextView.isEnabled = true
+            mTextView.paintFlags = 0
+        }
     }
 }

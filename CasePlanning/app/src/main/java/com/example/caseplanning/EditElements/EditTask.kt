@@ -214,7 +214,6 @@ class EditTask(mTask: Task?) : Fragment() {
                     )
                 }
                 btnOkSubTasks.performClick()
-                listSubTasksView!!.add(view_sub)
 
                 linerLayoutSubTask!!.addView(relativeLayoutSubTasks)
             }
@@ -463,7 +462,6 @@ class EditTask(mTask: Task?) : Fragment() {
         if (relativeLayoutSubTasks.parent != null) {
             (relativeLayoutSubTasks.parent as ViewGroup).removeView(relativeLayoutSubTasks)
         }
-        listSubTasksView!!.add(view)
         linerLayoutSubTask.addView(relativeLayoutSubTasks)
 
         btnDeleted!!.setOnClickListener { onClickDeletedSubTask(view) }
@@ -483,7 +481,8 @@ class EditTask(mTask: Task?) : Fragment() {
     fun onClickDeletedSubTask(viewSubTask: View) {
 
         (viewSubTask.parent as LinearLayout).removeView(viewSubTask)
-        listSubTasksView!!.remove(viewSubTask)
+        if(listSubTasksView!!.contains(viewSubTask))
+            listSubTasksView!!.remove(viewSubTask)
         Log.d("Size", "${listSubTasksView!!.size}")
 
         val btnAddSubTask = view!!.findViewById<TextView>(R.id.addSubTasks)
@@ -512,6 +511,8 @@ class EditTask(mTask: Task?) : Fragment() {
                 viewFr
             )
         }
+
+        listSubTasksView!!.add(viewFr)
         btnOkSubTasks.visibility = ImageButton.GONE
     }
 

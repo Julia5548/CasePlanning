@@ -16,11 +16,11 @@ import io.reactivex.disposables.Disposable
 
 class AdapterRecyclerViewAccess(
     val context: Context,
-    data: MutableMap<String, Users>
+    data: MutableMap<String, String>
 ) :
     RecyclerView.Adapter<AdapterRecyclerViewAccess.ViewHolder>() {
 
-    val mData: MutableMap<String, Users> = data
+    val mData: MutableMap<String, String> = data
     private var mAccessUsers: ArrayList<String>? = arrayListOf()
 
     inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -40,27 +40,41 @@ class AdapterRecyclerViewAccess(
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
 
-        holder.nameUser.text = mData.values.elementAt(position).name
+        holder.nameUser.text = mData.values.elementAt(position)
 
         holder.access.setOnClickListener {
             MaterialAlertDialogBuilder(context)
                 .setTitle("Разрешить?")
-                .setMessage("Действительно ли разрешить доступ пользователю ${mData.values.elementAt(position).name}")
+                .setMessage(
+                    "Действительно ли разрешить доступ пользователю ${mData.values.elementAt(
+                        position
+                    )}"
+                )
                 .setPositiveButton("Разрешить") { dialog, which ->
                     dialog.dismiss()
                     //другим пользователям
-                    val mCurrentUid = FirebaseAuth.getInstance().currentUser!!.uid
-                    if (!mData.values.elementAt(position).accessUsers.contains(mCurrentUid)) {
-                        mData.values.elementAt(position).accessUsers.add(mCurrentUid)
-                        val user = mData.values.elementAt(position)
-                        val dataBase = DataBase()
-                        dataBase.updateDataUser(user, mData.keys.elementAt(position))
-                        Toast.makeText(context, "Доступ разрешен", Toast.LENGTH_SHORT)
-                            .show()
-                    }else{
-                        Toast.makeText(context, "Данному пользователю уже был разрешен доступ", Toast.LENGTH_SHORT)
-                            .show()
-                    }
+                    val user = FirebaseAuth.getInstance().currentUser!!
+                    var disposable : Disposable? = null
+                    val dataBase = DataBase()
+                    disposable = dataBase
+                        .retrieveAccess(mData.keys.elementAt(position))
+                        .subscribe {
+                            if (!it.contains(user.uid)) {
+                                it[user.uid] = user.displayName!!
+                                dataBase.updateAccessUsers(it, mData.keys.elementAt(position))
+                                Toast.makeText(context, "Доступ разрешен", Toast.LENGTH_SHORT)
+                                    .show()
+                            } else {
+                                Toast.makeText(
+                                    context,
+                                    "Данному пользователю уже был разрешен доступ",
+                                    Toast.LENGTH_SHORT
+                                )
+                                    .show()
+                            }
+                            if(disposable != null && !disposable!!.isDisposed)
+                                disposable!!.dispose()
+                        }
                 }
                 .setNegativeButton("Отмена") { dialog, which ->
                     dialog.dismiss()

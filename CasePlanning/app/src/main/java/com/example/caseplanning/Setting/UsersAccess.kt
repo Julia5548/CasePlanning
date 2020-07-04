@@ -18,7 +18,7 @@ import com.example.caseplanning.adapter.AdapterSharedAccessUsers
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.firebase.auth.FirebaseAuth
 
-class UsersAccess(listAccessUsers: MutableMap<String, Users>?) : Fragment() {
+class UsersAccess(listAccessUsers: HashMap<String, Users>?) : Fragment() {
 
     var mListUsersAccess = listAccessUsers
     private lateinit var mAdapter: AdapterSharedAccessUsers
@@ -47,9 +47,11 @@ class UsersAccess(listAccessUsers: MutableMap<String, Users>?) : Fragment() {
 
             recycler_access_users.layoutManager = LinearLayoutManager(context)
 
-            mAdapter = AdapterSharedAccessUsers( context!!, mListUsersAccess!!, "user_access",
+            mAdapter = AdapterSharedAccessUsers(
+                context!!, mListUsersAccess!!, "user_access",
                 user_text_access,
-                refuse_access)
+                refuse_access
+            )
 
             recycler_access_users.adapter = mAdapter
         }
@@ -66,13 +68,10 @@ class UsersAccess(listAccessUsers: MutableMap<String, Users>?) : Fragment() {
                 dialog.dismiss()
                 val update_user = Users()
                 val user = FirebaseAuth.getInstance().currentUser!!
-
-                for((key, values) in mListUsersAccess!!) {
-                    update_user.name = values.name
-                    update_user.email = values.email
-                    values.accessUsers.remove(user.uid)
-                    update_user.accessUsers = values.accessUsers
-                    dataBase.updateDataUser(update_user, key)
+                for ((key, value) in mListUsersAccess!!) {
+                    value.accessUsers.keys.remove(user.uid)
+                    update_user.accessUsers = value.accessUsers
+                    dataBase.updateAccessUsers(update_user.accessUsers, key)
                 }
                 try {
                     mListUsersAccess = hashMapOf()

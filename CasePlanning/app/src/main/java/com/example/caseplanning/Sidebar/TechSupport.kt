@@ -11,11 +11,12 @@ import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.core.view.GravityCompat
+import androidx.core.view.get
+import androidx.core.view.size
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentTransaction
 import butterknife.ButterKnife
-import com.example.caseplanning.DataBase.DataBase
 import com.example.caseplanning.GroupTask.GroupTask
 import com.example.caseplanning.MainActivity
 import com.example.caseplanning.R
@@ -25,7 +26,8 @@ import com.google.android.material.navigation.NavigationView
 import com.google.firebase.auth.FirebaseAuth
 import io.reactivex.disposables.Disposable
 
-class TechSupport: Fragment(), NavigationView.OnNavigationItemSelectedListener {
+class TechSupport(val accessUsers: HashMap<String, String>?) : Fragment(),
+    NavigationView.OnNavigationItemSelectedListener {
 
     var mDrawerLayout: DrawerLayout? = null
     lateinit var disposable: Disposable
@@ -36,7 +38,7 @@ class TechSupport: Fragment(), NavigationView.OnNavigationItemSelectedListener {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        val viewFragment = inflater.inflate(R.layout.tech_support , container, false)
+        val viewFragment = inflater.inflate(R.layout.tech_support, container, false)
 
         val toolbar = viewFragment.findViewById<Toolbar>(R.id.toolbar)
         val activity = activity as AppCompatActivity?
@@ -73,7 +75,29 @@ class TechSupport: Fragment(), NavigationView.OnNavigationItemSelectedListener {
             emailUser.text = user.email
         }
 
+        if (accessUsers != null) {
+            addAccessUsers(accessUsers, navigationView)
+        }
+
         return viewFragment
+    }
+
+    private fun addAccessUsers(
+        accessUsers: HashMap<String, String>,
+        navigationView: NavigationView?
+    ) {
+        val menu = navigationView!!.menu
+        if (menu.size >= 7) {
+            for (position in 6 until menu.size())
+                menu[position].subMenu.clear()
+        }
+        val subMenu = menu.addSubMenu("Пользователи")
+        if (accessUsers.isNotEmpty()) {
+            for ((uid, user) in accessUsers) {
+                subMenu.add(0, 6, 0, user)
+                navigationView.invalidate()
+            }
+        }
     }
 
     override fun onNavigationItemSelected(menuItem: MenuItem): Boolean {
@@ -82,7 +106,7 @@ class TechSupport: Fragment(), NavigationView.OnNavigationItemSelectedListener {
             R.id.groupTask -> {
 
                 val groupTask: Fragment =
-                    GroupTask()
+                    GroupTask(accessUsers)
                 val transaction: FragmentTransaction = fragmentManager!!.beginTransaction()
 
                 transaction.replace(R.id.linerLayout, groupTask)
@@ -101,7 +125,7 @@ class TechSupport: Fragment(), NavigationView.OnNavigationItemSelectedListener {
             /*доступ к задачам другим людям*/
             R.id.access -> {
 
-                val access: Fragment = Access()
+                val access: Fragment = Access(accessUsers)
                 val transaction: FragmentTransaction = fragmentManager!!.beginTransaction()
 
                 transaction.replace(R.id.linerLayout, access)
@@ -113,7 +137,7 @@ class TechSupport: Fragment(), NavigationView.OnNavigationItemSelectedListener {
             R.id.progress -> {
 
                 val progress: Fragment =
-                    Progress()
+                    Progress(accessUsers)
                 val transaction: FragmentTransaction = fragmentManager!!.beginTransaction()
 
                 transaction.replace(R.id.linerLayout, progress)
@@ -125,7 +149,7 @@ class TechSupport: Fragment(), NavigationView.OnNavigationItemSelectedListener {
             R.id.setting -> {
 
                 val setting: Fragment =
-                    Setting()
+                    Setting(accessUsers)
                 val transaction: FragmentTransaction = fragmentManager!!.beginTransaction()
 
                 transaction.replace(R.id.linerLayout, setting)
@@ -137,7 +161,7 @@ class TechSupport: Fragment(), NavigationView.OnNavigationItemSelectedListener {
             R.id.techSupport -> {
 
                 val techSupport: Fragment =
-                    TechSupport()
+                    TechSupport(accessUsers)
                 val transaction: FragmentTransaction = fragmentManager!!.beginTransaction()
 
                 transaction.replace(R.id.linerLayout, techSupport)
@@ -153,6 +177,16 @@ class TechSupport: Fragment(), NavigationView.OnNavigationItemSelectedListener {
                 val intent = Intent(activity!!.applicationContext, MainActivity::class.java)
                 //intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
                 startActivity(intent)
+            }
+            else -> {
+                for ((uid, name) in accessUsers!!) {
+                    if (menuItem.title == name) {
+                        val windowTask: Fragment =
+                            WindowTask()
+                        fragmentManager!!.beginTransaction()
+                            .replace(R.id.linerLayout, windowTask).addToBackStack(null).commit()
+                    }
+                }
             }
         }
         mDrawerLayout!!.closeDrawer(GravityCompat.START)

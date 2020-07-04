@@ -10,7 +10,6 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.RecyclerView
-import com.example.caseplanning.DataBase.DataBase
 import com.example.caseplanning.DataBase.Folder
 import com.example.caseplanning.EditElements.EditFolder
 import com.example.caseplanning.GroupTask.ListTaskGroup
@@ -22,7 +21,8 @@ class AdapterRecyclerViewFolder(
     val context: Context,
     data: ArrayList<Folder>,
     currentTask: ArrayList<Int>,
-    progress: ArrayList<Float>
+    progress: ArrayList<Float>,
+    val uid: String
 ) : RecyclerView.Adapter<AdapterRecyclerViewFolder.ViewHolder>() {
 
     val mData: ArrayList<Folder> = data
@@ -48,7 +48,11 @@ class AdapterRecyclerViewFolder(
 
     override fun getItemCount(): Int = mData.size
 
-    fun update(folders: ArrayList<Folder>, currentTask: ArrayList<Int>, progress: ArrayList<Float>){
+    fun update(
+        folders: ArrayList<Folder>,
+        currentTask: ArrayList<Int>,
+        progress: ArrayList<Float>
+    ) {
         this.mData.clear()
         this.mData.addAll(folders)
 
@@ -78,7 +82,7 @@ class AdapterRecyclerViewFolder(
 
                 when (item.itemId) {
                     R.id.edit -> {
-                        val editFolder = EditFolder(context, mData[position])
+                        val editFolder = EditFolder(context, mData[position], uid)
                         editFolder.createDialog()
                         true
                     }
@@ -89,23 +93,13 @@ class AdapterRecyclerViewFolder(
         }
 
         holder.cardView.setOnClickListener {
-            val database = DataBase()
-            val disposal = database
-                .retrieveDataFolders()
-                .subscribe { folders ->
-                    for (folder in folders) {
-                        if (folder.name == mData[position].name) {
-                            val listTaskGroup: Fragment = ListTaskGroup(
-                                folder
-                            )
-                            (context as AppCompatActivity).supportFragmentManager.beginTransaction()
-                                .replace(R.id.linerLayout, listTaskGroup).addToBackStack(null)
-                                .commit()
-                        }
-                    }
-                }
-            if (disposal != null && disposal.isDisposed)
-                disposal.dispose()
+            val listTaskGroup: Fragment = ListTaskGroup(
+                mData[position], uid
+            )
+            (context as AppCompatActivity).supportFragmentManager.beginTransaction()
+                .replace(R.id.linerLayout, listTaskGroup).addToBackStack(null)
+                .commit()
         }
+
     }
 }

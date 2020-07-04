@@ -9,13 +9,13 @@ import com.example.caseplanning.DataBase.Users
 
 class PageViewAdapter : FragmentPagerAdapter {
 
-    private var mList_access_users: MutableMap<String, Users>? = null
-    private var mList_users_shared: MutableMap<String, Users>? = null
+    private var mList_access_users: HashMap<String, Users>? = null
+    private var mList_users_shared: HashMap<String, Users>? = null
 
     constructor(
         fragmentManager: FragmentManager,
-        list_access_users: MutableMap<String, Users>?,
-        list_users_shared: MutableMap<String, Users>?
+        list_access_users: HashMap<String, Users>?,
+        list_users_shared: HashMap<String, Users>?
     ):super(fragmentManager){
         mList_access_users = list_access_users
         mList_users_shared = list_users_shared

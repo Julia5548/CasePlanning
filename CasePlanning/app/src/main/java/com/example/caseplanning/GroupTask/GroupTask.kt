@@ -15,6 +15,8 @@ import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.core.view.GravityCompat
+import androidx.core.view.get
+import androidx.core.view.size
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.ItemTouchHelper
@@ -40,20 +42,22 @@ import com.google.android.material.navigation.NavigationView
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.textfield.TextInputLayout
 import com.google.firebase.auth.FirebaseAuth
-import com.miguelcatalan.materialsearchview.MaterialSearchView
 import io.reactivex.disposables.Disposable
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.collections.ArrayList
+import kotlin.collections.HashMap
 
-class GroupTask : Fragment(), NavigationView.OnNavigationItemSelectedListener,
+class GroupTask(val accessUsers: HashMap<String, String>?) : Fragment(),
+    NavigationView.OnNavigationItemSelectedListener,
     AdapterView.OnItemClickListener {
 
     var pageViewModel: MyViewModel? = null
     var mDrawerLayout: DrawerLayout? = null
     lateinit var disposable: Disposable
-    private var folders :ArrayList<Folder>? = null
+    private var folders: ArrayList<Folder>? = null
     var mAdapterFolder: AdapterRecyclerViewFolder? = null
+    private var uid : String? = null
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -94,8 +98,18 @@ class GroupTask : Fragment(), NavigationView.OnNavigationItemSelectedListener,
             nameUser.text = user.displayName
             emailUser.text = user.email
         }
-        listFolder(viewFragment)
+        if(arguments != null) {
+            uid = arguments!!.getString("uid_friends")
+            arguments = null
+        }else{
+            uid = user.uid
+        }
 
+        if (accessUsers != null) {
+            addAccessUsers(accessUsers, navigationView)
+        }
+
+        listFolder(viewFragment, uid!!)
         return viewFragment
     }
 
@@ -104,7 +118,25 @@ class GroupTask : Fragment(), NavigationView.OnNavigationItemSelectedListener,
         setHasOptionsMenu(true)
     }
 
-    private fun listFolder(viewFragment: View) {
+    private fun addAccessUsers(
+        accessUsers: HashMap<String, String>,
+        navigationView: NavigationView?
+    ) {
+        val menu = navigationView!!.menu
+        if (menu.size >= 7) {
+            for (position in 6 until menu.size())
+                menu[position].subMenu.clear()
+        }
+        val subMenu = menu.addSubMenu("Пользователи")
+        if (accessUsers.isNotEmpty()) {
+            for ((uid, user) in accessUsers) {
+                subMenu.add(0, 6, 0, user)
+                navigationView.invalidate()
+            }
+        }
+    }
+
+    private fun listFolder(viewFragment: View, uid: String) {
 
         val dataBaseTask = DataBase()
         val listFolder = viewFragment.findViewById<RecyclerView>(R.id.listViewFolder)
@@ -112,7 +144,7 @@ class GroupTask : Fragment(), NavigationView.OnNavigationItemSelectedListener,
         folders = arrayListOf()
         /*подписываемся и выводим данные из бд, при выходе надо удалить подписчиков*/
         disposable = dataBaseTask
-            .retrieveDataFolders()
+            .retrieveDataFolders(uid)
             .subscribe({ folders ->
                 val folder_list = arrayListOf<Folder>()
                 val current_task = arrayListOf<Int>()
@@ -125,7 +157,7 @@ class GroupTask : Fragment(), NavigationView.OnNavigationItemSelectedListener,
                     progress.add(folder.progress.toFloat())
                 }
                 mAdapterFolder =
-                    AdapterRecyclerViewFolder(context!!, folder_list, current_task, progress)
+                    AdapterRecyclerViewFolder(context!!, folder_list, current_task, progress, uid)
                 listFolder.adapter = mAdapterFolder
                 enableSwipeToDeleteAndUndo(listFolder)
 
@@ -173,7 +205,7 @@ class GroupTask : Fragment(), NavigationView.OnNavigationItemSelectedListener,
             folder.progress = "0"
             folder.date = formatedDate
             val dataBase = DataBase()
-            dataBase.updateDataFolder(folder, folder.id)
+            dataBase.updateDataFolder(folder, folder.id, uid!!)
         }
     }
 
@@ -194,12 +226,15 @@ class GroupTask : Fragment(), NavigationView.OnNavigationItemSelectedListener,
                     val progress = mAdapterFolder!!.mData[position].progress
                     val date = mAdapterFolder!!.mData[position].date
                     taskList = mAdapterFolder!!.mData[position].tasks
-                    dataBaseTask.deletedDataFolder(mAdapterFolder!!.mData[position].id)
+                        dataBaseTask.deletedDataFolder(
+                            uid = uid!!,
+                            key = mAdapterFolder!!.mData[position].id
+                        )
                     folders!!.removeAt(position)
 
                     val current_task = arrayListOf<Int>()
                     val progress_list = arrayListOf<Float>()
-                    for (folder in folders!!){
+                    for (folder in folders!!) {
                         current_task.add(folder.tasks!!.size)
                         progress_list.add(folder.progress.toFloat())
                     }
@@ -222,11 +257,11 @@ class GroupTask : Fragment(), NavigationView.OnNavigationItemSelectedListener,
                                 progress = progress,
                                 date = date
                             )
-                        dataBaseTask.createFolder(folderItem)
-                        val current_task = arrayListOf<Int>()
-                        val progress_list = arrayListOf<Float>()
+                        dataBaseTask.createFolder(uid!!, folderItem)
+                        current_task.clear()
+                        progress_list.clear()
                         folders!!.add(folderItem)
-                        for (folder in folders!!){
+                        for (folder in folders!!) {
                             current_task.add(folder.tasks!!.size)
                             progress_list.add(folder.progress.toFloat())
                         }
@@ -267,13 +302,13 @@ class GroupTask : Fragment(), NavigationView.OnNavigationItemSelectedListener,
                     date = formatedDate
                 )
 
-                dataBaseTask.createFolder(folder)
+                dataBaseTask.createFolder(uid!!,folder)
 
                 folders!!.add(folder)
 
                 val current_task = arrayListOf<Int>()
                 val progress_list = arrayListOf<Float>()
-                for (folder_item in folders!!){
+                for (folder_item in folders!!) {
                     current_task.add(folder_item.tasks!!.size)
                     progress_list.add(folder_item.progress.toFloat())
                 }
@@ -292,7 +327,7 @@ class GroupTask : Fragment(), NavigationView.OnNavigationItemSelectedListener,
             R.id.groupTask -> {
 
                 val groupTask: Fragment =
-                    GroupTask()
+                    GroupTask(accessUsers)
                 fragmentManager!!.beginTransaction()
                     .replace(R.id.linerLayout, groupTask)
                     .addToBackStack(null)
@@ -302,7 +337,7 @@ class GroupTask : Fragment(), NavigationView.OnNavigationItemSelectedListener,
                 val windowTask: Fragment =
                     WindowTask()
                 if (fragmentManager!!.findFragmentById(R.id.linerLayout) != null) {
-                    fragmentManager!!.beginTransaction().remove(GroupTask()).commit()
+                    fragmentManager!!.beginTransaction().remove(GroupTask(accessUsers)).commit()
                     fragmentManager!!.beginTransaction()
                         .replace(R.id.linerLayout, windowTask)
                         .addToBackStack(null)
@@ -312,7 +347,7 @@ class GroupTask : Fragment(), NavigationView.OnNavigationItemSelectedListener,
             /*доступ к задачам другим людям*/
             R.id.access -> {
 
-                val access: Fragment = Access()
+                val access: Fragment = Access(accessUsers)
                 fragmentManager!!.beginTransaction()
                     .replace(R.id.linerLayout, access)
                     .addToBackStack(null)
@@ -322,7 +357,7 @@ class GroupTask : Fragment(), NavigationView.OnNavigationItemSelectedListener,
             R.id.progress -> {
 
                 val progress: Fragment =
-                    Progress()
+                    Progress(accessUsers)
                 fragmentManager!!.beginTransaction()
                     .replace(R.id.linerLayout, progress)
                     .addToBackStack(null)
@@ -332,7 +367,7 @@ class GroupTask : Fragment(), NavigationView.OnNavigationItemSelectedListener,
             R.id.setting -> {
 
                 val setting: Fragment =
-                    Setting()
+                    Setting(accessUsers)
                 fragmentManager!!.beginTransaction()
                     .replace(R.id.linerLayout, setting)
                     .addToBackStack(null)
@@ -342,7 +377,7 @@ class GroupTask : Fragment(), NavigationView.OnNavigationItemSelectedListener,
             R.id.techSupport -> {
 
                 val techSupport: Fragment =
-                    TechSupport()
+                    TechSupport(accessUsers)
                 fragmentManager!!.beginTransaction()
                     .replace(R.id.linerLayout, techSupport)
                     .addToBackStack(null)
@@ -356,6 +391,16 @@ class GroupTask : Fragment(), NavigationView.OnNavigationItemSelectedListener,
                 val intent = Intent(activity!!.applicationContext, MainActivity::class.java)
                 //intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
                 startActivity(intent)
+            }
+            else -> {
+                for ((uid, name) in accessUsers!!) {
+                    if (menuItem.title == name) {
+                        val windowTask: Fragment =
+                            WindowTask()
+                        fragmentManager!!.beginTransaction()
+                            .replace(R.id.linerLayout, windowTask).addToBackStack(null).commit()
+                    }
+                }
             }
         }
         mDrawerLayout!!.closeDrawer(GravityCompat.START)

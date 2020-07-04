@@ -12,6 +12,8 @@ import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.core.view.GravityCompat
+import androidx.core.view.get
+import androidx.core.view.size
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -30,7 +32,8 @@ import com.google.firebase.auth.FirebaseAuth
 import com.miguelcatalan.materialsearchview.MaterialSearchView
 import io.reactivex.disposables.Disposable
 
-class Access : Fragment(), NavigationView.OnNavigationItemSelectedListener {
+class Access(val accessUsers: HashMap<String, String>?) : Fragment(),
+    NavigationView.OnNavigationItemSelectedListener {
 
     lateinit var disposable: Disposable
     private lateinit var mDrawerLayout: DrawerLayout
@@ -80,26 +83,31 @@ class Access : Fragment(), NavigationView.OnNavigationItemSelectedListener {
             nameUser.text = user.displayName
             emailUser.text = user.email
         }
-        createListUid(viewFragment)
+        listUsers(viewFragment)
+
+        if (accessUsers != null) {
+            addAccessUsers(accessUsers, navigationView)
+        }
+
         return viewFragment
     }
 
-    private fun getListUid(): ArrayList<String>? = list_uid
-
-    private fun createListUid(view: View) {
-        val dataBaseTask = DataBase()
-        disposable = dataBaseTask
-            .retrieveDataUid()
-            .subscribe { uids ->
-                if (list_uid != null) {
-                    if (list_uid!!.size > 0) {
-                        list_uid = arrayListOf()
-                    }
-                    for (uid_user in uids)
-                        list_uid!!.add(uid_user.id!!)
-                    listUsers(view)
-                }
+    private fun addAccessUsers(
+        accessUsers: HashMap<String, String>,
+        navigationView: NavigationView?
+    ) {
+        val menu = navigationView!!.menu
+        if (menu.size >= 7) {
+            for (position in 6 until menu.size())
+                menu[position].subMenu.clear()
+        }
+        val subMenu = menu.addSubMenu("Пользователи")
+        if (accessUsers.isNotEmpty()) {
+            for ((uid, user) in accessUsers) {
+                subMenu.add(0, 6, 0, user)
+                navigationView.invalidate()
             }
+        }
     }
 
     private fun listUsers(view: View) {
@@ -107,30 +115,26 @@ class Access : Fragment(), NavigationView.OnNavigationItemSelectedListener {
         val listUsers = view.findViewById<RecyclerView>(R.id.listViewUser)
         val layoutManager = LinearLayoutManager(context)
 
-        val stringList = mutableMapOf<String, Users>()
+        val stringList = mutableMapOf<String, String>()
         val dataBaseTask = DataBase()
-
-        val uids = getListUid()
-        if (uids != null) {
-            var position = 1
-            for (uid in uids) {
-                disposable = dataBaseTask
-                    .retrieveDataUser(uid)
-                    .subscribe { user_data ->
-                        if (uid != FirebaseAuth.getInstance().currentUser!!.uid) {
-                            stringList[uid] = user_data
-                        }
-                        if (position == uids.size) {
-                            listUsers.layoutManager = layoutManager
-                            listUsers.adapter =
-                                AdapterRecyclerViewAccess(context!!, stringList)
-                            if(!disposable.isDisposed)
-                                disposable.dispose()
-                        }
-                        position++
+        var position = 1
+        disposable = dataBaseTask
+            .retrieveDataUser()
+            .subscribe { user_data ->
+                for ((uid, name) in user_data) {
+                    if (uid != FirebaseAuth.getInstance().currentUser!!.uid) {
+                        stringList[uid] = name
                     }
+                    if (position == user_data.size) {
+                        listUsers.layoutManager = layoutManager
+                        listUsers.adapter =
+                            AdapterRecyclerViewAccess(context!!, stringList)
+                        if (!disposable.isDisposed)
+                            disposable.dispose()
+                    }
+                    position++
+                }
             }
-        }
     }
 
     override fun onNavigationItemSelected(menuItem: MenuItem): Boolean {
@@ -138,7 +142,7 @@ class Access : Fragment(), NavigationView.OnNavigationItemSelectedListener {
             /*группа задач*/
             R.id.groupTask -> {
                 val groupTask: Fragment =
-                    GroupTask()
+                    GroupTask(accessUsers)
                 fragmentManager!!.beginTransaction()
                     .replace(R.id.linerLayout, groupTask)
                     .addToBackStack(null)
@@ -155,7 +159,7 @@ class Access : Fragment(), NavigationView.OnNavigationItemSelectedListener {
             }
             /*доступ к задачам другим людям*/
             R.id.access -> {
-                val access: Fragment = Access()
+                val access: Fragment = Access(accessUsers)
                 fragmentManager!!.beginTransaction()
                     .replace(R.id.linerLayout, access)
                     .addToBackStack(null)
@@ -163,7 +167,7 @@ class Access : Fragment(), NavigationView.OnNavigationItemSelectedListener {
             }
             /*прогресс выполнения задач*/
             R.id.progress -> {
-                val progress: Fragment = Progress()
+                val progress: Fragment = Progress(accessUsers)
                 fragmentManager!!.beginTransaction()
                     .replace(R.id.linerLayout, progress)
                     .addToBackStack(null)
@@ -172,7 +176,7 @@ class Access : Fragment(), NavigationView.OnNavigationItemSelectedListener {
             /*настройки*/
             R.id.setting -> {
                 val setting: Fragment =
-                    Setting()
+                    Setting(accessUsers)
                 fragmentManager!!.beginTransaction()
                     .replace(R.id.linerLayout, setting)
                     .addToBackStack(null)
@@ -180,7 +184,7 @@ class Access : Fragment(), NavigationView.OnNavigationItemSelectedListener {
             }
             /*техподдержка*/
             R.id.techSupport -> {
-                val techSupport: Fragment = TechSupport()
+                val techSupport: Fragment = TechSupport(accessUsers)
                 fragmentManager!!.beginTransaction()
                     .replace(R.id.linerLayout, techSupport)
                     .addToBackStack(null)
@@ -192,6 +196,16 @@ class Access : Fragment(), NavigationView.OnNavigationItemSelectedListener {
                 mAuth.signOut()
                 val intent = Intent(activity!!.applicationContext, MainActivity::class.java)
                 startActivity(intent)
+            }
+            else -> {
+                for ((uid, name) in accessUsers!!) {
+                    if (menuItem.title == name) {
+                        val windowTask: Fragment =
+                            WindowTask()
+                        fragmentManager!!.beginTransaction()
+                            .replace(R.id.linerLayout, windowTask).addToBackStack(null).commit()
+                    }
+                }
             }
         }
         mDrawerLayout.closeDrawer(GravityCompat.START)

@@ -1,137 +1,120 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.drawerlayout.widget.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:app="http://schemas.android.com/apk/res-auto"
-        android:id="@+id/drawerLayout"
+        android:id="@+id/relativeLayout"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical">
+        android:layout_height="match_parent">
+
+    <androidx.appcompat.widget.Toolbar
+            android:id="@+id/toolbar"
+            style="@style/Toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+    </androidx.appcompat.widget.Toolbar>
+
+    <TextView
+            android:id="@+id/edit_account"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/toolbar"
+            android:layout_marginTop="7dp"
+            android:gravity="center"
+            android:text="Измените необходимую вам личную информацию"
+            android:textColor="#8D0C7595"
+            android:textSize="20sp"
+            android:typeface="monospace" />
 
     <RelativeLayout
-            android:id="@+id/relativeLayout"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
-
-        <androidx.appcompat.widget.Toolbar
-                android:id="@+id/toolbar"
-                style="@style/Toolbar"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content">
-
-        </androidx.appcompat.widget.Toolbar>
+            android:id="@+id/relative_info_nick"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/edit_account"
+            android:orientation="horizontal">
 
         <TextView
-                android:id="@+id/edit_account"
-                android:layout_width="match_parent"
+                android:id="@+id/nick"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_below="@id/toolbar"
+                android:layout_centerVertical="true"
+                android:layout_marginTop="10dp"
+                android:text="Ник" />
+
+        <com.google.android.material.card.MaterialCardView
+                android:id="@+id/nick_card"
+                android:layout_width="wrap_content"
+                android:layout_height="30dp"
+                android:layout_alignParentEnd="true"
+                android:layout_centerInParent="true"
+                android:layout_marginStart="38dp"
                 android:layout_marginTop="7dp"
-                android:gravity="center"
-                android:text="Измените необходимую вам личную информацию"
-                android:textColor="#8D0C7595"
-                android:textSize="20sp"
-                android:typeface="monospace" />
-
-        <RelativeLayout
-                android:id="@+id/relative_info_nick"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_below="@id/edit_account"
-                android:orientation="horizontal">
+                android:layout_toEndOf="@+id/nick"
+                app:cardBackgroundColor="@android:color/white">
 
             <TextView
-                    android:id="@+id/nick"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_centerVertical="true"
-                    android:layout_marginTop="10dp"
-                    android:text="Ник" />
-
-            <com.google.android.material.card.MaterialCardView
-                    android:id="@+id/nick_card"
-                    android:layout_width="wrap_content"
-                    android:layout_height="30dp"
-                    android:layout_alignParentEnd="true"
-                    android:layout_centerInParent="true"
-                    android:layout_marginStart="38dp"
-                    android:layout_marginTop="7dp"
-                    android:layout_toEndOf="@+id/nick"
-                    app:cardBackgroundColor="@android:color/white">
-
-                <TextView
-                        android:id="@+id/nick_text"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:gravity="center"
-                        android:textColor="#8D000000" />
-            </com.google.android.material.card.MaterialCardView>
-
-        </RelativeLayout>
-
-        <RelativeLayout
-                android:id="@+id/relative_info_mail"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_below="@+id/relative_info_nick"
-                android:orientation="horizontal">
-
-            <TextView
-                    android:id="@+id/emailText"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
-                    android:layout_marginEnd="5dp"
-                    android:text="Эл.почта" />
-
-            <com.google.android.material.card.MaterialCardView
-                    android:id="@+id/mail_card"
-                    android:layout_width="wrap_content"
-                    android:layout_height="30dp"
-                    android:layout_alignParentEnd="true"
-                    android:layout_marginTop="7dp"
-                    android:layout_marginBottom="7dp"
-                    android:layout_toEndOf="@+id/emailText"
-                    app:cardBackgroundColor="@android:color/white">
-
-                <TextView
-                        android:id="@+id/mail_text"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:gravity="center"
-                        android:textColor="#8D000000" />
-            </com.google.android.material.card.MaterialCardView>
-
-        </RelativeLayout>
-
-        <TextView
-                android:id="@+id/new_password"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_below="@+id/relative_info_mail"
-                android:gravity="center"
-                android:text="Сменить пароль"
-                android:textColor="#8D7F10EF"
-                android:typeface="monospace" />
-
-        <TextView
-                android:id="@+id/deleted_account"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_below="@+id/new_password"
-                android:layout_marginTop="5dp"
-                android:gravity="center"
-                android:text="Удалить аккаунт"
-                android:textColor="#8DEC2C1E"
-                android:typeface="monospace" />
+                    android:id="@+id/nick_text"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center"
+                    android:textColor="#8D000000" />
+        </com.google.android.material.card.MaterialCardView>
 
     </RelativeLayout>
 
-    <com.google.android.material.navigation.NavigationView
-            android:id="@+id/navigationView"
+    <RelativeLayout
+            android:id="@+id/relative_info_mail"
             android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_gravity="start"
-            android:layout_marginTop="?attr/actionBarSize"
-            app:headerLayout="@layout/header"
-            app:menu="@menu/drawer_menu" />
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/relative_info_nick"
+            android:orientation="horizontal">
 
-</androidx.drawerlayout.widget.DrawerLayout>
+        <TextView
+                android:id="@+id/emailText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:layout_marginEnd="5dp"
+                android:text="Эл.почта" />
+
+        <com.google.android.material.card.MaterialCardView
+                android:id="@+id/mail_card"
+                android:layout_width="wrap_content"
+                android:layout_height="30dp"
+                android:layout_alignParentEnd="true"
+                android:layout_marginTop="7dp"
+                android:layout_marginBottom="7dp"
+                android:layout_toEndOf="@+id/emailText"
+                app:cardBackgroundColor="@android:color/white">
+
+            <TextView
+                    android:id="@+id/mail_text"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:textColor="#8D000000" />
+        </com.google.android.material.card.MaterialCardView>
+
+    </RelativeLayout>
+
+    <TextView
+            android:id="@+id/new_password"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/relative_info_mail"
+            android:gravity="center"
+            android:text="Сменить пароль"
+            android:textColor="#8D7F10EF"
+            android:typeface="monospace" />
+
+    <TextView
+            android:id="@+id/deleted_account"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/new_password"
+            android:layout_marginTop="5dp"
+            android:gravity="center"
+            android:text="Удалить аккаунт"
+            android:textColor="#8DEC2C1E"
+            android:typeface="monospace" />
+
+</RelativeLayout>

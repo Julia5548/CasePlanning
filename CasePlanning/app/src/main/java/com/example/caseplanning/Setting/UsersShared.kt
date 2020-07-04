@@ -18,7 +18,7 @@ import com.example.caseplanning.adapter.AdapterSharedAccessUsers
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.firebase.auth.FirebaseAuth
 
-class UsersShared(listUsersShared: MutableMap<String, Users>?) : Fragment() {
+class UsersShared(listUsersShared: HashMap<String, Users>?) : Fragment() {
 
     private var mListUsersShared = listUsersShared
     private lateinit var mAdapter: AdapterSharedAccessUsers
@@ -62,14 +62,10 @@ class UsersShared(listUsersShared: MutableMap<String, Users>?) : Fragment() {
             .setMessage("Вы действительно хотите отказаться от всех предоставленных вам доступов?")
             .setPositiveButton("Да") { dialog, which ->
                 dialog.dismiss()
-                val update_user = Users()
                 val user = FirebaseAuth.getInstance().currentUser!!
-                user.let {
-                    update_user.name = user.displayName
-                    update_user.email = user.email
-                }
-                mListUsersShared = mutableMapOf()
-                dataBase.updateDataUser(update_user, user.uid)
+                val accessUsers = hashMapOf<String, String>()
+                mListUsersShared = hashMapOf()
+                dataBase.updateAccessUsers(accessUsers, user.uid)
                 try {
                     mAdapter.updateDate(mListUsersShared!!)
                 } catch (e: Exception) {

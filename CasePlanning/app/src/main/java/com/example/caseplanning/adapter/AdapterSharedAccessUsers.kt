@@ -20,13 +20,13 @@ import com.google.firebase.auth.FirebaseAuth
 
 class AdapterSharedAccessUsers(
     val context: Context,
-    data: MutableMap<String, Users>,
+    data: HashMap<String, Users>,
     val tag: String,
     val userTextAccess: TextView,
     val refuseAccess: TextView
 ) : RecyclerView.Adapter<AdapterSharedAccessUsers.ViewHolder>() {
 
-    var mData: MutableMap<String, Users> = data
+    var mData: HashMap<String, Users> = data
 
     inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
@@ -46,6 +46,7 @@ class AdapterSharedAccessUsers(
 
     @SuppressLint("SetTextI18n")
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+
         holder.name_user.text = mData.values.elementAt(position).name
         holder.switch.setOnCheckedChangeListener { buttonView, isChecked ->
             if (!isChecked) {
@@ -72,25 +73,19 @@ class AdapterSharedAccessUsers(
                     .setPositiveButton("Да") { dialog, which ->
                         dialog.dismiss()
                         val dataBase = DataBase()
-                        val update_user = Users()
+                        val accessUsers = hashMapOf<String, String>()
                         val user = FirebaseAuth.getInstance().currentUser!!
                         if (tag == "user_shared") {
                             mData.remove(mData.keys.elementAt(position))
-                            user.let {
-                                update_user.name = user.displayName
-                                update_user.email = user.email
-                            }
-                            for ((key, _) in mData)
-                                update_user.accessUsers.add(key)
-                            dataBase.updateDataUser(update_user, user.uid)
+                            for ((key, userdata) in mData)
+                                accessUsers[key] = userdata.name!!
+                            dataBase.updateAccessUsers(accessUsers, user.uid)
                             updateDate(mData)
                         } else {
-                            update_user.name = mData.values.elementAt(position).name
-                            update_user.email = mData.values.elementAt(position).email
                             mData.values.elementAt(position).accessUsers.remove(user.uid)
-                            for (values in mData.values.elementAt(position).accessUsers)
-                                update_user.accessUsers.add(values)
-                            dataBase.updateDataUser(update_user, mData.keys.elementAt(position))
+                            for ( (key, value) in mData.values.elementAt(position).accessUsers)
+                                accessUsers[key] = value
+                            dataBase.updateAccessUsers(accessUsers, mData.keys.elementAt(position))
                             mData.remove(mData.keys.elementAt(position))
                             updateDate(mData)
                         }
@@ -111,7 +106,7 @@ class AdapterSharedAccessUsers(
         }
     }
 
-    fun updateDate(mData: MutableMap<String, Users>) {
+    fun updateDate(mData: HashMap<String, Users >) {
         this.mData = hashMapOf()
         this.mData.putAll(mData)
         if (this.mData.isEmpty()) {
