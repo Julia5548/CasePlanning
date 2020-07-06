@@ -58,7 +58,7 @@ class CheckedTask() {
         }
     }
 
-    fun updateReplayTask(task: Task, checked: Boolean, day: String) {
+    fun updateReplayTask(task: Task, checked: Boolean, day: String, uid: String) {
         val database = DataBase()
         val checkedDate = day.replace('.', '-')
         if (checked) {
@@ -66,12 +66,13 @@ class CheckedTask() {
         } else {
             task.checkedTasks!!.remove(checkedDate)
         }
-        database.updateDataTask(task, task.idTasks!!)
+        database.updateDataTask(task, task.idTasks!!, uid)
     }
 
     fun updateTask(
         task: Task,
-        checked: Boolean
+        checked: Boolean,
+        uid: String
     ) {
         val dataBase = DataBase()
         if (checked) {
@@ -79,7 +80,7 @@ class CheckedTask() {
         } else {
             task.checked = checked
         }
-        dataBase.updateDataTask(task, task.idTasks!!)
+        dataBase.updateDataTask(task, task.idTasks!!, uid)
     }
 
     fun checkedTask(checked: Boolean) {

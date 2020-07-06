@@ -106,7 +106,12 @@ class WindowTask : Fragment(), NavigationView.OnNavigationItemSelectedListener {
                     throwable.printStackTrace()
                 })
 
-        calendar(viewFragment, FirebaseAuth.getInstance().currentUser!!.uid, "")
+        val uid = if(arguments != null){
+            arguments!!.getString("uid")
+        }else{
+            FirebaseAuth.getInstance().currentUser!!.uid
+        }
+        calendar(viewFragment, uid!!, "")
 
         return viewFragment
     }
@@ -320,6 +325,14 @@ class WindowTask : Fragment(), NavigationView.OnNavigationItemSelectedListener {
 
         val createTask: Fragment =
             CreateTaskWindow(date_task, null)
+        val arg = Bundle()
+        if(uid_friends == null) {
+            arg.putString("uid", FirebaseAuth.getInstance().currentUser!!.uid)
+        }
+        else{
+            arg.putString("uid", uid_friends)
+        }
+        createTask.arguments = arg
         fragmentManager!!.beginTransaction().replace(R.id.linerLayout, createTask)
             .addToBackStack(null).commit()
 

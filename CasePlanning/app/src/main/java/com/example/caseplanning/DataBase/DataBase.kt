@@ -190,10 +190,10 @@ class DataBase {
             .setValue(users)
     }
 
-    fun createTask(task: Task) = FirebaseDatabase
+    fun createTask(task: Task, uid: String) = FirebaseDatabase
         .getInstance()
         .reference
-        .child(FirebaseAuth.getInstance().currentUser!!.uid)
+        .child(uid)
         .child("Tasks")
         .push()
         .setValue(task)
@@ -223,10 +223,10 @@ class DataBase {
             .setValue(accessUsers)
     }
 
-    fun updateDataTask(task: Task, key: String) = FirebaseDatabase
+    fun updateDataTask(task: Task, key: String, uid: String) = FirebaseDatabase
         .getInstance()
         .reference
-        .child(FirebaseAuth.getInstance().currentUser!!.uid)
+        .child(uid)
         .child("Tasks")
         .child(key)
         .setValue(task)
@@ -239,10 +239,10 @@ class DataBase {
         .child(key)
         .setValue(folder)
 
-    fun deletedDataTask(key: String) = FirebaseDatabase
+    fun deletedDataTask(key: String, uid: String) = FirebaseDatabase
         .getInstance()
         .reference
-        .child(FirebaseAuth.getInstance().currentUser!!.uid)
+        .child(uid)
         .child("Tasks")
         .child(key)
         .removeValue()

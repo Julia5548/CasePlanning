@@ -44,10 +44,16 @@ class EditTask(mTask: Task?) : Fragment() {
     private var listSubTask: ArrayList<String>? = arrayListOf()
     private var listSubTasksView: ArrayList<View>? = arrayListOf()
     var pageViewModel: MyViewModel? = null
+    var uid: String? = ""
     var colorName: String? = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        if(arguments != null){
+            uid = arguments!!.getString("uid")
+            arguments = null
+        }
 
         pageViewModel = ViewModelProviders.of(this).get(MyViewModel::class.java)
         Log.d("onCreate", "onCreate")
@@ -241,6 +247,10 @@ class EditTask(mTask: Task?) : Fragment() {
 
     private fun loadMedia() {
         if (tasksData!!.photo != null && tasksData!!.photo != "") {
+
+            val btn_photo = view!!.findViewById<ImageButton>(R.id.btnAddPhoto)
+            btn_photo.isEnabled = false
+
             val relativeLayout: RelativeLayout = view!!.findViewById(R.id.photo_image)
             relativeLayout.visibility = View.VISIBLE
             var imageView:ImageView? = null
@@ -257,6 +267,10 @@ class EditTask(mTask: Task?) : Fragment() {
         }
 
         if (tasksData!!.video != null && tasksData!!.video != "") {
+
+            val btn_video = view!!.findViewById<ImageButton>(R.id.btnAddVideo)
+            btn_video.isEnabled = false
+
             val relativeLayout: RelativeLayout = view!!.findViewById(R.id.video)
             relativeLayout.visibility = View.VISIBLE
             val video = view!!.findViewById<VideoView>(R.id.videoView)
@@ -265,7 +279,17 @@ class EditTask(mTask: Task?) : Fragment() {
         }
 
         if (tasksData!!.audio != null && tasksData!!.audio != "") {
+            val btn_audio = view!!.findViewById<ImageButton>(R.id.addAudio)
+            btn_audio.isEnabled = false
+
             val audio: Fragment = AudioTask(tasksData, null)
+            val frame = view!!.findViewById<FrameLayout>(R.id.audio)
+            frame.removeAllViews()
+            frame.visibility = View.VISIBLE
+
+            val deletedAudio = view!!.findViewById<TextView>(R.id.deletedAudio)
+            deletedAudio.visibility = View.VISIBLE
+
             fragmentManager!!.beginTransaction().add(R.id.audio, audio).commit()
         }
     }
@@ -650,10 +674,11 @@ class EditTask(mTask: Task?) : Fragment() {
 
         val task = saveDataTask()
         val dataBaseTask = DataBase()
-        dataBaseTask.updateDataTask(task, task.idTasks!!)
+        dataBaseTask.updateDataTask(task, task.idTasks!!, uid!!)
 
         pageViewModel?.task?.value = null
         val intent = Intent(context, MainWindowCasePlanning :: class.java)
+        intent.putExtra("uid", uid!!)
         startActivity(intent)
     }
 

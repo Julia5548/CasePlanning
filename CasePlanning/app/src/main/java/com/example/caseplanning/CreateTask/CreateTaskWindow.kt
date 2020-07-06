@@ -45,12 +45,18 @@ class CreateTaskWindow(val date_task: String?, mTask : Task?) : Fragment() {
     private var pageViewModel: MyViewModel? = null
     var textPeriod = ""
     var colorName = ""
+    var uid : String? = ""
     var task: Task? = mTask
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         // retainInstance = true
         pageViewModel = ViewModelProviders.of(this).get(MyViewModel::class.java)
+
+        if(arguments != null){
+            uid = arguments!!.getString("uid")
+            arguments = null
+        }
     }
 
     @SuppressLint("SetTextI18n")
@@ -229,6 +235,10 @@ class CreateTaskWindow(val date_task: String?, mTask : Task?) : Fragment() {
 
             val btn_audio = view!!.findViewById<ImageButton>(R.id.addAudio)
             btn_audio.isEnabled = false
+
+            val frame = view!!.findViewById<FrameLayout>(R.id.audio)
+            frame.removeAllViews()
+            frame.visibility = View.GONE
 
             val deletedAudio = view!!.findViewById<ImageButton>(R.id.deletedAudio)
             deletedAudio.visibility = View.VISIBLE
@@ -688,11 +698,12 @@ class CreateTaskWindow(val date_task: String?, mTask : Task?) : Fragment() {
         //  scheduleNotification(task.day, task.notification, task.name!!)
 
         val dataBaseTask = DataBase()
-        dataBaseTask.createTask(task)
+        dataBaseTask.createTask(task, uid!!)
 
         pageViewModel?.task?.value = null
 
         val intent = Intent(context, MainWindowCasePlanning::class.java)
+        intent.putExtra("uid", uid!!)
         startActivity(intent)
     }
 

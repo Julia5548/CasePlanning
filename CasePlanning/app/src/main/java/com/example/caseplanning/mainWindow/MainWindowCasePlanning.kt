@@ -15,10 +15,18 @@ class MainWindowCasePlanning : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main_window_case_planning)
 
+        val intent = intent
+        val uid = intent.getStringExtra("uid")
+        val arg = Bundle()
+        val windowTask = WindowTask()
+        if(uid != null && uid != "") {
+            arg.putString("uid", uid)
+            windowTask.arguments = arg
+        }
         supportFragmentManager.beginTransaction()
             .add(
                 R.id.linerLayout,
-                WindowTask()
+                windowTask
             )
             .commitAllowingStateLoss()
 

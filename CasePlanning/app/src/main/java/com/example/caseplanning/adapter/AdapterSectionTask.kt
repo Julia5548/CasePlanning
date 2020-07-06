@@ -2,6 +2,7 @@ package com.example.caseplanning.adapter
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -130,9 +131,9 @@ class AdapterSectionTask(
                 childViewHolder.checkedTask
             )
             if (task.replay != "Нет >") {
-                checkedTask.updateReplayTask(task, isChecked, mDay!!)
+                checkedTask.updateReplayTask(task, isChecked, mDay!!, mUid)
             } else {
-                checkedTask.updateTask(task, isChecked)
+                checkedTask.updateTask(task, isChecked, mUid)
             }
             mData.removeAll(mData)
             notifyDataChanged(mData)
@@ -180,6 +181,9 @@ class AdapterSectionTask(
                     }
                     R.id.edit -> {
                         val editTask: Fragment = EditTask(task)
+                        val arg = Bundle()
+                        arg.putString("uid", mUid)
+                        editTask.arguments = arg
                         (context as AppCompatActivity).supportFragmentManager
                             .beginTransaction()
                             .remove(WindowTask())
@@ -188,7 +192,7 @@ class AdapterSectionTask(
                         true
                     }
                     R.id.delete -> {
-                        dataBaseTask.deletedDataTask(task.idTasks!!)
+                        dataBaseTask.deletedDataTask(task.idTasks!!, mUid)
                         mData.removeAll(mData)
                         notifyDataChanged(mData)
                         Toast.makeText(context, "Задача удалена", Toast.LENGTH_SHORT)
@@ -231,7 +235,7 @@ class AdapterSectionTask(
 
     private fun tomorrowTask(task: Task, nextDate: String) {
         task.day = nextDate
-        dataBaseTask.updateDataTask(task, task.idTasks!!)
+        dataBaseTask.updateDataTask(task, task.idTasks!!, mUid)
 
         mData.removeAll(mData)
         notifyDataChanged(mData)
