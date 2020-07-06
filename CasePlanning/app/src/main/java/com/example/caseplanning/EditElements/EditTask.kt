@@ -23,6 +23,7 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import butterknife.*
 import com.example.caseplanning.CreateTask.MyViewModel
+import com.example.caseplanning.CreateTask.StorageFile
 import com.example.caseplanning.CreateTask.TimePicker
 import com.example.caseplanning.DataBase.DataBase
 import com.example.caseplanning.DataBase.Task
@@ -269,6 +270,58 @@ class EditTask(mTask: Task?) : Fragment() {
         }
     }
 
+    @OnClick(R.id.deletedAudio)
+    fun deletedAudio() {
+        if (tasksData!!.audio != "") {
+            val name = tasksData!!.audio!!.split("/")
+            val storageFile = StorageFile(name[4], tasksData!!.audio!!, context!!)
+            storageFile.deletedAudio()
+        }
+        val btn_audio = view!!.findViewById<ImageButton>(R.id.addAudio)
+        btn_audio.isEnabled = true
+
+        val frame = view!!.findViewById<FrameLayout>(R.id.audio)
+        frame.removeAllViews()
+        frame.visibility = View.GONE
+
+        val deletedAudio = view!!.findViewById<TextView>(R.id.deletedAudio)
+        deletedAudio.visibility = View.GONE
+
+        tasksData!!.audio = ""
+        tasksData!!.timeAudio = ""
+
+        fragmentManager!!.beginTransaction().remove(AudioTask(null, null)).commit()
+
+    }
+
+    @OnClick(R.id.deletedPhoto)
+    fun deletedPhoto(){
+        val name = tasksData!!.photo!!.split("/")
+        val storageFile = StorageFile(name[9], tasksData!!.photo!!, context!!)
+        storageFile.deletedPhoto()
+        val relativeLayout: RelativeLayout = view!!.findViewById(R.id.photo_image)
+        relativeLayout.visibility = View.GONE
+        val btn_video = view!!.findViewById<ImageButton>(R.id.btnAddPhoto)
+        btn_video.isEnabled = true
+
+
+        tasksData!!.photo = ""
+    }
+
+    @OnClick(R.id.deletedVideo)
+    fun deletedVideo(){
+
+        val name = tasksData!!.video!!.split("/")
+        val storageFile = StorageFile(name[6], tasksData!!.video!!, context!!)
+        storageFile.deletedVideo()
+        val relativeLayout: RelativeLayout = view!!.findViewById(R.id.video)
+        relativeLayout.visibility = View.GONE
+        val btn_video = view!!.findViewById<ImageButton>(R.id.btnAddVideo)
+        btn_video.isEnabled = true
+
+        tasksData!!.video = ""
+    }
+
     /*добавление фото задачи*/
     @OnClick(R.id.btnAddPhoto)
     fun onClickAddPhoto() {
@@ -296,6 +349,10 @@ class EditTask(mTask: Task?) : Fragment() {
     @OnClick(R.id.addAudio)
     fun onClickAddAudio() {
         val audio = AudioTask(tasksData, pageViewModel)
+
+        val frame = view!!.findViewById<FrameLayout>(R.id.audio)
+        frame.visibility = View.VISIBLE
+
         fragmentManager!!.beginTransaction().add(R.id.audio, audio).commit()
     }
 

@@ -160,4 +160,45 @@ class StorageFile() {
         }
         return localFile.path
     }
+    fun deletedPhoto(){
+
+        val deletedPhoto = mStorageReference.child("images/$mNameFiles")
+        deletedPhoto.delete()
+            .addOnSuccessListener {
+                Toast.makeText(mContext, "Фотография удалена", Toast.LENGTH_SHORT)
+                    .show()
+            }
+            .addOnFailureListener {
+                Toast.makeText(mContext, "Фотография не удалена", Toast.LENGTH_SHORT)
+                    .show()
+            }
+    }
+
+    fun deletedVideo(){
+
+        val deletedPhoto = mStorageReference.child("videos/$mNameFiles")
+        deletedPhoto.delete()
+            .addOnSuccessListener {
+                Toast.makeText(mContext, "Видео удалена", Toast.LENGTH_SHORT)
+                    .show()
+            }
+            .addOnFailureListener {
+                Toast.makeText(mContext, "Видео не удалена", Toast.LENGTH_SHORT)
+                    .show()
+            }
+    }
+
+    fun deletedAudio(){
+
+        val deletedPhoto = mStorageReference.child("audios/$mNameFiles")
+        deletedPhoto.delete()
+            .addOnSuccessListener {
+                Toast.makeText(mContext, "Аудио удалена", Toast.LENGTH_SHORT)
+                    .show()
+            }
+            .addOnFailureListener {
+                Toast.makeText(mContext, "Аудио не удалена", Toast.LENGTH_SHORT)
+                    .show()
+            }
+    }
 }

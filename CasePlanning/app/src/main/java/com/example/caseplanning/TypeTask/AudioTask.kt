@@ -34,7 +34,7 @@ import java.io.File
 import java.lang.Exception
 
 
-class AudioTask(val task : Task?, val pageViewModel: MyViewModel?) : Fragment() {
+class AudioTask(val task: Task?, val pageViewModel: MyViewModel?) : Fragment() {
 
     private var mediaRecorder: MediaRecorder? = null
     private var mediaPlayer: MediaPlayer? = null
@@ -166,7 +166,7 @@ class AudioTask(val task : Task?, val pageViewModel: MyViewModel?) : Fragment() 
             val name = fileName.split("/")
             val storage = StorageFile(nameFile = name[4], path = fileName, context = context!!)
             storage.loadAudio()
-          } else {
+        } else {
             Log.d("Tag", "Audio stop is not possible")
         }
     }
@@ -229,6 +229,7 @@ class AudioTask(val task : Task?, val pageViewModel: MyViewModel?) : Fragment() 
             chronometer!!.base = SystemClock.elapsedRealtime()
         }
     }
+
     override fun onRequestPermissionsResult(
         requestCode: Int,
         permissions: Array<out String>,

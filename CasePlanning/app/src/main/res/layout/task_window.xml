@@ -14,7 +14,7 @@
         <com.google.android.material.appbar.MaterialToolbar
                 android:id="@+id/toolbar"
                 android:layout_width="match_parent"
-                android:layout_height="?attr/actionBarSize"/>
+                android:layout_height="?attr/actionBarSize" />
 
         <LinearLayout
                 android:id="@+id/addTask"
@@ -88,31 +88,50 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" />
 
-        <FrameLayout
+        <RelativeLayout
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:id="@+id/audio"/>
+                android:layout_height="wrap_content">
+
+            <FrameLayout
+                    android:id="@+id/audio"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+
+
+            <TextView
+                    android:id="@+id/deletedAudio"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:visibility="gone"
+                    android:layout_marginEnd="21dp"
+                    android:text="Удалить"
+                    android:textColor="#E43D3D"
+                    android:textSize="20sp" />
+        </RelativeLayout>
 
         <LinearLayout
                 android:id="@+id/type"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:baselineAligned="false">
+                android:baselineAligned="false"
+                android:orientation="horizontal">
 
-            <include layout="@layout/video"
-                    android:id = "@+id/video"
-                    android:layout_weight="1"
-                    android:visibility="gone"
+            <include
+                    android:id="@+id/video"
+                    layout="@layout/video"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"/>
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:visibility="gone" />
 
-            <include layout="@layout/photo"
-                    android:id = "@+id/photo_image"
-                    android:layout_weight="1"
-                    android:visibility="gone"
+            <include
+                    android:id="@+id/photo_image"
+                    layout="@layout/photo"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"/>
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:visibility="gone" />
 
         </LinearLayout>
 
@@ -141,8 +160,8 @@
             <Button
                     android:id="@+id/add"
                     android:layout_width="wrap_content"
-                    android:layout_alignParentEnd="true"
                     android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
                     android:text="@string/add" />
         </RelativeLayout>
 

@@ -1,10 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
-        xmlns:android="http://schemas.android.com/apk/res/android"
-        android:orientation="vertical"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/linearLayoutPhoto"
         android:layout_width="wrap_content"
-        android:id = "@+id/linearLayoutPhoto"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
 
     <TextView
             android:id="@+id/photoText"
@@ -15,13 +14,26 @@
             android:text="Фото"
             android:textSize="20sp" />
 
-    <ImageView
-            android:id="@+id/photoImage"
-            android:layout_width="150dp"
-            android:layout_height="150dp"
+    <RelativeLayout
+            android:layout_width="160dp"
+            android:layout_height="160dp"
             android:layout_below="@+id/photoText"
-            android:layout_centerInParent="true"
-            android:layout_marginTop="7dp"
-            android:contentDescription="@string/addphoto" />
+            android:layout_centerInParent="true">
 
+        <ImageView
+                android:id="@+id/photoImage"
+                android:layout_width="150dp"
+                android:layout_height="150dp"
+                android:layout_centerInParent="true"
+                android:layout_marginTop="7dp"
+                android:contentDescription="@string/addphoto" />
+
+        <ImageButton
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:id="@+id/deletedPhoto"
+                android:layout_alignParentEnd="true"
+                android:layout_marginTop="-5dp"
+                android:src="@drawable/ic_close_black_24dp" />
+    </RelativeLayout>
 </RelativeLayout>

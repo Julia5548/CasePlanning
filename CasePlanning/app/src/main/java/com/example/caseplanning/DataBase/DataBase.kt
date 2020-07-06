@@ -118,33 +118,35 @@ class DataBase {
         }
     }
 
-    private fun readAccess(uid: String) : Observable<HashMap<String, String>>{
+    private fun readAccess(uid: String): Observable<HashMap<String, String>> {
         val reference = FirebaseDatabase.getInstance().reference
             .child(uid)
             .child("accessUsers")
-        return object : Observable<HashMap<String, String>>(){
+        return object : Observable<HashMap<String, String>>() {
             override fun subscribeActual(observer: Observer<in HashMap<String, String>>?) {
                 val disposal = RxFirebaseDatabase
                     .dataChanges(reference)
-                    .subscribe(fun(dataSnapshot : DataSnapshot){
-                        val genericAccess = object : GenericTypeIndicator<HashMap<String, String>>(){}
+                    .subscribe(fun(dataSnapshot: DataSnapshot) {
+                        val genericAccess =
+                            object : GenericTypeIndicator<HashMap<String, String>>() {}
                         val access = HashMap<String, String>()
-                        if(dataSnapshot.exists()){
+                        if (dataSnapshot.exists()) {
                             val data = dataSnapshot.getValue(genericAccess)
-                            for(( uid_access, user) in data!!){
+                            for ((uid_access, user) in data!!) {
                                 access[uid_access] = user
                             }
                         }
                         observer!!.onNext(access)
                     },
-                        {t: Throwable? ->
+                        { t: Throwable? ->
                             t!!.printStackTrace()
                         })
             }
 
         }
     }
-    private fun readFolder(uid:String): Observable<List<Folder>> {
+
+    private fun readFolder(uid: String): Observable<List<Folder>> {
 
         val databaseReference =
             FirebaseDatabase.getInstance().reference.child(uid)
@@ -160,13 +162,15 @@ class DataBase {
                         if (dataSnapshot.exists()) {
                             val table = dataSnapshot.getValue(genericList)
                             for ((key, value) in table!!) {
-                                folders.add(Folder(
-                                    id = key,
-                                    name = value.name,
-                                    tasks = value.tasks,
-                                    progress = value.progress,
-                                    date = value.date
-                                ))
+                                folders.add(
+                                    Folder(
+                                        id = key,
+                                        name = value.name,
+                                        tasks = value.tasks,
+                                        progress = value.progress,
+                                        date = value.date
+                                    )
+                                )
                             }
                         }
                         observer!!.onNext(folders)
@@ -187,29 +191,30 @@ class DataBase {
     }
 
     fun createTask(task: Task) = FirebaseDatabase
-            .getInstance()
-            .reference
-            .child(FirebaseAuth.getInstance().currentUser!!.uid)
-            .child("Tasks")
-            .push()
-            .setValue(task)
+        .getInstance()
+        .reference
+        .child(FirebaseAuth.getInstance().currentUser!!.uid)
+        .child("Tasks")
+        .push()
+        .setValue(task)
 
-    fun createFolder(uid : String,folder: Folder) = FirebaseDatabase
-            .getInstance()
-            .reference
-            .child(uid)
-            .child("Folders")
-            .push()
-            .setValue(folder)
+    fun createFolder(uid: String, folder: Folder) = FirebaseDatabase
+        .getInstance()
+        .reference
+        .child(uid)
+        .child("Folders")
+        .push()
+        .setValue(folder)
 
-    fun updateDataUser(access_user: HashMap<String, String>){
+    fun updateDataUser(access_user: HashMap<String, String>) {
         FirebaseDatabase
             .getInstance()
             .reference
             .child("Users")
             .setValue(access_user)
     }
-    fun updateAccessUsers(accessUsers : HashMap<String, String>, uid: String){
+
+    fun updateAccessUsers(accessUsers: HashMap<String, String>, uid: String) {
         FirebaseDatabase
             .getInstance()
             .reference
@@ -219,14 +224,14 @@ class DataBase {
     }
 
     fun updateDataTask(task: Task, key: String) = FirebaseDatabase
-            .getInstance()
-            .reference
-            .child(FirebaseAuth.getInstance().currentUser!!.uid)
-            .child("Tasks")
-            .child(key)
-            .setValue(task)
+        .getInstance()
+        .reference
+        .child(FirebaseAuth.getInstance().currentUser!!.uid)
+        .child("Tasks")
+        .child(key)
+        .setValue(task)
 
-    fun updateDataFolder(folder : Folder, key : String, uid: String) = FirebaseDatabase
+    fun updateDataFolder(folder: Folder, key: String, uid: String) = FirebaseDatabase
         .getInstance()
         .reference
         .child(uid)
@@ -235,26 +240,46 @@ class DataBase {
         .setValue(folder)
 
     fun deletedDataTask(key: String) = FirebaseDatabase
-            .getInstance()
-            .reference
-            .child(FirebaseAuth.getInstance().currentUser!!.uid)
-            .child("Tasks")
-            .child(key)
-            .removeValue()
+        .getInstance()
+        .reference
+        .child(FirebaseAuth.getInstance().currentUser!!.uid)
+        .child("Tasks")
+        .child(key)
+        .removeValue()
 
-    fun deletedDataFolder(uid: String, key:String) = FirebaseDatabase
+    fun deletedDataFolder(uid: String, key: String) = FirebaseDatabase
+        .getInstance()
+        .reference
+        .child(uid)
+        .child("Folders")
+        .child(key)
+        .removeValue()
+
+    fun deletedFolderItem(uid: String, folder: Folder) {
+        val query = FirebaseDatabase
             .getInstance()
             .reference
             .child(uid)
             .child("Folders")
-            .child(key)
-            .removeValue()
+            .orderByChild("name")
+            .equalTo(folder.name)
+        query.addListenerForSingleValueEvent(object : ValueEventListener{
+            override fun onCancelled(databaseError: DatabaseError) {
+                Log.e("Error", "onCancelled", databaseError.toException())
+            }
 
-    fun retrieveData(uid:String): Observable<List<Task>> {
+            override fun onDataChange(dataSnapshot: DataSnapshot) {
+                for(data in dataSnapshot.children)
+                    data.ref.removeValue()
+            }
+        })
+    }
+
+    fun retrieveData(uid: String): Observable<List<Task>> {
         return readData(uid)
     }
 
-    fun retrieveAccess(uid: String): Observable<HashMap<String, String>>{
+    fun retrieveAccess(uid: String): Observable<HashMap<String, String>> {
         return readAccess(uid)
     }
 
@@ -266,13 +291,13 @@ class DataBase {
         return readUid()
     }
 
-    fun retrieveDataFolders(uid:String): Observable<List<Folder>> {
+    fun retrieveDataFolders(uid: String): Observable<List<Folder>> {
         return readFolder(uid)
     }
 
     fun deletedUser(uid: String) = FirebaseDatabase
-    .getInstance()
-    .reference
-    .child(uid)
-    .removeValue()
+        .getInstance()
+        .reference
+        .child(uid)
+        .removeValue()
 }

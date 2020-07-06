@@ -226,10 +226,14 @@ class GroupTask(val accessUsers: HashMap<String, String>?) : Fragment(),
                     val progress = mAdapterFolder!!.mData[position].progress
                     val date = mAdapterFolder!!.mData[position].date
                     taskList = mAdapterFolder!!.mData[position].tasks
+                    if(mAdapterFolder!!.mData[position].id != "") {
                         dataBaseTask.deletedDataFolder(
                             uid = uid!!,
                             key = mAdapterFolder!!.mData[position].id
                         )
+                    }else{
+                        dataBaseTask.deletedFolderItem(uid!!, mAdapterFolder!!.mData[position])
+                    }
                     folders!!.removeAt(position)
 
                     val current_task = arrayListOf<Int>()
@@ -240,8 +244,6 @@ class GroupTask(val accessUsers: HashMap<String, String>?) : Fragment(),
                     }
 
                     mAdapterFolder!!.update(folders!!, current_task, progress_list)
-//                    mAdapterFolder!!.mData.removeAt(position)
-//                    mAdapterFolder!!.notifyDataSetChanged()
 
                     val snackbar = Snackbar.make(
                         relativeLayout,

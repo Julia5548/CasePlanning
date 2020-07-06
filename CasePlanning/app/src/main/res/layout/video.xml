@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="wrap_content"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
         android:id="@+id/relativeLayoutVideo"
         android:layout_height="wrap_content">
 
@@ -12,11 +13,25 @@
                 android:gravity="center"
                 android:text="Видео"
                 android:textSize="20sp" />
+
+        <RelativeLayout
+                android:layout_width="160dp"
+                android:layout_below="@+id/videoText"
+                android:layout_centerInParent="true"
+                android:layout_height="160dp">
         <VideoView
                 android:id="@+id/videoView"
                 android:layout_width="150dp"
                 android:layout_height="150dp"
-                android:layout_centerInParent="true"
-                android:layout_below="@+id/videoText"
-                android:layout_marginTop="7dp" />
+                android:layout_marginTop="7dp"/>
+
+                <ImageButton
+                        android:layout_width="30dp"
+                        android:layout_height="30dp"
+                        android:id="@+id/deletedVideo"
+                        android:layout_alignParentEnd="true"
+                        android:layout_marginTop="-5dp"
+                        android:src="@drawable/ic_close_black_24dp" />
+        </RelativeLayout>
+
 </RelativeLayout>

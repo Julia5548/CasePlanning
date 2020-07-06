@@ -5,6 +5,7 @@ import android.content.Intent
 import android.graphics.BitmapFactory
 import android.graphics.PorterDuff
 import android.graphics.drawable.BitmapDrawable
+import android.opengl.Visibility
 import android.os.Build
 import android.os.Bundle
 import android.preference.PreferenceManager
@@ -195,6 +196,8 @@ class CreateTaskWindow(val date_task: String?, mTask : Task?) : Fragment() {
     private fun loadMedia() {
 
         if (task!!.photo != null && task!!.photo != "") {
+            val btn_photo = view!!.findViewById<ImageButton>(R.id.btnAddPhoto)
+            btn_photo.isEnabled = false
             val relativeLayout: RelativeLayout = view!!.findViewById(R.id.photo_image)
             relativeLayout.visibility = View.VISIBLE
             var imageView: ImageView? = null
@@ -211,6 +214,10 @@ class CreateTaskWindow(val date_task: String?, mTask : Task?) : Fragment() {
         }
 
         if (task!!.video != null && task!!.video != "") {
+
+            val btn_video = view!!.findViewById<ImageButton>(R.id.btnAddVideo)
+            btn_video.isEnabled = false
+
             val relativeLayout: RelativeLayout = view!!.findViewById(R.id.video)
             relativeLayout.visibility = View.VISIBLE
             val video = view!!.findViewById<VideoView>(R.id.videoView)
@@ -219,6 +226,13 @@ class CreateTaskWindow(val date_task: String?, mTask : Task?) : Fragment() {
         }
 
         if (task!!.audio != null && task!!.audio != "") {
+
+            val btn_audio = view!!.findViewById<ImageButton>(R.id.addAudio)
+            btn_audio.isEnabled = false
+
+            val deletedAudio = view!!.findViewById<ImageButton>(R.id.deletedAudio)
+            deletedAudio.visibility = View.VISIBLE
+
             val audio: Fragment = AudioTask(task, null)
             fragmentManager!!.beginTransaction().add(R.id.audio, audio).commit()
         }
@@ -379,6 +393,57 @@ class CreateTaskWindow(val date_task: String?, mTask : Task?) : Fragment() {
         }
     }
 
+    @OnClick(R.id.deletedAudio)
+    fun deletedAudio() {
+        if (task!!.audio != "") {
+            val name = task!!.audio!!.split("/")
+            val storageFile = StorageFile(name[4], task!!.audio!!, context!!)
+            storageFile.deletedAudio()
+        }
+        val btn_audio = view!!.findViewById<ImageButton>(R.id.addAudio)
+        btn_audio.isEnabled = true
+
+        val frame = view!!.findViewById<FrameLayout>(R.id.audio)
+        frame.removeAllViews()
+        frame.visibility = View.GONE
+
+        val deletedAudio = view!!.findViewById<TextView>(R.id.deletedAudio)
+        deletedAudio.visibility = View.GONE
+
+        task!!.audio = ""
+        task!!.timeAudio = ""
+
+        fragmentManager!!.beginTransaction().remove(AudioTask(null, null)).commit()
+
+    }
+
+    @OnClick(R.id.deletedPhoto)
+     fun deletedPhoto(){
+        val name = task!!.photo!!.split("/")
+        val storageFile = StorageFile(name[9], task!!.photo!!, context!!)
+        storageFile.deletedPhoto()
+        val relativeLayout: RelativeLayout = view!!.findViewById(R.id.photo_image)
+        relativeLayout.visibility = View.GONE
+        val btn_video = view!!.findViewById<ImageButton>(R.id.btnAddPhoto)
+        btn_video.isEnabled = true
+
+
+        task!!.photo = ""
+    }
+
+    @OnClick(R.id.deletedVideo)
+     fun deletedVideo(){
+
+        val name = task!!.video!!.split("/")
+        val storageFile = StorageFile(name[6], task!!.video!!, context!!)
+        storageFile.deletedVideo()
+        val relativeLayout: RelativeLayout = view!!.findViewById(R.id.video)
+        relativeLayout.visibility = View.GONE
+        val btn_video = view!!.findViewById<ImageButton>(R.id.btnAddVideo)
+        btn_video.isEnabled = true
+
+        task!!.video = ""
+    }
     /*добавление фото задачи*/
     @OnClick(R.id.btnAddPhoto)
     fun onClickAddPhoto() {
@@ -405,7 +470,15 @@ class CreateTaskWindow(val date_task: String?, mTask : Task?) : Fragment() {
     @OnClick(R.id.addAudio)
     fun onClickAddAudio() {
         task = saveDataTask()
+
+        val deletedAudio = view!!.findViewById<TextView>(R.id.deletedAudio)
+        deletedAudio.visibility = View.VISIBLE
+
         val audio = AudioTask(task, pageViewModel)
+
+        val frame = view!!.findViewById<FrameLayout>(R.id.audio)
+        frame.visibility = View.VISIBLE
+
         fragmentManager!!.beginTransaction().add(R.id.audio, audio).commit()
     }
 
