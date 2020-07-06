@@ -38,14 +38,14 @@ import com.example.caseplanning.mainWindow.MainWindowCasePlanning
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import java.util.*
 
-class CreateTaskWindow(val date_task: String?, mTask : Task?) : Fragment() {
+class CreateTaskWindow(val date_task: String?, mTask: Task?) : Fragment() {
 
     var listSubTask: ArrayList<String>? = null
     var listSubTasksView: ArrayList<View>? = null
     private var pageViewModel: MyViewModel? = null
     var textPeriod = ""
     var colorName = ""
-    var uid : String? = ""
+    var uid: String? = ""
     var task: Task? = mTask
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -53,7 +53,7 @@ class CreateTaskWindow(val date_task: String?, mTask : Task?) : Fragment() {
         // retainInstance = true
         pageViewModel = ViewModelProviders.of(this).get(MyViewModel::class.java)
 
-        if(arguments != null){
+        if (arguments != null) {
             uid = arguments!!.getString("uid")
             arguments = null
         }
@@ -94,7 +94,7 @@ class CreateTaskWindow(val date_task: String?, mTask : Task?) : Fragment() {
     private fun restore_data(view: View) {
 
         pageViewModel?.task?.observe(requireActivity(), Observer<Task> { tasks ->
-            if(tasks != null)
+            if (tasks != null)
                 task = tasks
         })
 
@@ -115,11 +115,7 @@ class CreateTaskWindow(val date_task: String?, mTask : Task?) : Fragment() {
             if (task!!.timer != "")
                 timer.text = task!!.timer
 
-            if (arguments != null) {
-                textReplay.text = arguments!!.getString("Replay")
-            } else {
-                textReplay.text = task!!.replay
-            }
+            textReplay.text = task!!.replay
 
             comment.setText(task!!.comment)
             day.text = task!!.day
@@ -428,7 +424,7 @@ class CreateTaskWindow(val date_task: String?, mTask : Task?) : Fragment() {
     }
 
     @OnClick(R.id.deletedPhoto)
-     fun deletedPhoto(){
+    fun deletedPhoto() {
         val name = task!!.photo!!.split("/")
         val storageFile = StorageFile(name[9], task!!.photo!!, context!!)
         storageFile.deletedPhoto()
@@ -442,7 +438,7 @@ class CreateTaskWindow(val date_task: String?, mTask : Task?) : Fragment() {
     }
 
     @OnClick(R.id.deletedVideo)
-     fun deletedVideo(){
+    fun deletedVideo() {
 
         val name = task!!.video!!.split("/")
         val storageFile = StorageFile(name[6], task!!.video!!, context!!)
@@ -454,6 +450,7 @@ class CreateTaskWindow(val date_task: String?, mTask : Task?) : Fragment() {
 
         task!!.video = ""
     }
+
     /*добавление фото задачи*/
     @OnClick(R.id.btnAddPhoto)
     fun onClickAddPhoto() {
@@ -576,7 +573,7 @@ class CreateTaskWindow(val date_task: String?, mTask : Task?) : Fragment() {
 
         // relativeLayoutSubTasks.visibility = RelativeLayout.GONE
         (viewSubTask.parent as LinearLayout).removeView(viewSubTask)
-        if(listSubTasksView!!.contains(viewSubTask))
+        if (listSubTasksView!!.contains(viewSubTask))
             listSubTasksView!!.remove(viewSubTask)
         Log.d("Size", "${listSubTasksView!!.size}")
 
@@ -786,7 +783,6 @@ class CreateTaskWindow(val date_task: String?, mTask : Task?) : Fragment() {
             )
             Log.d("Element", listSubTask!![position])
         }
-
 
         val checked_list = hashMapOf<String, Boolean>()
         return Task(

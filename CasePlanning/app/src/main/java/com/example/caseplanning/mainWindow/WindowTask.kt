@@ -104,7 +104,7 @@ class WindowTask : Fragment(), NavigationView.OnNavigationItemSelectedListener {
         disposable = dataBase!!
             .retrieveAccess(user.uid)
             .subscribe({ user ->
-                addAccessUsers(user, navigationView, dataBase)
+                addAccessUsers(user, navigationView)
             },
                 { throwable ->
                     throwable.printStackTrace()
@@ -122,8 +122,7 @@ class WindowTask : Fragment(), NavigationView.OnNavigationItemSelectedListener {
 
     private fun addAccessUsers(
         accessUsers: HashMap<String, String>,
-        navigationView: NavigationView?,
-        dataBase: DataBase
+        navigationView: NavigationView?
     ) {
         val menu = navigationView!!.menu
         if (menu.size >= 7) {
