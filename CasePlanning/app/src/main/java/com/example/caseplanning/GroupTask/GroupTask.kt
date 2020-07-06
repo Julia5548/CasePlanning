@@ -57,7 +57,7 @@ class GroupTask(val accessUsers: HashMap<String, String>?) : Fragment(),
     lateinit var disposable: Disposable
     private var folders: ArrayList<Folder>? = null
     var mAdapterFolder: AdapterRecyclerViewFolder? = null
-    private var uid : String? = null
+    private var uid: String? = null
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -98,10 +98,17 @@ class GroupTask(val accessUsers: HashMap<String, String>?) : Fragment(),
             nameUser.text = user.displayName
             emailUser.text = user.email
         }
-        if(arguments != null) {
+
+        nameUser.setOnClickListener {
+            uid = user.uid
+            mDrawerLayout!!.closeDrawer(GravityCompat.START)
+
+            listFolder(viewFragment, uid!!)
+        }
+        if (arguments != null) {
             uid = arguments!!.getString("uid_friends")
             arguments = null
-        }else{
+        } else {
             uid = user.uid
         }
 
@@ -157,7 +164,13 @@ class GroupTask(val accessUsers: HashMap<String, String>?) : Fragment(),
                     progress.add(folder.progress.toFloat())
                 }
                 mAdapterFolder =
-                    AdapterRecyclerViewFolder(context!!, folder_list, current_task, progress, uid)
+                    AdapterRecyclerViewFolder(
+                        context!!,
+                        folder_list,
+                        current_task,
+                        progress,
+                        uid
+                    )
                 listFolder.adapter = mAdapterFolder
                 enableSwipeToDeleteAndUndo(listFolder)
 
@@ -226,12 +239,12 @@ class GroupTask(val accessUsers: HashMap<String, String>?) : Fragment(),
                     val progress = mAdapterFolder!!.mData[position].progress
                     val date = mAdapterFolder!!.mData[position].date
                     taskList = mAdapterFolder!!.mData[position].tasks
-                    if(mAdapterFolder!!.mData[position].id != "") {
+                    if (mAdapterFolder!!.mData[position].id != "") {
                         dataBaseTask.deletedDataFolder(
                             uid = uid!!,
                             key = mAdapterFolder!!.mData[position].id
                         )
-                    }else{
+                    } else {
                         dataBaseTask.deletedFolderItem(uid!!, mAdapterFolder!!.mData[position])
                     }
                     folders!!.removeAt(position)
@@ -268,8 +281,6 @@ class GroupTask(val accessUsers: HashMap<String, String>?) : Fragment(),
                             progress_list.add(folder.progress.toFloat())
                         }
                         mAdapterFolder!!.update(folders!!, current_task, progress_list)
-//                        mAdapterFolder!!.mData.add(folderItem)
-//                        mAdapterFolder!!.notifyDataSetChanged()
                         listFolder.scrollToPosition(position)
                     }
                     snackbar.setActionTextColor(Color.YELLOW)
@@ -304,7 +315,7 @@ class GroupTask(val accessUsers: HashMap<String, String>?) : Fragment(),
                     date = formatedDate
                 )
 
-                dataBaseTask.createFolder(uid!!,folder)
+                dataBaseTask.createFolder(uid!!, folder)
 
                 folders!!.add(folder)
 
@@ -338,6 +349,9 @@ class GroupTask(val accessUsers: HashMap<String, String>?) : Fragment(),
             R.id.tasks -> {
                 val windowTask: Fragment =
                     WindowTask()
+                val arg = Bundle()
+                arg.putString("uid", uid)
+                windowTask.arguments = arg
                 if (fragmentManager!!.findFragmentById(R.id.linerLayout) != null) {
                     fragmentManager!!.beginTransaction().remove(GroupTask(accessUsers)).commit()
                     fragmentManager!!.beginTransaction()

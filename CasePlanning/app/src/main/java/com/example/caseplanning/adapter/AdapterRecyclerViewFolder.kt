@@ -61,6 +61,7 @@ class AdapterRecyclerViewFolder(
 
         this.mProgress.clear()
         this.mProgress.addAll(progress)
+
         notifyDataSetChanged()
     }
 
@@ -82,7 +83,7 @@ class AdapterRecyclerViewFolder(
 
                 when (item.itemId) {
                     R.id.edit -> {
-                        val editFolder = EditFolder(context, mData[position], uid)
+                        val editFolder = EditFolder(context, mData[position], uid, mData, this)
                         editFolder.createDialog()
                         true
                     }

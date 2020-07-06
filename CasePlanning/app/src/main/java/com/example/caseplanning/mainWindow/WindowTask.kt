@@ -92,9 +92,13 @@ class WindowTask : Fragment(), NavigationView.OnNavigationItemSelectedListener {
             nameUser.text = user.displayName
             emailUser.text = user.email
         }
+        var uid : String?
         nameUser.setOnClickListener {
-            Toast.makeText(context, "Мяу", Toast.LENGTH_SHORT)
-                .show()
+            uid = user.uid
+            mDrawerLayout!!.closeDrawer(GravityCompat.START)
+            uid_friends = null
+
+            calendar(viewFragment, uid!!, "")
         }
 
         disposable = dataBase!!
@@ -106,7 +110,7 @@ class WindowTask : Fragment(), NavigationView.OnNavigationItemSelectedListener {
                     throwable.printStackTrace()
                 })
 
-        val uid = if(arguments != null){
+         uid = if(arguments != null){
             arguments!!.getString("uid")
         }else{
             FirebaseAuth.getInstance().currentUser!!.uid
