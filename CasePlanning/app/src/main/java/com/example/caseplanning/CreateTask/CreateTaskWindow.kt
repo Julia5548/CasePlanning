@@ -1,6 +1,11 @@
 package com.example.caseplanning.CreateTask
 
 import android.annotation.SuppressLint
+import android.app.AlarmManager
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.app.PendingIntent
+import android.content.Context.ALARM_SERVICE
 import android.content.Intent
 import android.graphics.BitmapFactory
 import android.graphics.PorterDuff
@@ -31,11 +36,14 @@ import com.example.caseplanning.DataBase.Task
 import com.example.caseplanning.EditElements.Video
 import com.example.caseplanning.Increase.PhotoIncrease
 import com.example.caseplanning.Increase.VideoIncrease
+import com.example.caseplanning.Notification.NotificationBroadcast
+import com.example.caseplanning.Notification.NotificationService
 import com.example.caseplanning.R
 import com.example.caseplanning.TypeTask.AudioTask
 import com.example.caseplanning.TypeTask.Photo
 import com.example.caseplanning.mainWindow.MainWindowCasePlanning
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import java.text.SimpleDateFormat
 import java.util.*
 
 class CreateTaskWindow(val date_task: String?, mTask: Task?) : Fragment() {
@@ -691,8 +699,7 @@ class CreateTaskWindow(val date_task: String?, mTask: Task?) : Fragment() {
 
         val task = saveDataTask()
 
-        // createNotificationChannel()
-        //  scheduleNotification(task.day, task.notification, task.name!!)
+        createNotificationChannel()
 
         val dataBaseTask = DataBase()
         dataBaseTask.createTask(task, uid!!)
@@ -702,22 +709,13 @@ class CreateTaskWindow(val date_task: String?, mTask: Task?) : Fragment() {
         val intent = Intent(context, MainWindowCasePlanning::class.java)
         intent.putExtra("uid", uid!!)
         startActivity(intent)
+        onDestroy()
     }
 
-    /* @SuppressLint("SimpleDateFormat")
+     @SuppressLint("SimpleDateFormat")
      private fun scheduleNotification(day: String, timeNotification: String, name: String) {
 
          var mDate = day
-         val intentNotification = Intent(context!!, NotificationBroadcast::class.java)
-         intentNotification.putExtra("name_task", name)
-         intentNotification.putExtra("time_notification", timeNotification)
-         val pendingIntent = PendingIntent.getBroadcast(
-             context!!,
-             42,
-             intentNotification,
-             PendingIntent.FLAG_ONE_SHOT
-         )
-         val alarmManager: AlarmManager = context!!.getSystemService(ALARM_SERVICE) as AlarmManager
          val arrayDate: List<String> = mDate.split(".")
          var month = ""
          if (arrayDate[1].length == 1) {
@@ -728,10 +726,16 @@ class CreateTaskWindow(val date_task: String?, mTask: Task?) : Fragment() {
          val date = SimpleDateFormat("dd.MM.yyyy hh:mm").parse(date_notification)
          val milliseconds = date!!.time
 
-         alarmManager.set(AlarmManager.RTC_WAKEUP, milliseconds, pendingIntent)
+         val intentNotification = Intent(context!!, NotificationService::class.java)
+
+         intentNotification.putExtra("name_task", name)
+         intentNotification.putExtra("time_notification", timeNotification)
+         intentNotification.putExtra("milliseconds", milliseconds)
+
+         context!!.startService(intentNotification)
      }
- */
-    /*   private fun createNotificationChannel() {
+
+       private fun createNotificationChannel() {
 
            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
                val name : CharSequence = "LemubitReminderChannel"
@@ -744,7 +748,7 @@ class CreateTaskWindow(val date_task: String?, mTask: Task?) : Fragment() {
                notificationManager.createNotificationChannel(channel)
            }
        }
-   */
+
     private fun saveDataTask(): Task {
 
 
@@ -813,6 +817,8 @@ class CreateTaskWindow(val date_task: String?, mTask: Task?) : Fragment() {
 
     override fun onStop() {
         super.onStop()
+        task = saveDataTask()
+        scheduleNotification(task!!.day, task!!.notification, task!!.name!!)
     }
 
     override fun onDestroyView() {
