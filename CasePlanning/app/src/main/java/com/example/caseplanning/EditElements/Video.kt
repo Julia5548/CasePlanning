@@ -28,34 +28,39 @@ import com.example.caseplanning.Increase.VideoIncrease
 import com.example.caseplanning.R
 
 
-class Video(val task: Task?, val tagger : String) : Fragment() {
+class Video(val task: Task?, val tagger: String) : Fragment() {
 
     val CAMERA_REQUEST = 1
     val PERMISSION_CODE = 1001
     var outputUriFile: Uri? = null
+    var tagList: ArrayList<String>? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                if (context!!.checkSelfPermission(Manifest.permission.CAMERA)
-                    == PackageManager.PERMISSION_DENIED ||
-                    context!!.checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                    == PackageManager.PERMISSION_DENIED
-                ) {
-                    val permission: Array<String> = arrayOf(
-                        Manifest.permission.CAMERA,
-                        Manifest.permission.WRITE_EXTERNAL_STORAGE
-                    )
-                    requestPermissions(permission, PERMISSION_CODE)
-                } else {
-                    openCamera()
-                }
-
+        if (arguments != null) {
+            tagList = arguments!!.getStringArrayList("tagList")
+            arguments == null
+        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (context!!.checkSelfPermission(Manifest.permission.CAMERA)
+                == PackageManager.PERMISSION_DENIED ||
+                context!!.checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                == PackageManager.PERMISSION_DENIED
+            ) {
+                val permission: Array<String> = arrayOf(
+                    Manifest.permission.CAMERA,
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE
+                )
+                requestPermissions(permission, PERMISSION_CODE)
             } else {
                 openCamera()
             }
+
+        } else {
+            openCamera()
         }
+    }
 
     fun openCamera() {
 
@@ -81,14 +86,16 @@ class Video(val task: Task?, val tagger : String) : Fragment() {
             storage.loadVideo()
 
             task!!.video = file
-            if(tagger == "edit_task") {
-                fragmentManager!!.beginTransaction().replace(R.id.linerLayout, EditTask(task))
+            if (tagger == "edit_task") {
+                fragmentManager!!.beginTransaction()
+                    .replace(R.id.linerLayout, EditTask(task, tagList!!))
                     .commit()
-            }else{
-                fragmentManager!!.beginTransaction().replace(R.id.linerLayout, CreateTaskWindow(task.day, task))
+            } else {
+                fragmentManager!!.beginTransaction()
+                    .replace(R.id.linerLayout, CreateTaskWindow(task.day, task))
                     .commit()
             }
-          } else {
+        } else {
             Log.d("Ошибка", "Не удалось сохранить видео")
         }
     }

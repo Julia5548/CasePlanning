@@ -1,16 +1,11 @@
 package com.example.caseplanning.CreateTask
 
 import android.annotation.SuppressLint
-import android.app.AlarmManager
-import android.app.NotificationChannel
-import android.app.NotificationManager
-import android.app.PendingIntent
-import android.content.Context.ALARM_SERVICE
+import android.app.*
 import android.content.Intent
 import android.graphics.BitmapFactory
 import android.graphics.PorterDuff
 import android.graphics.drawable.BitmapDrawable
-import android.opengl.Visibility
 import android.os.Build
 import android.os.Bundle
 import android.preference.PreferenceManager
@@ -36,8 +31,7 @@ import com.example.caseplanning.DataBase.Task
 import com.example.caseplanning.EditElements.Video
 import com.example.caseplanning.Increase.PhotoIncrease
 import com.example.caseplanning.Increase.VideoIncrease
-import com.example.caseplanning.Notification.NotificationBroadcast
-import com.example.caseplanning.Notification.NotificationService
+import com.example.caseplanning.Notification.MyService
 import com.example.caseplanning.R
 import com.example.caseplanning.TypeTask.AudioTask
 import com.example.caseplanning.TypeTask.Photo
@@ -709,30 +703,38 @@ class CreateTaskWindow(val date_task: String?, mTask: Task?) : Fragment() {
         val intent = Intent(context, MainWindowCasePlanning::class.java)
         intent.putExtra("uid", uid!!)
         startActivity(intent)
+        if(task.notification != "" && task.notification != "Установить >")
+            scheduleNotification(task)
         onDestroy()
     }
 
      @SuppressLint("SimpleDateFormat")
-     private fun scheduleNotification(day: String, timeNotification: String, name: String) {
+     private fun scheduleNotification(task:Task) {
 
-         var mDate = day
+         var mDate = task.day
          val arrayDate: List<String> = mDate.split(".")
          var month = ""
          if (arrayDate[1].length == 1) {
              month = "0${arrayDate[1]}"
              mDate = "${arrayDate[0]}.$month.${arrayDate[2]}"
          }
-         val date_notification = "$mDate $timeNotification"
+
+         val date_notification = "$mDate ${task.notification}"
          val date = SimpleDateFormat("dd.MM.yyyy hh:mm").parse(date_notification)
          val milliseconds = date!!.time
 
-         val intentNotification = Intent(context!!, NotificationService::class.java)
+         val mContext = activity!!.baseContext
+         val intentNotification = Intent(mContext, MyService::class.java)
 
-         intentNotification.putExtra("name_task", name)
-         intentNotification.putExtra("time_notification", timeNotification)
+         intentNotification.putExtra("task", task)
          intentNotification.putExtra("milliseconds", milliseconds)
 
-         context!!.startService(intentNotification)
+         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+             activity!!.startForegroundService(intentNotification)
+         }else{
+
+             activity!!.startService(intentNotification)
+         }
      }
 
        private fun createNotificationChannel() {
@@ -817,8 +819,6 @@ class CreateTaskWindow(val date_task: String?, mTask: Task?) : Fragment() {
 
     override fun onStop() {
         super.onStop()
-        task = saveDataTask()
-        scheduleNotification(task!!.day, task!!.notification, task!!.name!!)
     }
 
     override fun onDestroyView() {

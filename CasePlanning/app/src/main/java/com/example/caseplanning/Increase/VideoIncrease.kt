@@ -19,8 +19,11 @@ import com.example.caseplanning.CreateTask.MyViewModel
 import com.example.caseplanning.DataBase.Task
 import com.example.caseplanning.EditElements.EditTask
 import com.example.caseplanning.R
+import com.example.caseplanning.mainWindow.FragmentDialog
 
 class VideoIncrease(val task: Task?, val tagger : String) : Fragment() {
+
+    private var tagList : ArrayList<String>? = null
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -39,6 +42,10 @@ class VideoIncrease(val task: Task?, val tagger : String) : Fragment() {
             null
         }
 
+        if(arguments != null){
+            tagList = arguments!!.getStringArrayList("tagList")
+            arguments == null
+        }
         var mediaController: MediaController? = null
         if (videoUri != null) {
             mediaController = object : MediaController(context) {
@@ -47,10 +54,13 @@ class VideoIncrease(val task: Task?, val tagger : String) : Fragment() {
                     if (event.keyCode == KeyEvent.KEYCODE_BACK) {
                         if(tagger == "edit_task") {
                             fragmentManager!!.beginTransaction().remove(this@VideoIncrease)
-                                .replace(R.id.linerLayout, EditTask(task)).commit()
-                        }else{
+                                .replace(R.id.linerLayout, EditTask(task, tagList!!)).commit()
+                        }else if (tagger == "create_task"){
                             fragmentManager!!.beginTransaction().remove(this@VideoIncrease)
                                 .replace(R.id.linerLayout, CreateTaskWindow(task.day, task)).commit()
+                        }else{
+                            fragmentManager!!.beginTransaction().remove(this@VideoIncrease)
+                                .replace(R.id.linerLayout, FragmentDialog(task)).commit()
                         }
                         return true
                     }

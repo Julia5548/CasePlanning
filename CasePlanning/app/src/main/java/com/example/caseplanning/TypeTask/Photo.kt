@@ -39,6 +39,7 @@ import java.io.File
 import java.io.IOException
 import java.text.SimpleDateFormat
 import java.util.*
+import kotlin.collections.ArrayList
 import kotlin.math.E
 
 class Photo(val task: Task?, val tagger: String) : Fragment() {
@@ -48,9 +49,16 @@ class Photo(val task: Task?, val tagger: String) : Fragment() {
     private var mCurrentFile: String? = null
     private var mPhotoFile: File? = null
     private var photoUri: Uri? = null
+    private var tagList : ArrayList<String>? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        if(arguments != null){
+            tagList = arguments!!.getStringArrayList("tagList")
+            arguments == null
+        }
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (context!!.checkSelfPermission(Manifest.permission.CAMERA)
                 == PackageManager.PERMISSION_DENIED ||
@@ -101,7 +109,7 @@ class Photo(val task: Task?, val tagger: String) : Fragment() {
             storage.loadImages()
             task!!.photo = mCurrentFile!!
             if (tagger == "edit_task") {
-                fragmentManager!!.beginTransaction().replace(R.id.linerLayout, EditTask(task))
+                fragmentManager!!.beginTransaction().replace(R.id.linerLayout, EditTask(task, tagList!!))
                     .commit()
             } else {
                 fragmentManager!!.beginTransaction().replace(R.id.linerLayout, CreateTaskWindow(task.day, task))

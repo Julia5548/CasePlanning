@@ -37,7 +37,7 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlin.collections.ArrayList
 
 //обновить еще и в папке
-class EditTask(mTask: Task?) : Fragment() {
+class EditTask(mTask: Task?, val tagList : ArrayList<String>) : Fragment() {
 
     var tasksData: Task? = mTask
     var textPeriod: String? = ""
@@ -88,7 +88,6 @@ class EditTask(mTask: Task?) : Fragment() {
         restore_data(view!!)
     }
     private fun restore_data(view:View){
-        Log.d("onViewCreated", "onViewCreated")
 
         pageViewModel?.task?.observe(this, Observer {
             if (it != null)
@@ -239,6 +238,9 @@ class EditTask(mTask: Task?) : Fragment() {
     @OnTouch(R.id.videoView)
     fun video_zoom(){
         val videoIncrease : Fragment = VideoIncrease(tasksData, "edit_task")
+        val arg = Bundle()
+        arg.putStringArrayList("tagList", tagList)
+        videoIncrease.arguments = arg
         fragmentManager!!.beginTransaction()
             .addToBackStack(null)
             .replace(R.id.linerLayout, videoIncrease)
@@ -246,24 +248,29 @@ class EditTask(mTask: Task?) : Fragment() {
     }
 
     private fun loadMedia() {
+        val storageFile = StorageFile()
         if (tasksData!!.photo != null && tasksData!!.photo != "") {
+                val btn_photo = view!!.findViewById<ImageButton>(R.id.btnAddPhoto)
+                btn_photo.isEnabled = false
 
-            val btn_photo = view!!.findViewById<ImageButton>(R.id.btnAddPhoto)
-            btn_photo.isEnabled = false
+                val relativeLayout: RelativeLayout = view!!.findViewById(R.id.photo_image)
+                relativeLayout.visibility = View.VISIBLE
+                var imageView: ImageView? = null
+                if (imageView != null)
+                    (imageView.drawable as? BitmapDrawable)!!.bitmap.recycle()
 
-            val relativeLayout: RelativeLayout = view!!.findViewById(R.id.photo_image)
-            relativeLayout.visibility = View.VISIBLE
-            var imageView:ImageView? = null
-            if (imageView != null) {
-                (imageView.drawable as? BitmapDrawable)!!.bitmap.recycle()
+                imageView = view!!.findViewById<ImageButton>(R.id.photoImage)
+
+            if(tagList.contains("old_photo")) {
+                val name = tasksData!!.photo!!.split("/")
+                storageFile.loadImagesFilesMemory(imageView, name[9])
+            }else{
+                val options = BitmapFactory.Options()
+                options.inJustDecodeBounds = false
+                options.inSampleSize = 42
+                val bitmap = BitmapFactory.decodeFile(tasksData!!.photo!!, options)
+                imageView!!.setImageBitmap(bitmap)
             }
-            imageView = view!!.findViewById<ImageButton>(R.id.photoImage)
-
-            val options = BitmapFactory.Options()
-            options.inJustDecodeBounds = false
-            options.inSampleSize = 42
-            val bitmap = BitmapFactory.decodeFile(tasksData!!.photo!!, options)
-            imageView!!.setImageBitmap(bitmap)
         }
 
         if (tasksData!!.video != null && tasksData!!.video != "") {
@@ -274,15 +281,28 @@ class EditTask(mTask: Task?) : Fragment() {
             val relativeLayout: RelativeLayout = view!!.findViewById(R.id.video)
             relativeLayout.visibility = View.VISIBLE
             val video = view!!.findViewById<VideoView>(R.id.videoView)
-            video.setVideoURI(tasksData!!.video!!.toUri())
-            video.seekTo(1)
+            if(tagList.contains("old_video")) {
+                val name = tasksData!!.video!!.split("/")
+                storageFile.loadVideoFilesMemory(video, name[6], context!!)
+            }else{
+                video.setVideoURI(tasksData!!.video!!.toUri())
+                video.seekTo(1)
+            }
         }
 
         if (tasksData!!.audio != null && tasksData!!.audio != "") {
             val btn_audio = view!!.findViewById<ImageButton>(R.id.addAudio)
             btn_audio.isEnabled = false
 
-            val audio: Fragment = AudioTask(tasksData, null)
+            val audio: Fragment =if(tagList.contains("old_audio")){
+                val name = tasksData!!.audio!!.split("/")
+                val file = storageFile.loadAudioFilesMemory(name[4], context!!)
+                tasksData!!.audio = file
+                AudioTask(tasksData, null)
+            }else{
+
+                AudioTask(tasksData, null)
+            }
             val frame = view!!.findViewById<FrameLayout>(R.id.audio)
             frame.removeAllViews()
             frame.visibility = View.VISIBLE
@@ -311,6 +331,7 @@ class EditTask(mTask: Task?) : Fragment() {
         val deletedAudio = view!!.findViewById<TextView>(R.id.deletedAudio)
         deletedAudio.visibility = View.GONE
 
+        tagList.remove("old_audio")
         tasksData!!.audio = ""
         tasksData!!.timeAudio = ""
 
@@ -323,6 +344,7 @@ class EditTask(mTask: Task?) : Fragment() {
         val name = tasksData!!.photo!!.split("/")
         val storageFile = StorageFile(name[9], tasksData!!.photo!!, context!!)
         storageFile.deletedPhoto()
+        tagList.remove("old_photo")
         val relativeLayout: RelativeLayout = view!!.findViewById(R.id.photo_image)
         relativeLayout.visibility = View.GONE
         val btn_video = view!!.findViewById<ImageButton>(R.id.btnAddPhoto)
@@ -338,6 +360,7 @@ class EditTask(mTask: Task?) : Fragment() {
         val name = tasksData!!.video!!.split("/")
         val storageFile = StorageFile(name[6], tasksData!!.video!!, context!!)
         storageFile.deletedVideo()
+        tagList.remove("old_video")
         val relativeLayout: RelativeLayout = view!!.findViewById(R.id.video)
         relativeLayout.visibility = View.GONE
         val btn_video = view!!.findViewById<ImageButton>(R.id.btnAddVideo)
@@ -352,7 +375,10 @@ class EditTask(mTask: Task?) : Fragment() {
         var photo = fragmentManager!!.findFragmentByTag("photo")
         if (photo == null) {
             tasksData = saveDataTask()
+            val arg = Bundle()
+            arg.putStringArrayList("tagList", tagList)
             photo = Photo(tasksData, "edit_task")
+            photo.arguments = arg
             fragmentManager!!.beginTransaction().add(photo, "photo").commit()
         }
     }
@@ -363,10 +389,12 @@ class EditTask(mTask: Task?) : Fragment() {
         var video = fragmentManager!!.findFragmentByTag("video")
         if(video == null){
             tasksData = saveDataTask()
+            val arg = Bundle()
+            arg.putStringArrayList("tagList", tagList)
             video = Video(tasksData, "edit_task")
+            video.arguments = arg
             fragmentManager!!.beginTransaction().add(video, "video").commit()
         }
-
     }
 
     /*добавление аудио задачи*/

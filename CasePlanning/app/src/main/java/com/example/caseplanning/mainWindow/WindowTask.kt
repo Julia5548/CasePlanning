@@ -336,8 +336,7 @@ class WindowTask : Fragment(), NavigationView.OnNavigationItemSelectedListener {
             arg.putString("uid", uid_friends)
         }
         createTask.arguments = arg
-        fragmentManager!!.beginTransaction().replace(R.id.linerLayout, createTask)
-            .addToBackStack(null).commit()
+        fragmentManager!!.beginTransaction().replace(R.id.linerLayout, createTask).commit()
 
     }
 
@@ -433,6 +432,7 @@ class WindowTask : Fragment(), NavigationView.OnNavigationItemSelectedListener {
         mDrawerLayout!!.closeDrawer(GravityCompat.START)
         return true
     }
+
 
     override fun onStop() {
         super.onStop()

@@ -111,10 +111,11 @@ class Account(
                             mName = new_information.text.toString()
                             nickname!!.text = mName
 
-                            for ((key, value) in users)
+                            for ((key, value) in users) {
                                 if (key == user.uid) {
                                     users[key] = mName!!
                                 }
+                            }
 
                             val dataBase = DataBase()
                             dataBase.updateDataUser(users)

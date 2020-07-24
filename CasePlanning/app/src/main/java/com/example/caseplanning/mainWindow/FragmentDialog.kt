@@ -13,11 +13,16 @@ import android.view.ViewGroup
 import android.widget.*
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.DialogFragment
+import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import butterknife.ButterKnife
+import butterknife.OnClick
+import butterknife.OnTouch
 import com.example.caseplanning.CreateTask.StorageFile
 import com.example.caseplanning.DataBase.Task
+import com.example.caseplanning.Increase.PhotoIncrease
+import com.example.caseplanning.Increase.VideoIncrease
 import com.example.caseplanning.R
 import com.example.caseplanning.adapter.AdapterRecyclerView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -237,5 +242,22 @@ class FragmentDialog(
             chronometer.base = SystemClock.elapsedRealtime()
         }
 
+    }
+    @OnClick(R.id.imageViewPhoto)
+    fun photo_zoom() {
+        val photoIncrease: Fragment = PhotoIncrease(dataTask)
+        fragmentManager!!.beginTransaction()
+            .addToBackStack(null)
+            .replace(R.id.linerLayout, photoIncrease)
+            .commit()
+    }
+
+    @OnTouch(R.id.videoView)
+    fun video_zoom(){
+        val videoIncrease : Fragment = VideoIncrease(dataTask, "task")
+        fragmentManager!!.beginTransaction()
+            .addToBackStack(null)
+            .replace(R.id.linerLayout, videoIncrease)
+            .commit()
     }
 }

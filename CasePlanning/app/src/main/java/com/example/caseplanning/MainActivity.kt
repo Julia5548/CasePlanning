@@ -149,4 +149,3 @@ class MainActivity : AppCompatActivity() {
         mAuth = null
     }
 }
-

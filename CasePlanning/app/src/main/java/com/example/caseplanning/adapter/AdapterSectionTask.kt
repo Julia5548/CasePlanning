@@ -180,7 +180,14 @@ class AdapterSectionTask(
                         true
                     }
                     R.id.edit -> {
-                        val editTask: Fragment = EditTask(task)
+                        val tagList = arrayListOf<String>()
+                        if(task.audio != "" && task.audio != null)
+                            tagList.add("old_audio")
+                        if(task.photo != ""&& task.photo != null)
+                            tagList.add("old_photo")
+                        if(task.video != ""&& task.video != null)
+                            tagList.add("old_video")
+                        val editTask: Fragment = EditTask(task, tagList)
                         val arg = Bundle()
                         arg.putString("uid", mUid)
                         editTask.arguments = arg
