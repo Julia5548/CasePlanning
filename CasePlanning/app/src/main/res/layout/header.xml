@@ -2,10 +2,9 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="match_parent"
         android:layout_height="170dp"
-        android:background="@drawable/main_drawer_menu"
+        android:background="@drawable/snowcovered"
         android:padding="20dp"
         android:orientation="vertical">
-
 
     <ImageView
             android:layout_width="75dp"
